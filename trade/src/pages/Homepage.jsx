@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import './homepage.css'
-
+import { useNavigate } from 'react-router-dom';
 function Homepage (){
+    const navigate = useNavigate();
 
 
 
@@ -27,8 +28,8 @@ function Homepage (){
                 <i class="fa fa-times" onclick="hideMenu()"></i>
                 <ul>
                     <li><a href="#">Home</a></li>
-                    <li><a href="#">Scanner</a></li>
-                    <li><a href="#">Trading</a></li>
+                    <li><a href="#" onclick={()=>navigate('/scanner',{replace:true})}>Scanner</a></li>
+                    <li><a href="#" onClick={()=>navigate('/greek',{replace:true})}>Trading</a></li>
                     <li><a href="#">Report</a></li>
                     <li><a href="#">Subscription</a></li>
                     <li><a href="#">Profile</a></li>

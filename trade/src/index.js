@@ -18,9 +18,9 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     {/* <Greek></Greek> */}
-    <Exp></Exp>
+    {/* <Exp></Exp> */}
     {/* <Pass></Pass> */}
-    {/* <Home></Home> */}
+    <Home></Home>
     {/* <Start></Start> */}
     {/* <HomePage></HomePage> */}
     {/* <App /> */}
