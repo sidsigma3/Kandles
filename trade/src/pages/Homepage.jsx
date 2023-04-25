@@ -29,7 +29,7 @@ function Homepage (){
                 <ul>
                     <li><a href="#">Home</a></li>
                     <li><a href="#" onclick={()=>navigate('/scanner',{replace:true})}>Scanner</a></li>
-                    <li><a href="#" onClick={()=>navigate('/greek',{replace:true})}>Trading</a></li>
+                    <li><a href="#" onClick={()=>navigate('/greek')}>Trading</a></li>
                     <li><a href="#">Report</a></li>
                     <li><a href="#">Subscription</a></li>
                     <li><a href="#">Profile</a></li>
