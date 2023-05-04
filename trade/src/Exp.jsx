@@ -90,7 +90,7 @@ function Exp() {
           <h1>Put</h1>
         </div>
         </div>
-      <table>
+      <table className='table'>
         <thead>
           <tr>
             
@@ -121,9 +121,9 @@ function Exp() {
              <td> {call.totalTradedVolume}</td>
              <td>{call.impliedVolatility}</td>
               <td>{call.lastPrice}</td>
-              <td>{call.change}</td>
+              <td>{Math.round(call.change)}</td>
               <td>{call.strikePrice}</td>
-              <td>{stockData.puts[index].change}</td>
+              <td>{Math.round(stockData.puts[index].change)}</td>
               <td>{stockData.puts[index].lastPrice}</td>
               <td>{stockData.puts[index].impliedVolatility}</td>
               <td> {stockData.puts[index].totalTradedVolume}</td>

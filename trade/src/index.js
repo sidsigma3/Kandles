@@ -5,22 +5,29 @@ import './bootstrap/css/bootstrap.css'
 // import App from './App';
 import Reset from './pages/Reset';
 import Home from './Home';
-// import HomePage from './HomePage';
+import HomePage from './pages/Homepage';
 // import Signup from './Signup';
 import Start from './Start';
 import Pass from './pages/Pass';
 import Login from './pages/Login';
 import Exp from './Exp';
 import Greek from './Greek';
+import Change from './Change';
+import MaxPain from './MaxPain';
+import Scanner from './Scanner';
+
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
+    <Scanner></Scanner>
+    {/* <MaxPain></MaxPain> */}
+    {/* <Change></Change> */}
     {/* <Greek></Greek> */}
     {/* <Exp></Exp> */}
     {/* <Pass></Pass> */}
-    <Home></Home>
+    {/* <Home></Home> */}
     {/* <Start></Start> */}
     {/* <HomePage></HomePage> */}
     {/* <App /> */}

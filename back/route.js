@@ -15,10 +15,16 @@ const { error } = require('console');
 const axios = require('axios');
 const greeks = require("greeks");
 
+
+const axiosCookieJarSupport = require('axios-cookiejar-support').default;
+const tough = require('tough-cookie');
+
+
 const htmlTemplate = fs.readFileSync('C:/Users/sidsi/Desktop/intern/trade/src/components/WelocomeEmail.html', "utf8");
 const resetEmail = fs.readFileSync('C:/Users/sidsi/Desktop/intern/trade/src/components/resetEmail.html','utf-8')
 
 
+const cookieJar = new tough.CookieJar();
 
 
 const sendEmail = async (recipient,userName) => {
@@ -344,7 +350,7 @@ router.post('/api/stock', (req, res) => {
       'Accept-Language': 'en-US,en;q=0.9',
       'Accept-Encoding': 'gzip, deflate, br',
       'Referer': 'https://www.nseindia.com/',
-      cookie:'defaultLang=en; JSESSIONID=980F5B8DE26AEBBC2E20A3A34559975C.jvm1; _gid=GA1.2.103240614.1681968394; _ga=GA1.1.1973558800.1680625735; nseQuoteSymbols=[{"symbol":"NIFTY","identifier":"OPTIDXNIFTY20-04-2023CE17700.00","type":"equity"},{"symbol":"ITC","identifier":null,"type":"equity"},{"symbol":"HCLTECH","identifier":null,"type":"equity"}]; nsit=AhldP5XJhl-R_dZXusQtr_Aq; bm_mi=1ACC7CBCC02FF96F58D7723B8157989B~YAAQyd44fYWA2p2HAQAA3VZRnxONdOkvvjqMa2YXJAK9Yop5kwB1GwZIxXxhMZTKUJU8wcGacENGMe7JIdwuCUjq1M3hgbvleTM3/IVmTWChOY3HbKsiKziViA59c+0KaMYP/yulsmRkn1XaioHfX4OQoikxiSOMWn3c403G6xjoAsKJa4fullHtEKmhYTeW/8fFCofAqTAMAKt6wsKwGEBghVXkgVbYg3sUsxD1UobtTz5wtjNIuJKNqCG0QYoQnpoehnMcJEzwDWGt2sJ3NOiGQlY0gsjiZQmIooOqNHNqWDxci/qGo8KzGub8lqNtbVgO1hX2Ct/riUgpI+CT4qCVRh0P/Q==~1; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4MjAwNTEyMywiZXhwIjoxNjgyMDEyMzIzfQ.KLpU-JZcfWqdnUD5SQWIJH-PeoSdKc5AEcX_1XFtTK0; AKA_A2=A; _ga_PJSKY6CFJH=GS1.1.1682004607.54.1.1682005125.36.0.0; ak_bmsc=48D7B63AF24B44B240F0572BE5022F32~000000000000000000000000000000~YAAQyd44fRGB2p2HAQAA/W1RnxPrz7rCxL4n+pqqOCWwp7fXJ9iRJkLAdgq8w3HFZLpLMxiJtMDNFq0CtebtB2w6kLqon2Tuxih+7UBBKa1iYsWYaaI6l4vGqvyvEbG6+7f++SWnFvRWRgbqGgsSzvKEB/xfCbXRx9QYvXd9tuqmabg+eEI6AvlGA9pu9vey58Mg8hK4Fnz/+JaZsSvlEPIM9KT1T75AEWpZNYlvwZNp92MeyCouJQarw9K839bGe6PYUMVQNiQIhJZ+6UM4w2tSnUR76ftdbYSkknS7s6yD+q0o1/48i8XTzE9dbfmgjXp4qOncFnVnggmzYU58SXP3UbiIiquFcE5eVEHcNoDzqEgR1oeijFV1es+7+LkcwuJFX+40ibCUq6MnOmtV7CmXYmAWOv+HaRTkfWTXwhLgsFmwFz7AzAY+7yJq6L3S03sCSyQ=; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lgpaesl3&sl=1&tt=1xk&bcn=//17de4c18.akstat.io/&nu=umi9x3gn&cl=htm&ld=hvc"; bm_sv=7284BF5D5FA80F742ABE0A8177E575EF~YAAQyd44fS+B2p2HAQAA+HBRnxMMoK/wL3S/tsq/L8wRf236L4t1/PmoSB6uKJ1DGdOy/eUn4k3dqA6Ex+6EGmxQO/k9dy0Hn5bJs0shtpVQ0YSnNHXcnp1eN8ElefIrrzjQ3gZLgumRvxd2sryKiIAztUJHQylT3+D60I5g6IqNviza4P8Rkk3Q/ixcio5WRhab+L1co/wiQAc9uHxvq0VxScAhVLi9uDCg4MjqhuQEhCQlD1vXX9jvXzO3SDNbLnrM~1',
+      cookie:'defaultLang=en; _ga=GA1.1.1973558800.1680625735; nsit=n2V4hKNRa4nJVUdACHx2Jntx; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4MzE5Njc3NSwiZXhwIjoxNjgzMjAzOTc1fQ.HoQ5QlISZN9PzgmBPLefqcBR8kGW7c2HunITtf2MpuQ; AKA_A2=A; _ga_PJSKY6CFJH=GS1.1.1683196776.81.1.1683196777.59.0.0; ak_bmsc=64E10EC712C48F2E24DF76DC728184C6~000000000000000000000000000000~YAAQnt44fY5BIeaHAQAAcZVY5hPYi3FnIGunmdOuMFxvSD4fP6ibZxoLn8x6uJ552wIev6PcXst763Y91EJM64Ex6Yq+10/zG+0AIvv2rOtLjOjwNL5ltRefOMh956e2Ffhkrr2qh46CZpPFPABDV3G+SMi6iSoqiz6tmydbl1WEKbir8iSPJYNZgU6CqGU7UTks1D8g6ot6EGXnwBdgut26Jp3uhj+kWY4xX+gAQP3646WwBK4bAZFOqIh4GMqechmvj/Hf69Uw3pOaV7/CfKxbdg/Q+/0fONlhpl2cthYc6jDLYt6YfgXQeumeANsGcHcBaTD0mCBRXr9OBavvGSw4ABfbuK3t527mYDTUz7fXo1cHen84ud+mGPWvhmSJlddpvrasI6HOxxNMgB5JnVycJKK2XP/7wPIKG6fMY2znyH2f3UsPRlHHMHIdvihWqtjChfib6qw3jZqw4S7VW5aw+vK/w0xZ1QO2gwESeHxnfO6WpSHBWw7e/NHUPA==; nseQuoteSymbols=[{"symbol":"NIFTY","identifier":"OPTIDXNIFTY20-04-2023CE17700.00","type":"equity"}]; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lh8zwg4s&sl=0&tt=0&se=8c&bcn=//684d0d4a.akstat.io/&ld=1mn535&nu=2jjsp7ek&cl=5hy"; bm_sv=A65CE2872C5333615F4B063B1ECFBF55~YAAQDD/LF9VzKKKHAQAAvqhY5hMwRzgQEyRhAHjqYj9+1N/EzUj2QesViZ9oOtrGLnkv9LNMrdFD6WxFhPIjawr2fKDjeIEzptZCBj9lM+YAMWKmjPNbYQ4eRRexifYKlJng03fve6EQVJh7mD8u26AfA6CFYtFbC7YW2qQEAsBz3X7hA5ejxpAjHeEvzVtcMI00LjXu5pa5gfDMK9kM0ZShBa8KKIrZiZUmF4T2ODkg0RRKhMkB3DpqLvumy+772KE=~1',
       'X-Requested-With': 'XMLHttpRequest',
       'Connection': 'keep-alive',
     }
@@ -449,7 +455,7 @@ router.post('/calculate-greeks', (req, res) => {
       'Accept-Language': 'en-US,en;q=0.9',
       'Accept-Encoding': 'gzip, deflate, br',
       // 'Referer': 'https://www.nseindia.com/',
-      cookie:'_ga=GA1.2.1370922286.1680970843; JSESSIONID=870AEF040EA14F25DF8C5A23B84936A7; _gid=GA1.2.1006338812.1682004775; _gat=1',
+      cookie:'_ga=GA1.2.1370922286.1680970843; _gid=GA1.2.539950304.1683196670; _gat=1; JSESSIONID=A1DBE6C0ED2840315A9A13F2EAB1BC67',
       'X-Requested-With': 'XMLHttpRequest',
       'Connection': 'keep-alive',
     }
@@ -546,6 +552,211 @@ router.post('/calculate-greeks', (req, res) => {
 
 });
 
+router.post('/oi-changes', (req, res) => {
+  const symbol = req.body.symbol
 
+  apiKey='OOT5PNL8EV6DJ5J8'
+  const expiryDate = req.body.date
+  
+  const url1=`https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}&date=${expiryDate}`
+
+  const url2=`https://www.nseindia.com/api/option-chain-indices?symbol=${symbol}`
+
+  let url =null;
+  if (symbol==='NIFTY'){
+    url=url2
+  }
+  else{
+    url=url1
+  }
+
+
+  // const url =`https://opstra.definedge.com/api/v1/option-chain?symbol=${req.body.symbol}`
+   axios.get(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Referer': 'https://www.nseindia.com/',
+      cookie:'defaultLang=en; _ga=GA1.1.1973558800.1680625735; nsit=n2V4hKNRa4nJVUdACHx2Jntx; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4MzE5Njc3NSwiZXhwIjoxNjgzMjAzOTc1fQ.HoQ5QlISZN9PzgmBPLefqcBR8kGW7c2HunITtf2MpuQ; AKA_A2=A; _ga_PJSKY6CFJH=GS1.1.1683196776.81.1.1683196777.59.0.0; ak_bmsc=64E10EC712C48F2E24DF76DC728184C6~000000000000000000000000000000~YAAQnt44fY5BIeaHAQAAcZVY5hPYi3FnIGunmdOuMFxvSD4fP6ibZxoLn8x6uJ552wIev6PcXst763Y91EJM64Ex6Yq+10/zG+0AIvv2rOtLjOjwNL5ltRefOMh956e2Ffhkrr2qh46CZpPFPABDV3G+SMi6iSoqiz6tmydbl1WEKbir8iSPJYNZgU6CqGU7UTks1D8g6ot6EGXnwBdgut26Jp3uhj+kWY4xX+gAQP3646WwBK4bAZFOqIh4GMqechmvj/Hf69Uw3pOaV7/CfKxbdg/Q+/0fONlhpl2cthYc6jDLYt6YfgXQeumeANsGcHcBaTD0mCBRXr9OBavvGSw4ABfbuK3t527mYDTUz7fXo1cHen84ud+mGPWvhmSJlddpvrasI6HOxxNMgB5JnVycJKK2XP/7wPIKG6fMY2znyH2f3UsPRlHHMHIdvihWqtjChfib6qw3jZqw4S7VW5aw+vK/w0xZ1QO2gwESeHxnfO6WpSHBWw7e/NHUPA==; nseQuoteSymbols=[{"symbol":"NIFTY","identifier":"OPTIDXNIFTY20-04-2023CE17700.00","type":"equity"}]; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lh8zwg4s&sl=0&tt=0&se=8c&bcn=//684d0d4a.akstat.io/&ld=1mn535&nu=2jjsp7ek&cl=5hy"; bm_sv=A65CE2872C5333615F4B063B1ECFBF55~YAAQDD/LF9VzKKKHAQAAvqhY5hMwRzgQEyRhAHjqYj9+1N/EzUj2QesViZ9oOtrGLnkv9LNMrdFD6WxFhPIjawr2fKDjeIEzptZCBj9lM+YAMWKmjPNbYQ4eRRexifYKlJng03fve6EQVJh7mD8u26AfA6CFYtFbC7YW2qQEAsBz3X7hA5ejxpAjHeEvzVtcMI00LjXu5pa5gfDMK9kM0ZShBa8KKIrZiZUmF4T2ODkg0RRKhMkB3DpqLvumy+772KE=~1',
+      'X-Requested-With': 'XMLHttpRequest',
+      'Connection': 'keep-alive',
+    }
+  })
+  .then((response) => {
+   
+    const { data } = response;
+    // const expiries = data.records.expiryDate;
+   
+    // const filteredData = data.records.data.filter(option => option.expiryDate === expiryDate);
+    
+    // console.log(filteredData)
+    const filteredData = data.filtered.data
+
+    const optionChain = {
+      calls: [],
+      puts: [],
+      pcr:[]
+    };
+
+    filteredData.forEach(option => {
+      const callOption = {
+      strikePrice:option.CE?.strikePrice,
+      expiryDate:option.CE?.expiryDate,
+      underlying:option.CE?.underlying,
+      lastPrice:option.CE?.lastPrice,
+      openInterest:option.CE?.openInterest,
+      changeinOpenInterest:option.CE?.changeinOpenInterest,
+  
+      };
+     
+      const putOption = {
+        strikePrice:option.PE?.strikePrice,
+        expiryDate:option.PE?.expiryDate,
+        underlying:option.PE?.underlying,
+        lastPrice:option.PE?.lastPrice,
+        openInterest:option.PE?.openInterest,
+        changeinOpenInterest:option.PE?.changeinOpenInterest,
+
+
+        };
+        optionChain.calls.push(callOption);
+        optionChain.puts.push(putOption);
+
+        const ratio = ((option.PE?.openInterest+0.5)/(0.5+option.CE?.openInterest))
+
+        optionChain.pcr.push(ratio) 
+
+
+         
+    });    
+    console.log(optionChain)
+    res.send(optionChain)
+      
+  }).catch((error) => {
+    console.error(error);
+    res.status(500).send('Server Error');
+  })
+
+})
+
+
+router.post('/max-pain', (req, res) => {
+  const symbol = req.body.symbol
+
+  apiKey='OOT5PNL8EV6DJ5J8'
+  const expiryDate = req.body.date
+  
+
+  const url1=`https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}`
+
+  const url2=`https://www.nseindia.com/api/option-chain-indices?symbol=${symbol}`
+
+  let url =null;
+  if (symbol==='NIFTY'){
+    url=url2
+  }
+  else{
+    url=url1
+  }
+
+// 
+
+   axios.get(url, 
+    {withCredentials: true,
+      jar: cookieJar,
+      headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Referer': 'https://www.nseindia.com/',
+          cookie:'defaultLang=en; _ga=GA1.1.1973558800.1680625735; nsit=n2V4hKNRa4nJVUdACHx2Jntx; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4MzE5Njc3NSwiZXhwIjoxNjgzMjAzOTc1fQ.HoQ5QlISZN9PzgmBPLefqcBR8kGW7c2HunITtf2MpuQ; AKA_A2=A; _ga_PJSKY6CFJH=GS1.1.1683196776.81.1.1683196777.59.0.0; ak_bmsc=64E10EC712C48F2E24DF76DC728184C6~000000000000000000000000000000~YAAQnt44fY5BIeaHAQAAcZVY5hPYi3FnIGunmdOuMFxvSD4fP6ibZxoLn8x6uJ552wIev6PcXst763Y91EJM64Ex6Yq+10/zG+0AIvv2rOtLjOjwNL5ltRefOMh956e2Ffhkrr2qh46CZpPFPABDV3G+SMi6iSoqiz6tmydbl1WEKbir8iSPJYNZgU6CqGU7UTks1D8g6ot6EGXnwBdgut26Jp3uhj+kWY4xX+gAQP3646WwBK4bAZFOqIh4GMqechmvj/Hf69Uw3pOaV7/CfKxbdg/Q+/0fONlhpl2cthYc6jDLYt6YfgXQeumeANsGcHcBaTD0mCBRXr9OBavvGSw4ABfbuK3t527mYDTUz7fXo1cHen84ud+mGPWvhmSJlddpvrasI6HOxxNMgB5JnVycJKK2XP/7wPIKG6fMY2znyH2f3UsPRlHHMHIdvihWqtjChfib6qw3jZqw4S7VW5aw+vK/w0xZ1QO2gwESeHxnfO6WpSHBWw7e/NHUPA==; nseQuoteSymbols=[{"symbol":"NIFTY","identifier":"OPTIDXNIFTY20-04-2023CE17700.00","type":"equity"}]; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lh8zwg4s&sl=0&tt=0&se=8c&bcn=//684d0d4a.akstat.io/&ld=1mn535&nu=2jjsp7ek&cl=5hy"; bm_sv=A65CE2872C5333615F4B063B1ECFBF55~YAAQDD/LF9VzKKKHAQAAvqhY5hMwRzgQEyRhAHjqYj9+1N/EzUj2QesViZ9oOtrGLnkv9LNMrdFD6WxFhPIjawr2fKDjeIEzptZCBj9lM+YAMWKmjPNbYQ4eRRexifYKlJng03fve6EQVJh7mD8u26AfA6CFYtFbC7YW2qQEAsBz3X7hA5ejxpAjHeEvzVtcMI00LjXu5pa5gfDMK9kM0ZShBa8KKIrZiZUmF4T2ODkg0RRKhMkB3DpqLvumy+772KE=~1',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Connection': 'keep-alive',
+        }
+  })
+  .then((response) => {
+    const { data } = response;
+    const expiries = data.records.expiryDate;
+  
+    // const filteredData = data.filtered.data.filter(option => option.expiryDate === expiryDate);
+    const filteredData = data.filtered.data
+
+    const callPain=[]
+    const putPain=[]
+
+
+    
+    
+    let maxpain = [];
+   filteredData.forEach((option,index)=>{
+    const strikePrice = option.CE?.strikePrice
+   
+    const slicedEntries = Object.entries(filteredData).slice(0,index)
+
+    
+    let pain=0
+    slicedEntries.forEach(option=>{
+        
+        const callOi=option[1].CE?.openInterest
+     
+        const strikeP=option[1].CE?.strikePrice
+
+        const difference = strikePrice-strikeP
+        pain = pain + (callOi*difference)
+
+
+    })
+
+    callPain.push(pain)
+
+   })
+
+  const keys = Object.keys(filteredData);
+  for (let i = keys.length - 1; i >= 0; i--) {
+    const key = keys[i];
+    const value = filteredData[key];
+    const strikePrice=filteredData[key].PE?.strikePrice
+
+    const slicedEntries = Object.entries(filteredData).slice(i,keys.length)
+    let pain=0
+    slicedEntries.forEach(option=>{
+        
+        const putOi=option[1].PE?.openInterest
+        const strikeP=option[1].PE?.strikePrice
+
+        const difference = Math.abs(strikePrice-strikeP)
+        pain = pain + (putOi*difference)
+
+
+    })
+
+    putPain.push(pain)
+
+  }
+  
+
+    const pPain=putPain.reverse()
+    
+    filteredData.forEach((option, index) => {
+     
+      const result = {
+        strikePrice:option.CE.strikePrice,
+        maxPain:(callPain[index]+pPain[index])*(75)
+      }
+
+      maxpain.push(result)
+
+    })
+     
+   
+  console.log(maxpain)
+   res.send(maxpain) 
+  }).catch((error) => {
+    console.error(error);
+    res.status(500).send('Server Error');
+  })
+
+})
 
 module.exports = router
