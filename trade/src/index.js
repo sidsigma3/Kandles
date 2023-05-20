@@ -21,13 +21,13 @@ import Scanner from './Scanner';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Scanner></Scanner>
+    {/* <Scanner></Scanner> */}
     {/* <MaxPain></MaxPain> */}
     {/* <Change></Change> */}
     {/* <Greek></Greek> */}
     {/* <Exp></Exp> */}
     {/* <Pass></Pass> */}
-    {/* <Home></Home> */}
+    <Home></Home>
     {/* <Start></Start> */}
     {/* <HomePage></HomePage> */}
     {/* <App /> */}

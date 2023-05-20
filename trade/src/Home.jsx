@@ -13,6 +13,7 @@ import Homepage from './pages/Homepage';
 import Start from './Start';
 import Exp from "./Exp"
 import Greek from "./Greek"
+import Scanner from './Scanner';
 const browserHistory = createBrowserHistory({forceRefresh:true})
 
 const Home = () =>{
@@ -26,7 +27,7 @@ return(
                 <Route exact path='/login' element={<Login></Login>}/> 
                 <Route exact path='/signup' element={<Signup></Signup>}/>  
                 <Route exact path='/reset' element={<Reset></Reset>}/>  
-                <Route exact path='/scanner' element={<Exp></Exp>}/>  
+                <Route exact path='/scanner' element={<Scanner></Scanner>}/>  
                 <Route exact path='/greek' element={<Greek></Greek>}/>  
                     {/* <Route exact path='/' element={<App></App>}/>   
                     <Route exact path='/resetPassword' element={<Reset></Reset>}/> */}

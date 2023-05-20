@@ -3,7 +3,7 @@ import axios from 'axios';
 import './exp.css'
 
 import { Button } from 'react-bootstrap';
-
+import queryString from 'query-string';
 
 function Exp() {
   const [symbol, setSymbol] = useState('');
@@ -11,8 +11,11 @@ function Exp() {
   const [error, setError] = useState(null);
   const [stockData, setStockData] = useState(null);
   const [date,setDate] = useState(null)
+  const [requestToken,setrequestToken] = useState(null)
 
-
+  // const queryParams = queryString.parse(window.location.search);
+  // setrequestToken(queryParams.request_token)
+ 
   const changeHandler = (e) => {
     setSymbol(e.target.value)
   }
@@ -25,10 +28,10 @@ function Exp() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    
-
+    const queryParams = queryString.parse(window.location.search);
+    setrequestToken(queryParams.request_token)
     axios
-      .post(`http://localhost:5000/api/stock`,{symbol,date})
+      .post(`http://localhost:5000/api/stock`,{symbol,date,requestToken})
       .then((response) => {
         setStockData(response.data);
         setError(null);

@@ -1,8 +1,18 @@
 import React, { Component } from 'react';
 import './homepage.css'
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 function Homepage (){
     const navigate = useNavigate();
+
+
+    const loginProcess = () =>{
+        console.log('yoooo')
+        axios.post('http://localhost:5000/kite')
+        .then((res)=>
+        console.log(res))
+
+    }
 
 
 
@@ -28,10 +38,11 @@ function Homepage (){
                 <i class="fa fa-times" onclick="hideMenu()"></i>
                 <ul>
                     <li><a href="#">Home</a></li>
-                    <li><a href="#" onclick={()=>navigate('/scanner',{replace:true})}>Scanner</a></li>
+                    <li><a href="#" onClick={()=>navigate('/scanner')}>Scanner</a></li>
                     <li><a href="#" onClick={()=>navigate('/greek')}>Trading</a></li>
+                    <li><a href="#" onClick={loginProcess}>Login</a></li>
                     <li><a href="#">Report</a></li>
-                    <li><a href="#">Subscription</a></li>
+                    <li><a href="#" onclick={loginProcess}>Subscription</a></li>
                     <li><a href="#">Profile</a></li>
                      <li class="logout-icon"><a href="KandleLog.html"><i class="fa fa-sign-out" aria-hidden="true"></i></a></li> 
                 </ul>

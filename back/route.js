@@ -14,17 +14,22 @@ const bcrypt = require('bcrypt');
 const { error } = require('console');
 const axios = require('axios');
 const greeks = require("greeks");
-
-
+const readline = require('readline');
+const open = require('open')
 const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
+const KiteConnect = require('kiteconnect').KiteConnect;
+const KiteTicker = require('kiteconnect').KiteTicker;
 
 
 const htmlTemplate = fs.readFileSync('C:/Users/sidsi/Desktop/intern/trade/src/components/WelocomeEmail.html', "utf8");
 const resetEmail = fs.readFileSync('C:/Users/sidsi/Desktop/intern/trade/src/components/resetEmail.html','utf-8')
-
+var access_token=null;
 
 const cookieJar = new tough.CookieJar();
+
+
+
 
 
 const sendEmail = async (recipient,userName) => {
@@ -66,30 +71,6 @@ const sendEmail = async (recipient,userName) => {
 
 router.post('/login',(req,res)=>{
   
-    // const email =req.body.email
-    // const password=req.body.password
-    
-
-    // db.query('SELECT * FROM login.user WHERE email=? AND password=?',[email,password],(err,result)=>{
-    //     if (err){
-    //         console.log(err)
-    //     }
-    //     else{
-    //         if (result.length>0){
-    //             res.json({
-    //                 stat:200,
-    //                 msg:"sucessfully entered website"
-    //             })
-    //         }
-    //         else{
-    //         res.json({
-    //             stat:201,
-    //             msg:"Email and password doesn't match"
-    //         })
-    //     }
-    //     }
-    // })
-
     const email =req.body.email
     const password=req.body.password
     
@@ -116,7 +97,7 @@ router.post('/login',(req,res)=>{
         }
         else{
             if (result.length>0){
-                // reset the login attempts if the user enters correct credentials
+               
                 loginAttempts = 0;
                 res.json({
                     stat:200,
@@ -124,7 +105,7 @@ router.post('/login',(req,res)=>{
                 })
             }
             else{
-                // increment the login attempts if the user enters wrong credentials
+               
                 loginAttempts++;
                 res.json({
                     stat:201,
@@ -196,11 +177,11 @@ db.query('SELECT * FROM login.user WHERE email=? ',[email],(err,result)=>{
 
  router.post('/reset',(req,res)=>{
     
-    const email =req.body.email
-  // Generate a unique token
+  const email =req.body.email
+  
   const token = jwt.sign({ email }, 'your-secret-key', { expiresIn: '1h' });
 
-  // Store the token and email address in the database
+ 
   db.query('INSERT INTO password_reset_tokens (email, token) VALUES (?, ?)', [email, token], (error, results, fields) => {
     if (error) {
       console.error(error);
@@ -209,7 +190,6 @@ db.query('SELECT * FROM login.user WHERE email=? ',[email],(err,result)=>{
     }
 
 
-    // Send an email with the password reset link
     const resetLink = `http://localhost:3000/pass?email=${email}&token=${token}`;
     
     let transporter = nodemailer.createTransport({
@@ -327,104 +307,357 @@ if (password!==repass){
 })
 
 
-router.post('/api/stock', (req, res) => {
+
+const secret ='e9jpxrsvft5jkzxpzqys62g3e5slfagn'
+const apiKey = 'thxudf2o662hgrk5';
+const kite = new KiteConnect({
+  api_key: apiKey
+})
+
+
+
+router.post('/api/stock', async (req, res) => {
   const symbol = req.body.symbol
-
-  apiKey='OOT5PNL8EV6DJ5J8'
   const expiryDate = req.body.date
+  const requestToken = req.body.requestToken
+  console.log(requestToken)
   
-  // const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
+  
 
-  // const url = `https://www.alphavantage.co/query?function=OPTION&symbol=${symbol}&date=2023-04-13&datatype=json&apikey=${apiKey} `
+  
 
-  const url=`https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}&date=${expiryDate}`
-
-  // const url=`https://www.nseindia.com/api/option-chain-indices?symbol=${symbol}`
-
-  // const url = `https://query1.finance.yahoo.com/v7/finance/options/${symbol}`;
-
-  // const url =`https://opstra.definedge.com/api/v1/option-chain?symbol=${req.body.symbol}`
-   axios.get(url, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'Referer': 'https://www.nseindia.com/',
-      cookie:'defaultLang=en; _ga=GA1.1.1973558800.1680625735; nsit=n2V4hKNRa4nJVUdACHx2Jntx; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4MzE5Njc3NSwiZXhwIjoxNjgzMjAzOTc1fQ.HoQ5QlISZN9PzgmBPLefqcBR8kGW7c2HunITtf2MpuQ; AKA_A2=A; _ga_PJSKY6CFJH=GS1.1.1683196776.81.1.1683196777.59.0.0; ak_bmsc=64E10EC712C48F2E24DF76DC728184C6~000000000000000000000000000000~YAAQnt44fY5BIeaHAQAAcZVY5hPYi3FnIGunmdOuMFxvSD4fP6ibZxoLn8x6uJ552wIev6PcXst763Y91EJM64Ex6Yq+10/zG+0AIvv2rOtLjOjwNL5ltRefOMh956e2Ffhkrr2qh46CZpPFPABDV3G+SMi6iSoqiz6tmydbl1WEKbir8iSPJYNZgU6CqGU7UTks1D8g6ot6EGXnwBdgut26Jp3uhj+kWY4xX+gAQP3646WwBK4bAZFOqIh4GMqechmvj/Hf69Uw3pOaV7/CfKxbdg/Q+/0fONlhpl2cthYc6jDLYt6YfgXQeumeANsGcHcBaTD0mCBRXr9OBavvGSw4ABfbuK3t527mYDTUz7fXo1cHen84ud+mGPWvhmSJlddpvrasI6HOxxNMgB5JnVycJKK2XP/7wPIKG6fMY2znyH2f3UsPRlHHMHIdvihWqtjChfib6qw3jZqw4S7VW5aw+vK/w0xZ1QO2gwESeHxnfO6WpSHBWw7e/NHUPA==; nseQuoteSymbols=[{"symbol":"NIFTY","identifier":"OPTIDXNIFTY20-04-2023CE17700.00","type":"equity"}]; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lh8zwg4s&sl=0&tt=0&se=8c&bcn=//684d0d4a.akstat.io/&ld=1mn535&nu=2jjsp7ek&cl=5hy"; bm_sv=A65CE2872C5333615F4B063B1ECFBF55~YAAQDD/LF9VzKKKHAQAAvqhY5hMwRzgQEyRhAHjqYj9+1N/EzUj2QesViZ9oOtrGLnkv9LNMrdFD6WxFhPIjawr2fKDjeIEzptZCBj9lM+YAMWKmjPNbYQ4eRRexifYKlJng03fve6EQVJh7mD8u26AfA6CFYtFbC7YW2qQEAsBz3X7hA5ejxpAjHeEvzVtcMI00LjXu5pa5gfDMK9kM0ZShBa8KKIrZiZUmF4T2ODkg0RRKhMkB3DpqLvumy+772KE=~1',
-      'X-Requested-With': 'XMLHttpRequest',
-      'Connection': 'keep-alive',
+  const connectKite= async ()=>{
+    try {
+       
+        const response = await kite.generateSession(requestToken, secret);
+        access_token = response.access_token;
+        await kite.setAccessToken(access_token);
+       
+    } catch (error) {
+        console.error(error)
     }
-  })
-  .then((response) => {
-    const { data } = response;
-    const expiries = data.records.expiryDates;
-    console.log(data)
-    const filteredData = data.filtered.data.filter(option => option.expiryDate === expiryDate);
-    console.log(filteredData);
-    console.log(expiries)
-  
-    const optionChain = {
-      calls: [],
-      puts: [],
-    };
+}
+if (!access_token){
+  await connectKite()
+}
 
-    filteredData.forEach(option => {
-      const callOption = {
-      strikePrice:option.CE?.strikePrice,
-      expiryDate:option.CE?.expiryDate,
-      underlying:option.CE?.underlying,
-      identifier:option.CE?.identifier,
-      openInterest:option.CE?.openInterest,
-      changeinOpenInterest:option.CE?.changeinOpenInterest,
-      pchangeinOpenInterest:option.CE?.pchangeinOpenInterest,
-      totalTradedVolume:option.CE?.totalTradedVolume,
-      impliedVolatility:option.CE?.impliedVolatility,
-      lastPrice:option.CE?.lastPrice,
-      change:option.CE?.change,
-      pChange:option.CE?.pChange,
-      totalBuyQuantity:option.CE?.totalBuyQuantity,
-      totalSellQuantity:option.CE?.totalSellQuantity,
-      bidQty:option.CE?.bidQty,
-      bidprice:option.CE?.bidprice,
-      askQty:option.CE?.askQty,
-      askPrice:option.CE?.askPrice,
-      underlyingValue:option.CE?.underlyingValue
-      };
-     
-      const putOption = {
-        strikePrice:option.PE?.strikePrice,
-        expiryDate:option.PE?.expiryDate,
-        underlying:option.PE?.underlying,
-        identifier:option.PE?.identifier,
-        openInterest:option.PE?.openInterest,
-        changeinOpenInterest:option.PE?.changeinOpenInterest,
-        pchangeinOpenInterest:option.PE?.pchangeinOpenInterest,
-        totalTradedVolume:option.PE?.totalTradedVolume,
-        impliedVolatility:option.PE?.impliedVolatility,
-        lastPrice:option.PE?.lastPrice,
-        change:option.PE?.change,
-        pChange:option.PE?.pChange,
-        totalBuyQuantity:option.PE?.totalBuyQuantity,
-        totalSellQuantity:option.PE?.totalSellQuantity,
-        bidQty:option.PE?.bidQty,
-        bidprice:option.PE?.bidprice,
-        askQty:option.PE?.askQty,
-        askPrice:option.PE?.askPrice,
-        underlyingValue:option.PE?.underlyingValue
-        };
-        optionChain.calls.push(callOption);
-        optionChain.puts.push(putOption);
-         
-    });    
-        console.log(optionChain)
-    res.send(optionChain)
-      
-  }).catch((error) => {
-    console.error(error);
-    res.status(500).send('Server Error');
+getQuote(["NSE:RELIANCE"]);
+
+function getQuote(instruments) {
+  kite.getQuote(instruments).then(function(response) {
+    console.log(response);
+  }).catch(function(err) {
+    console.log(err);
   })
+}
+
 
 })
+
+
+  
+
+  
+
+
+ 
+
+
+
+
+  // const head = {headers: {
+  //       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+  //       'Accept-Language': 'en-US,en;q=0.9',
+  //       'Accept-Encoding': 'gzip, deflate, br',
+  //       'Referer': 'https://www.nseindia.com/',
+  //       // cookie:cookieJar.getCookieStringSync('https://www.nseindia.com'),
+  //       // cookie:'defaultLang=en; nsit=-arbJUepMbgT_ZAL13gPeFnO; AKA_A2=A; ak_bmsc=7641E6013C3ED0341E048CE9694BBD1C~000000000000000000000000000000~YAAQfidzaEhTRwGIAQAAnuHiIxP6AN4Gq9xiLAUD28mxZlBKMXm3whgrpilU0AxIKVcmZq2oAVTihecF4os1qRo9eixMJUwvunx4Y2CXqcobzyp5zm3ytsrczrxnEyN2VgoS1qxkSrVWSdcHibZACmj1ToBEXdXwxZUnRVxtArxXQKeGIGt8JY8phKLzESjv7PbNgIOkDekhP+g1/p72R+trriVbYdOV5pBlIjX0O8Rky5DcP3BSMJUxrS7LEdwX2WO8iFuNg9SX4yALTmtL34ix/AQKRIjuocXOxdYPP7rwOhjA88z7tD9iG7C33tv0eqsEG/YfRriCCLthm5qru9Tt2H2xO6sBISo4z3025JSXPpXYRNiuiPuzL+zId1CTsdIObu/yt1t8JiVxB1TlRD0J1TXwqSNvKWHshMGdzqWmRs/RiJEB6fndBJzjthNnfTl+f4QgtTRNeLBtPFyVH9eE1FFE4eWJAkm23GrOE8XpWd+IlU2svBrVkyydZA==; _gid=GA1.2.352090767.1684229924; _gat_UA-143761337-1=1; _ga=GA1.1.1973558800.1680625735; nseQuoteSymbols=[{"symbol":"SBIN","identifier":null,"type":"equity"},{"symbol":"TCS","identifier":null,"type":"equity"}]; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4NDIyOTk1NywiZXhwIjoxNjg0MjM3MTU3fQ.UyMhM21xwfMZASBJ8ii9wa_r2VD-uc_RhW7bSpMqqxk; _ga_PJSKY6CFJH=GS1.1.1684229251.92.1.1684229958.20.0.0; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lhq309xf&sl=5&tt=bxj&se=8c&bcn=//684d0d41.akstat.io/&nu=de6o9i2j&cl=wpc"; bm_sv=3E0CCDF39E76232D3BEDB526FE184FC9~YAAQfidzaMnJRwGIAQAAlrPtIxPedAvIfzWSx99xrAODOQW7gsUPTazxPp7obm6btOlPVJfXDyr0nvddsizVqbdTaxo24l1GRvB3ciOu3Ro29Xnl+hNOY9K4MCU0xr4XKcZF7L6OdqzH13zMgU4ZP3XsMd7kodpmPzniPDwKS8XeE/JoMJK7OgJCgdiS2t9yflvshL8TcQyaRZDLveLteXXXufVEvzbhR7ly23lF23fbhrdYjyoDLXwZwRS71wwnLO+F~1',
+  //       'X-Requested-With': 'XMLHttpRequest',
+  //       'Connection': 'keep-alive',
+  //     }}
+
+  // axios.get('https://www.nseindia.com',head)
+  // .then((response)=>{
+  //   console.log(response)
+  //   cookies = response.headers['set-cookie'];
+  //   console.log(cookies)
+  //   const cookieJar = new tough.CookieJar();
+  //   cookies.forEach(cookie => {
+  //     cookieJar.setCookieSync(cookie, 'https://www.nseindia.com');
+  //   });
+  // })
+  // .catch((error)=>{
+  //   console.log(error)
+  // })
+ 
+ 
+  // const url=`https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}&date=${expiryDate}`
+
+  
+  // function generateSession() {
+  //   return new Promise((resolve, reject) => {
+  //     kite.generateSession(requestToken, secret)
+  //       .then((response) => {
+  //         const access_token = response.access_token;
+  //         console.log('Access Token:', access_token);
+  //         kite.setAccessToken(access_token);
+  //         resolve(access_token);
+  //       })
+  //       .catch((err) => {
+  //         console.error('Error generating session:', err);
+  //         reject(err);
+  //       });
+  //   });
+  // }
+  
+  // async function initializeTicker() {
+  //   try {
+  //     if (access_token===null){
+  //     access_token = await generateSession();
+  //     console.log()
+  //   }
+  //   else{
+  //     axios.post('')
+  //   }
+
+
+  //     const ticker = new KiteTicker({
+  //       api_key: apiKey,
+  //       access_token: access_token
+  //     });
+  
+  //     function onTicks(ticks) {
+  //       console.log('Ticks', ticks);
+  //     }
+  
+  //     function subscribe() {
+  //       const instrumentTokens = [738562];
+  //       ticker.subscribe(instrumentTokens);
+  //       ticker.setMode(ticker.modeFull, instrumentTokens);
+  //     }
+
+  //     function onDisconnect(error) {
+  //       console.log("Closed connection on disconnect", error);
+  //     }
+      
+  //     function onError(error) {
+  //       console.log("Closed connection on error", error);
+  //     }
+      
+  //     function onClose(reason) {
+  //       console.log("Closed connection on close", reason);
+  //     }
+      
+  //     function onTrade(order) {
+  //         console.log("Order update", order);
+  //     }
+  
+
+  //     function getQuote(instruments) {
+  //       kite.getQuote(instruments).then(function(response) {
+  //         console.log(response);
+  //       }).catch(function(err) {
+  //         console.log(err);
+  //       })
+  //     }
+      
+
+  //     ticker.connect();
+  //     ticker.on('ticks', onTicks);
+  //     ticker.on('connect', subscribe);
+  //     ticker.on('disconnect', onDisconnect);
+  //     ticker.on('error', onError);
+  //     ticker.on('close', onClose);
+  //     ticker.on('order_update', onTrade);
+
+  //     getQuote(["NSE:RELIANCE"]);
+
+  //   } catch (err) {
+  //     console.error('Error initializing ticker:', err);
+  //   }
+  // }
+  
+
+
+  
+  // async function generateSession() {
+  //   try {
+  //     const response = await kite.generateSession(requestToken, secret)
+  //     .then((response)=>{
+  //       console.log(response)
+  //       console.log(response.access_token)
+  //       const access_token = response.access_token;
+  //       console.log('Access Token:', access_token);
+  //       kite.setAccessToken(access_token);
+  //       return access_token;
+  //     }
+  //     )
+  //     .catch((err)=>{
+  //       console.log(err)
+  //     })
+     
+     
+  //   } catch (err) {
+  //     console.error('Error generating session:', err);
+  //     throw err;
+  //   }
+  // }
+  
+  // async function initializeTicker() {
+  //   // const access_token = await generateSession();
+  //   const ticker = new KiteTicker({
+  //     api_key: apiKey,
+  //     access_token: ' 235abzrfe4jKxALtyUJaMLhMZJyZw01J'
+  //   });
+    
+  //   function onTicks(ticks) {
+  //     console.log('Ticks', ticks);
+  //   }
+    
+  //   function subscribe() {
+  //     const instrumentTokens = [738562];
+  //     ticker.subscribe(instrumentTokens);
+  //     ticker.setMode(ticker.modeFull, instrumentTokens);
+  //   }
+    
+  //   ticker.connect();
+  //   ticker.on('ticks', onTicks);
+  //   ticker.on('connect', subscribe);
+  // }
+  
+  // initializeTicker();
+
+  // kite.generateSession(requestToken, secret)
+  // .then((response) => {
+  //   const access_token = response.access_token;
+  //   console.log(response);
+  //   kite.setAccessToken(access_token);
+  
+  //   const ticker = new KiteTicker({
+  //     api_key: apiKey,
+  //     access_token: access_token
+  //   });
+
+  //   function onTicks(ticks) {
+  //     console.log('Ticks', ticks);
+  //   }
+
+  //   function subscribe() {
+  //     const instrumentTokens = [738562];
+  //     ticker.subscribe(instrumentTokens);
+  //     ticker.setMode(ticker.modeFull, instrumentTokens);
+  //   }
+
+  //   ticker.connect();
+  //   ticker.on('ticks', onTicks);
+  //   ticker.on('connect', subscribe);
+
+  // })
+  // .catch((err) => {
+  //   console.error('Error generating session:', err);
+  // });
+
+
+  // const ticker = new KiteTicker({
+  //   api_key: apiKey,
+  //   access_token: access_token
+  // });
+  
+  // function onTicks(ticks) {
+  //   console.log('Ticks', ticks);
+  // }
+  
+  // function subscribe() {
+  //   const instrumentTokens = [738562];
+  //   ticker.subscribe(instrumentTokens);
+  //   ticker.setMode(ticker.modeFull, instrumentTokens);
+  // }
+
+  // ticker.connect();
+  // ticker.on('ticks', onTicks);
+  // ticker.on('connect', subscribe);
+
+  //  axios.get(url, {
+  //   headers: {
+  //     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+  //     'Accept-Language': 'en-US,en;q=0.9',
+  //     'Accept-Encoding': 'gzip, deflate, br',
+  //     'Referer': 'https://www.nseindia.com/',
+  //     cookie:cookieJar.getCookieStringSync('https://www.nseindia.com'),
+  //     // cookie:'defaultLang=en; nsit=-arbJUepMbgT_ZAL13gPeFnO; AKA_A2=A; ak_bmsc=7641E6013C3ED0341E048CE9694BBD1C~000000000000000000000000000000~YAAQfidzaEhTRwGIAQAAnuHiIxP6AN4Gq9xiLAUD28mxZlBKMXm3whgrpilU0AxIKVcmZq2oAVTihecF4os1qRo9eixMJUwvunx4Y2CXqcobzyp5zm3ytsrczrxnEyN2VgoS1qxkSrVWSdcHibZACmj1ToBEXdXwxZUnRVxtArxXQKeGIGt8JY8phKLzESjv7PbNgIOkDekhP+g1/p72R+trriVbYdOV5pBlIjX0O8Rky5DcP3BSMJUxrS7LEdwX2WO8iFuNg9SX4yALTmtL34ix/AQKRIjuocXOxdYPP7rwOhjA88z7tD9iG7C33tv0eqsEG/YfRriCCLthm5qru9Tt2H2xO6sBISo4z3025JSXPpXYRNiuiPuzL+zId1CTsdIObu/yt1t8JiVxB1TlRD0J1TXwqSNvKWHshMGdzqWmRs/RiJEB6fndBJzjthNnfTl+f4QgtTRNeLBtPFyVH9eE1FFE4eWJAkm23GrOE8XpWd+IlU2svBrVkyydZA==; _gid=GA1.2.352090767.1684229924; _gat_UA-143761337-1=1; _ga=GA1.1.1973558800.1680625735; nseQuoteSymbols=[{"symbol":"SBIN","identifier":null,"type":"equity"},{"symbol":"TCS","identifier":null,"type":"equity"}]; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4NDIyOTk1NywiZXhwIjoxNjg0MjM3MTU3fQ.UyMhM21xwfMZASBJ8ii9wa_r2VD-uc_RhW7bSpMqqxk; _ga_PJSKY6CFJH=GS1.1.1684229251.92.1.1684229958.20.0.0; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lhq309xf&sl=5&tt=bxj&se=8c&bcn=//684d0d41.akstat.io/&nu=de6o9i2j&cl=wpc"; bm_sv=3E0CCDF39E76232D3BEDB526FE184FC9~YAAQfidzaMnJRwGIAQAAlrPtIxPedAvIfzWSx99xrAODOQW7gsUPTazxPp7obm6btOlPVJfXDyr0nvddsizVqbdTaxo24l1GRvB3ciOu3Ro29Xnl+hNOY9K4MCU0xr4XKcZF7L6OdqzH13zMgU4ZP3XsMd7kodpmPzniPDwKS8XeE/JoMJK7OgJCgdiS2t9yflvshL8TcQyaRZDLveLteXXXufVEvzbhR7ly23lF23fbhrdYjyoDLXwZwRS71wwnLO+F~1',
+  //     'X-Requested-With': 'XMLHttpRequest',
+  //     'Connection': 'keep-alive',
+  //   }
+  // })
+  // .then((response) => {
+  //   const { data } = response;
+  //   const expiries = data.records.expiryDates;
+   
+  //   const filteredData = data.filtered.data.filter(option => option.expiryDate === expiryDate);
+   
+  
+  //   const optionChain = {
+  //     calls: [],
+  //     puts: [],
+  //   };
+
+  //   filteredData.forEach(option => {
+  //     const callOption = {
+  //     strikePrice:option.CE?.strikePrice,
+  //     expiryDate:option.CE?.expiryDate,
+  //     underlying:option.CE?.underlying,
+  //     identifier:option.CE?.identifier,
+  //     openInterest:option.CE?.openInterest,
+  //     changeinOpenInterest:option.CE?.changeinOpenInterest,
+  //     pchangeinOpenInterest:option.CE?.pchangeinOpenInterest,
+  //     totalTradedVolume:option.CE?.totalTradedVolume,
+  //     impliedVolatility:option.CE?.impliedVolatility,
+  //     lastPrice:option.CE?.lastPrice,
+  //     change:option.CE?.change,
+  //     pChange:option.CE?.pChange,
+  //     totalBuyQuantity:option.CE?.totalBuyQuantity,
+  //     totalSellQuantity:option.CE?.totalSellQuantity,
+  //     bidQty:option.CE?.bidQty,
+  //     bidprice:option.CE?.bidprice,
+  //     askQty:option.CE?.askQty,
+  //     askPrice:option.CE?.askPrice,
+  //     underlyingValue:option.CE?.underlyingValue
+  //     };
+     
+  //     const putOption = {
+  //       strikePrice:option.PE?.strikePrice,
+  //       expiryDate:option.PE?.expiryDate,
+  //       underlying:option.PE?.underlying,
+  //       identifier:option.PE?.identifier,
+  //       openInterest:option.PE?.openInterest,
+  //       changeinOpenInterest:option.PE?.changeinOpenInterest,
+  //       pchangeinOpenInterest:option.PE?.pchangeinOpenInterest,
+  //       totalTradedVolume:option.PE?.totalTradedVolume,
+  //       impliedVolatility:option.PE?.impliedVolatility,
+  //       lastPrice:option.PE?.lastPrice,
+  //       change:option.PE?.change,
+  //       pChange:option.PE?.pChange,
+  //       totalBuyQuantity:option.PE?.totalBuyQuantity,
+  //       totalSellQuantity:option.PE?.totalSellQuantity,
+  //       bidQty:option.PE?.bidQty,
+  //       bidprice:option.PE?.bidprice,
+  //       askQty:option.PE?.askQty,
+  //       askPrice:option.PE?.askPrice,
+  //       underlyingValue:option.PE?.underlyingValue
+  //       };
+  //       optionChain.calls.push(callOption);
+  //       optionChain.puts.push(putOption);
+         
+  //   });    
+  //       // console.log(optionChain)
+  //   res.send(optionChain)
+      
+  // }).catch((error) => {
+  //   console.error(error);
+  //   res.status(500).send('Server Error');
+  // })
+
+// })
  
 
 router.post('/calculate-greeks', (req, res) => {
@@ -438,11 +671,6 @@ router.post('/calculate-greeks', (req, res) => {
     puts: [],
     spotPrice:''
   };
-
-  
-  // const url=`https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}`
-
-  // const url='https://opstra.definedge.com/api/openinterest/optionchain/free/${symbol}&${expiryDate}'
   
   const url = `https://opstra.definedge.com/api/openinterest/optionchain/free/${symbol}&${expiryDate}`;
 
@@ -455,7 +683,7 @@ router.post('/calculate-greeks', (req, res) => {
       'Accept-Language': 'en-US,en;q=0.9',
       'Accept-Encoding': 'gzip, deflate, br',
       // 'Referer': 'https://www.nseindia.com/',
-      cookie:'_ga=GA1.2.1370922286.1680970843; _gid=GA1.2.539950304.1683196670; _gat=1; JSESSIONID=A1DBE6C0ED2840315A9A13F2EAB1BC67',
+      cookie:'_ga=GA1.2.1370922286.1680970843; _gid=GA1.2.1557409501.1684570172; _gat=1; JSESSIONID=54CEE061F9423F043EBD80E69CF08C1B',
       'X-Requested-With': 'XMLHttpRequest',
       'Connection': 'keep-alive',
     }
@@ -463,12 +691,10 @@ router.post('/calculate-greeks', (req, res) => {
   )
   .then(response => {
     const { data } = response;
-    // console.log(data)
-    // const filteredData = data.filtered.data.filter(option => option.expiryDate === expiryDate);
-    // optionChain.spotPrice=data.records.underlyingValue
+   
   
     data.data.map((option)=>{
-      console.log(option)     
+       
       const callGreeksData ={
        gamma :option.CallGamma,
        vega :option.CallVega,
@@ -497,54 +723,6 @@ router.post('/calculate-greeks', (req, res) => {
 
     })
 
-
-    
-    // filteredData.map((option)=>{
-    //   const underlyingPrice = option.CE?.underlyingValue
-    //   const strikePrice =option.CE?.strikePrice
-    //   const timeToExpiration = 9 / 365; // time to expiration in years
-    //   const callVolatility =option.CE?.impliedVolatility
-    //   const putVolatility =option.PE?.impliedVolatility
-    //   const riskFreeInterestRate=0.1
-
-    //   const callDelta = greeks.getDelta(underlyingPrice, strikePrice, timeToExpiration, riskFreeInterestRate ,callVolatility,'call');
-    //   const callGamma = greeks.getGamma(underlyingPrice, strikePrice, timeToExpiration, riskFreeInterestRate ,callVolatility,'call');
-    //   const callVega = greeks.getVega(underlyingPrice, strikePrice, timeToExpiration, riskFreeInterestRate ,callVolatility,'call')
-    //   const callTheta = greeks.getTheta(underlyingPrice, strikePrice, timeToExpiration, riskFreeInterestRate ,callVolatility,'call')
-  
-    //   const callGreeksData={
-    //     delta:callDelta.toFixed(2),
-    //     gamma:callGamma.toFixed(2),
-    //     vega:callVega.toFixed(2),
-    //     theta:callTheta.toFixed(2),
-    //     iv:callVolatility,
-    //     strikePrice:strikePrice
-       
-    //   }
-    //   optionChain.calls.push(callGreeksData)
-  
-    //   const putDelta = greeks.getDelta(underlyingPrice, strikePrice, timeToExpiration, riskFreeInterestRate ,putVolatility,'put');
-    //   const putGamma = greeks.getGamma(underlyingPrice, strikePrice, timeToExpiration, riskFreeInterestRate ,putVolatility,'put');
-    //   const putVega = greeks.getVega(underlyingPrice, strikePrice, timeToExpiration, riskFreeInterestRate ,putVolatility,'put');
-    //   const putTheta = greeks.getTheta(underlyingPrice, strikePrice, timeToExpiration, riskFreeInterestRate ,putVolatility,'put')
-      
-      
-    //   const putGreeksData={
-    //     delta:putDelta.toFixed(2),
-    //     gamma:putGamma.toFixed(2),
-    //     vega:putVega.toFixed(2),
-    //     theta:putTheta.toFixed(2),
-    //     iv:putVolatility,
-    //     strikePrice:strikePrice
-        
-    //   }
-
-
-    //   optionChain.puts.push(putGreeksData)
-        
-    // })
-  
-    // console.log(optionChain)
    res.send(optionChain)
   })
   .catch(error => console.error(error));
@@ -555,7 +733,7 @@ router.post('/calculate-greeks', (req, res) => {
 router.post('/oi-changes', (req, res) => {
   const symbol = req.body.symbol
 
-  apiKey='OOT5PNL8EV6DJ5J8'
+  
   const expiryDate = req.body.date
   
   const url1=`https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}&date=${expiryDate}`
@@ -570,15 +748,13 @@ router.post('/oi-changes', (req, res) => {
     url=url1
   }
 
-
-  // const url =`https://opstra.definedge.com/api/v1/option-chain?symbol=${req.body.symbol}`
    axios.get(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
       'Accept-Language': 'en-US,en;q=0.9',
       'Accept-Encoding': 'gzip, deflate, br',
       'Referer': 'https://www.nseindia.com/',
-      cookie:'defaultLang=en; _ga=GA1.1.1973558800.1680625735; nsit=n2V4hKNRa4nJVUdACHx2Jntx; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4MzE5Njc3NSwiZXhwIjoxNjgzMjAzOTc1fQ.HoQ5QlISZN9PzgmBPLefqcBR8kGW7c2HunITtf2MpuQ; AKA_A2=A; _ga_PJSKY6CFJH=GS1.1.1683196776.81.1.1683196777.59.0.0; ak_bmsc=64E10EC712C48F2E24DF76DC728184C6~000000000000000000000000000000~YAAQnt44fY5BIeaHAQAAcZVY5hPYi3FnIGunmdOuMFxvSD4fP6ibZxoLn8x6uJ552wIev6PcXst763Y91EJM64Ex6Yq+10/zG+0AIvv2rOtLjOjwNL5ltRefOMh956e2Ffhkrr2qh46CZpPFPABDV3G+SMi6iSoqiz6tmydbl1WEKbir8iSPJYNZgU6CqGU7UTks1D8g6ot6EGXnwBdgut26Jp3uhj+kWY4xX+gAQP3646WwBK4bAZFOqIh4GMqechmvj/Hf69Uw3pOaV7/CfKxbdg/Q+/0fONlhpl2cthYc6jDLYt6YfgXQeumeANsGcHcBaTD0mCBRXr9OBavvGSw4ABfbuK3t527mYDTUz7fXo1cHen84ud+mGPWvhmSJlddpvrasI6HOxxNMgB5JnVycJKK2XP/7wPIKG6fMY2znyH2f3UsPRlHHMHIdvihWqtjChfib6qw3jZqw4S7VW5aw+vK/w0xZ1QO2gwESeHxnfO6WpSHBWw7e/NHUPA==; nseQuoteSymbols=[{"symbol":"NIFTY","identifier":"OPTIDXNIFTY20-04-2023CE17700.00","type":"equity"}]; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lh8zwg4s&sl=0&tt=0&se=8c&bcn=//684d0d4a.akstat.io/&ld=1mn535&nu=2jjsp7ek&cl=5hy"; bm_sv=A65CE2872C5333615F4B063B1ECFBF55~YAAQDD/LF9VzKKKHAQAAvqhY5hMwRzgQEyRhAHjqYj9+1N/EzUj2QesViZ9oOtrGLnkv9LNMrdFD6WxFhPIjawr2fKDjeIEzptZCBj9lM+YAMWKmjPNbYQ4eRRexifYKlJng03fve6EQVJh7mD8u26AfA6CFYtFbC7YW2qQEAsBz3X7hA5ejxpAjHeEvzVtcMI00LjXu5pa5gfDMK9kM0ZShBa8KKIrZiZUmF4T2ODkg0RRKhMkB3DpqLvumy+772KE=~1',
+      cookie:'defaultLang=en; _ga=GA1.1.1973558800.1680625735; nsit=hXTyxKwwkw8oIAs2JBG0QIG8; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4NDU3MDExMywiZXhwIjoxNjg0NTc3MzEzfQ.sjpvcLE5QUjIphLIqbaU_lE_0ADF1Txe5Kp5CEO1kJw; AKA_A2=A; ak_bmsc=CC3C37F4B6031F72A57BF6A3E6CFE0F1~000000000000000000000000000000~YAAQr4gsMXubDwGIAQAA+BU0OBPSKHVwJgM3YoIufy7znQxlK66jtEIrA3u+w+8SZjKLznfcg6Ds/2lLjgypfuiF9uIM+0uXJZScTVefJD2TkxXQ+ZqCQzfebWUwZnkJwcc09gIeOj+m8G08rSLTuL411BwWDHao4MqGXEswhQla4vNkm406mvazK5iHON6bKw00uvA96iouyxe46uwgW88nPmG81CeiSNbajeNA/sFFbM7Qo5zsFGZN8C0hRDNVePgL2OEbg7kwN4UNwAAlXcMTA0Qiotg4NUyGSDgPuI04bC8f4yXc4YAa2X4Gf3LuTiMnwCkt/0lwSuusq8PGN24wto+6RaQ+2RQkVXFEZWCWa8FrHFELWeuSr9z7E2bxMHsiIDY66fKI4PGbRNzc5hcd3PI+0us7DGhsGjNTEiEcFDWKNXMHhBj9WRdQotdv6K77txXVluZ12Gy4Rjba9/cbrDipSAX1+EnB5iZaHjgtYjLlGddk30ZQDOBO; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lhq314l7&sl=0&tt=0&se=8c&bcn=//684d0d43.akstat.io/&nu=de6o9i2j&cl=5mith1"; _ga_PJSKY6CFJH=GS1.1.1684570114.97.1.1684570118.56.0.0; bm_sv=B049DF162765869B975BBDC12E423C34~YAAQr4gsMYSbDwGIAQAA4Bc0OBO2V5lRagAHknBtmpOGg2DmRENzfH+2/r2EH/OEzybNKVx7XsH+7b41ddo51DJeAfXSifxenv/8JuANQ9+BTVfQwNHgk3TD/u0bh7hsasQeRgapWKeKIn0IDf/+9rTcLKAjdPAdTLOH6Sb09x/iT3pLnUGXwGjhQgFUglhMXDKMlQ0v71hhd0cKCbGnQT+QDb6dQNqqkz6qN8jVGXd4nRREjmmU9REHSpELrEZDCD8=~1',
       'X-Requested-With': 'XMLHttpRequest',
       'Connection': 'keep-alive',
     }
@@ -586,11 +762,6 @@ router.post('/oi-changes', (req, res) => {
   .then((response) => {
    
     const { data } = response;
-    // const expiries = data.records.expiryDate;
-   
-    // const filteredData = data.records.data.filter(option => option.expiryDate === expiryDate);
-    
-    // console.log(filteredData)
     const filteredData = data.filtered.data
 
     const optionChain = {
@@ -644,12 +815,12 @@ router.post('/oi-changes', (req, res) => {
 router.post('/max-pain', (req, res) => {
   const symbol = req.body.symbol
 
-  apiKey='OOT5PNL8EV6DJ5J8'
+  
   const expiryDate = req.body.date
   
 
   const url1=`https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}`
-
+          
   const url2=`https://www.nseindia.com/api/option-chain-indices?symbol=${symbol}`
 
   let url =null;
@@ -660,7 +831,6 @@ router.post('/max-pain', (req, res) => {
     url=url1
   }
 
-// 
 
    axios.get(url, 
     {withCredentials: true,
@@ -670,7 +840,7 @@ router.post('/max-pain', (req, res) => {
           'Accept-Language': 'en-US,en;q=0.9',
           'Accept-Encoding': 'gzip, deflate, br',
           'Referer': 'https://www.nseindia.com/',
-          cookie:'defaultLang=en; _ga=GA1.1.1973558800.1680625735; nsit=n2V4hKNRa4nJVUdACHx2Jntx; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4MzE5Njc3NSwiZXhwIjoxNjgzMjAzOTc1fQ.HoQ5QlISZN9PzgmBPLefqcBR8kGW7c2HunITtf2MpuQ; AKA_A2=A; _ga_PJSKY6CFJH=GS1.1.1683196776.81.1.1683196777.59.0.0; ak_bmsc=64E10EC712C48F2E24DF76DC728184C6~000000000000000000000000000000~YAAQnt44fY5BIeaHAQAAcZVY5hPYi3FnIGunmdOuMFxvSD4fP6ibZxoLn8x6uJ552wIev6PcXst763Y91EJM64Ex6Yq+10/zG+0AIvv2rOtLjOjwNL5ltRefOMh956e2Ffhkrr2qh46CZpPFPABDV3G+SMi6iSoqiz6tmydbl1WEKbir8iSPJYNZgU6CqGU7UTks1D8g6ot6EGXnwBdgut26Jp3uhj+kWY4xX+gAQP3646WwBK4bAZFOqIh4GMqechmvj/Hf69Uw3pOaV7/CfKxbdg/Q+/0fONlhpl2cthYc6jDLYt6YfgXQeumeANsGcHcBaTD0mCBRXr9OBavvGSw4ABfbuK3t527mYDTUz7fXo1cHen84ud+mGPWvhmSJlddpvrasI6HOxxNMgB5JnVycJKK2XP/7wPIKG6fMY2znyH2f3UsPRlHHMHIdvihWqtjChfib6qw3jZqw4S7VW5aw+vK/w0xZ1QO2gwESeHxnfO6WpSHBWw7e/NHUPA==; nseQuoteSymbols=[{"symbol":"NIFTY","identifier":"OPTIDXNIFTY20-04-2023CE17700.00","type":"equity"}]; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lh8zwg4s&sl=0&tt=0&se=8c&bcn=//684d0d4a.akstat.io/&ld=1mn535&nu=2jjsp7ek&cl=5hy"; bm_sv=A65CE2872C5333615F4B063B1ECFBF55~YAAQDD/LF9VzKKKHAQAAvqhY5hMwRzgQEyRhAHjqYj9+1N/EzUj2QesViZ9oOtrGLnkv9LNMrdFD6WxFhPIjawr2fKDjeIEzptZCBj9lM+YAMWKmjPNbYQ4eRRexifYKlJng03fve6EQVJh7mD8u26AfA6CFYtFbC7YW2qQEAsBz3X7hA5ejxpAjHeEvzVtcMI00LjXu5pa5gfDMK9kM0ZShBa8KKIrZiZUmF4T2ODkg0RRKhMkB3DpqLvumy+772KE=~1',
+          cookie:'defaultLang=en; _ga=GA1.1.1973558800.1680625735; nsit=hXTyxKwwkw8oIAs2JBG0QIG8; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4NDU3MDExMywiZXhwIjoxNjg0NTc3MzEzfQ.sjpvcLE5QUjIphLIqbaU_lE_0ADF1Txe5Kp5CEO1kJw; AKA_A2=A; ak_bmsc=CC3C37F4B6031F72A57BF6A3E6CFE0F1~000000000000000000000000000000~YAAQr4gsMXubDwGIAQAA+BU0OBPSKHVwJgM3YoIufy7znQxlK66jtEIrA3u+w+8SZjKLznfcg6Ds/2lLjgypfuiF9uIM+0uXJZScTVefJD2TkxXQ+ZqCQzfebWUwZnkJwcc09gIeOj+m8G08rSLTuL411BwWDHao4MqGXEswhQla4vNkm406mvazK5iHON6bKw00uvA96iouyxe46uwgW88nPmG81CeiSNbajeNA/sFFbM7Qo5zsFGZN8C0hRDNVePgL2OEbg7kwN4UNwAAlXcMTA0Qiotg4NUyGSDgPuI04bC8f4yXc4YAa2X4Gf3LuTiMnwCkt/0lwSuusq8PGN24wto+6RaQ+2RQkVXFEZWCWa8FrHFELWeuSr9z7E2bxMHsiIDY66fKI4PGbRNzc5hcd3PI+0us7DGhsGjNTEiEcFDWKNXMHhBj9WRdQotdv6K77txXVluZ12Gy4Rjba9/cbrDipSAX1+EnB5iZaHjgtYjLlGddk30ZQDOBO; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lhq314l7&sl=0&tt=0&se=8c&bcn=//684d0d43.akstat.io/&nu=de6o9i2j&cl=5mith1"; _ga_PJSKY6CFJH=GS1.1.1684570114.97.1.1684570118.56.0.0; bm_sv=B049DF162765869B975BBDC12E423C34~YAAQr4gsMYSbDwGIAQAA4Bc0OBO2V5lRagAHknBtmpOGg2DmRENzfH+2/r2EH/OEzybNKVx7XsH+7b41ddo51DJeAfXSifxenv/8JuANQ9+BTVfQwNHgk3TD/u0bh7hsasQeRgapWKeKIn0IDf/+9rTcLKAjdPAdTLOH6Sb09x/iT3pLnUGXwGjhQgFUglhMXDKMlQ0v71hhd0cKCbGnQT+QDb6dQNqqkz6qN8jVGXd4nRREjmmU9REHSpELrEZDCD8=~1',
           'X-Requested-With': 'XMLHttpRequest',
           'Connection': 'keep-alive',
         }
@@ -678,8 +848,6 @@ router.post('/max-pain', (req, res) => {
   .then((response) => {
     const { data } = response;
     const expiries = data.records.expiryDate;
-  
-    // const filteredData = data.filtered.data.filter(option => option.expiryDate === expiryDate);
     const filteredData = data.filtered.data
 
     const callPain=[]
@@ -758,5 +926,19 @@ router.post('/max-pain', (req, res) => {
   })
 
 })
+
+
+router.post('/kite',(req,res)=>{
+  
+  const apiKey = 'thxudf2o662hgrk5';
+  const redirectUri = 'http://localhost:3000/scanner';
+
+ 
+  const login_url = `https://kite.zerodha.com/connect/login?api_key=${apiKey}&v=3`;
+
+  open(login_url)  
+
+})
+
 
 module.exports = router
