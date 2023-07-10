@@ -69,6 +69,7 @@ function Greek() {
             <option value='18MAY2023'>18-May-2023</option>
             <option value='25MAY2023'>25-May-2023</option>
             <option value='29JUN2023'>29-Jun-2023</option>
+            <option value='27JUL2023'>27-Jul-2023</option>
 
             </select>
 )}           

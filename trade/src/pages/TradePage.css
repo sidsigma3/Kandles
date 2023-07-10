@@ -1,0 +1,136 @@
+.Capital_Value,
+.Trade_Value,
+.Type_Value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.Capital_Value:hover,
+.Trade_Value:hover,
+.Type_Value:hover {
+  transform: scale(1.05);
+}
+.reset-box{
+  display: table-row;
+  text-align: center;
+  height: auto;
+}
+.stock-pages-grid{
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: hidden;
+  height: auto;
+  display: unset;
+}
+.stock-page-button {
+  padding: 10px;
+  margin-right: 10px;
+  background-color: #ccc;
+  border: none;
+  cursor: pointer;
+}
+
+.stock-page-button.active {
+  background-color: #999;
+}
+.reset-box {
+  position: unset;
+  top: 0;
+  right: 0;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid hidden;
+  border-radius: 5px;
+ 
+  width: fit-content;
+}
+.trade-page {
+  display: -webkit-inline-box;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.low{
+    margin-left: -20px;
+
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: 20px;
+  width: auto;
+
+}
+
+.centered-row {
+  display: -ms-inline-grid;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.Capital_Value,
+.Trade_Value,
+.Type_Value {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-bottom: 20px;
+  width: 400px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.buy-at-low-form,
+.input-field-6,
+.input-field-9,
+.input-field-12 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.input-field-1,
+.input-field-3,
+.input-field-4,
+.input-field-5,
+.input-field-7,
+.input-field-8,
+.input-field-10,
+.input-field-11,
+.input-field-13,
+.input-field-14 {
+  margin-bottom: 10px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.submit-button,
+.reset-button {
+  padding: 10px 20px;
+  margin-right: 10px;
+}
+.spacer {
+  height: 50px; 
+}
+
+.stock-page-button.active {
+  background-color: #f0f0f0; /* Background color for the active button */
+  color: #000000; /* Text color for the active button */
+  /* Add any additional styles as needed */
+}
+
+.low.highlighted {
+  border: 10px solid #ff0000; /* Border style for the highlighted box */
+  /* Add any additional styles as needed */
+}

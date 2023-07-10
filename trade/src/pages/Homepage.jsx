@@ -1,9 +1,46 @@
-import React, { Component } from 'react';
+import React, { Component ,useEffect,useState,useRef} from 'react';
 import './homepage.css'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import queryString from 'query-string';
 function Homepage (){
     const navigate = useNavigate();
+
+    const [requestToken,setrequestToken] = useState(null)
+    const hasExecuted = useRef(false);
+
+
+    useEffect(() => {
+    
+        const queryParams = queryString.parse(window.location.search);
+        if(!requestToken){
+        setrequestToken(queryParams.request_token);
+        }
+      }, []); 
+
+    useEffect(()=>{
+       
+        if (requestToken && !hasExecuted.current) {
+            hasExecuted.current = true;
+      
+            axios.post(`http://localhost:5000/connect`, { requestToken })
+              .then((response) => {
+                // Handle the response
+              })
+              .catch((error) => {
+               console.log(error)
+              });
+          }
+
+
+    // console.log('on process')
+    // axios.post(`http://localhost:5000/connect`,{requestToken})
+    // .then((response)=>{
+       
+    // })
+        },[requestToken])
+
+
 
 
     const loginProcess = () =>{
@@ -39,10 +76,10 @@ function Homepage (){
                 <ul>
                     <li><a href="#">Home</a></li>
                     <li><a href="#" onClick={()=>navigate('/scanner')}>Scanner</a></li>
-                    <li><a href="#" onClick={()=>navigate('/greek')}>Trading</a></li>
+                    <li><a href="#" onClick={()=>navigate('/trading')}>Trading</a></li>
                     <li><a href="#" onClick={loginProcess}>Login</a></li>
-                    <li><a href="#">Report</a></li>
-                    <li><a href="#" onclick={loginProcess}>Subscription</a></li>
+                    <li><a href="#" onClick={()=>navigate('/report')}>Report</a></li>
+                    <li><a href="#">Subscription</a></li>
                     <li><a href="#">Profile</a></li>
                      <li class="logout-icon"><a href="KandleLog.html"><i class="fa fa-sign-out" aria-hidden="true"></i></a></li> 
                 </ul>

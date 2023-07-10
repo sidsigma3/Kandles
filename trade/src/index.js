@@ -15,7 +15,8 @@ import Greek from './Greek';
 import Change from './Change';
 import MaxPain from './MaxPain';
 import Scanner from './Scanner';
-
+import Trading from './pages/Trading';
+import TradePage from './pages/TradePage';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -28,6 +29,8 @@ root.render(
     {/* <Exp></Exp> */}
     {/* <Pass></Pass> */}
     <Home></Home>
+    {/* <Trading></Trading> */}
+    {/* <TradePage></TradePage> */}
     {/* <Start></Start> */}
     {/* <HomePage></HomePage> */}
     {/* <App /> */}

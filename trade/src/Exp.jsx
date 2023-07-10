@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import axios from 'axios';
 import './exp.css'
 
@@ -12,6 +12,13 @@ function Exp() {
   const [stockData, setStockData] = useState(null);
   const [date,setDate] = useState(null)
   const [requestToken,setrequestToken] = useState(null)
+
+
+  useEffect(() => {
+    const queryParams = queryString.parse(window.location.search);
+    setrequestToken(queryParams.request_token);
+  }, []); 
+
 
   // const queryParams = queryString.parse(window.location.search);
   // setrequestToken(queryParams.request_token)
@@ -28,10 +35,9 @@ function Exp() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const queryParams = queryString.parse(window.location.search);
-    setrequestToken(queryParams.request_token)
-    axios
-      .post(`http://localhost:5000/api/stock`,{symbol,date,requestToken})
+   
+   
+    axios.post(`http://localhost:5000/stock`,{symbol,date,requestToken})
       .then((response) => {
         setStockData(response.data);
         setError(null);

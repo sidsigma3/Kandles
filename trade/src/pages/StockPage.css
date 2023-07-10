@@ -1,0 +1,94 @@
+.stock-page {
+    background-color: #f7f7f7;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  
+    border: 1px solid black;
+    margin: 10px;
+    padding: 10px;
+    flex-basis: calc(25% - 20px);
+    box-sizing: border-box;
+  }
+  
+  .input-container,
+  .result-container {
+    flex: 0 0 33.33%;
+  }
+  
+  
+  .stock-page h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .stock-page button {
+    background-color: #2196f3;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .stock-page button:hover {
+    background-color: #0d8bf2;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .stock-page input[type='number'] {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .stock-page p {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #666;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Styling for input fields */
+  input[type="number"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100px;
+  }
+  
+  /* Styling for the Punch button */
+  button {
+    padding: 5px 10px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Styling for the Result section */
+  .result-container p {
+    margin-bottom: 5px;
+  }
+
+  .option{
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100px;
+
+  }
