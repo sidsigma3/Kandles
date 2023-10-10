@@ -25,11 +25,11 @@ const io = require("./server");
 const { v4: uuidv4 } = require('uuid');
 
 const htmlTemplate = fs.readFileSync(
-  "C:/Users/sidsi/Desktop/intern/trade/src/components/WelocomeEmail.html",
+  "trade/src/components/WelocomeEmail.html",
   "utf8"
 );
 const resetEmail = fs.readFileSync(
-  "C:/Users/sidsi/Desktop/intern/trade/src/components/resetEmail.html",
+  "trade/src/components/resetEmail.html",
   "utf-8"
 );
 var access_token = null;
