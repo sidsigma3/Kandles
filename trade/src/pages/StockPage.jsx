@@ -23,6 +23,13 @@ const StockPage = (prop) => {
   const [holdings,setHoldings] =useState()
   const [pnl,setPnl] = useState()
   const [activeTrade, setActiveTrade] = useState(null);
+  const [tradingInfo,setTradingInfo]= useState()
+  const [symbol,setSymbol]=useState()
+  const [target,setTraget] = useState()
+  const [stoploss,setStoploss]=useState()
+  const [finalPnl,setFinalPnl]=useState()
+  const [roll,setRoll] = useState()
+
   // const [pnlArray, setPnlArray] = useState(Array(numTrades).fill(null));
   const handleOptionTypeChange = () => {
     if (optionType === 'MP') {
@@ -61,13 +68,15 @@ const StockPage = (prop) => {
 
   useEffect(()=>{
     
-    setPnl(prop.pnl)
-   setCapital(prop.props2)
-   setOptionSL(prop.props1)
-   setCapitalRisk(prop.props3)
-   setOptionPrice(prop.props)
+   
+    setCapital(Math.floor(prop.props2))
+    setOptionSL(prop.props1)
+    setCapitalRisk(prop.props3)
+    setOptionPrice(prop.props)
     setrewardToRisk(prop.props4)
     setNumTrade(prop.props7)
+    setTradingInfo(prop.props6)
+    setRoll(prop.roll)
 
     const calculatedOptionProfit = prop.props1 * prop.props4;
     const calculatedTradeQuantity = Math.floor(prop.props5);
@@ -76,19 +85,49 @@ const StockPage = (prop) => {
     const calculatedWin=calculatedTradeAmount*(calculatedOptionProfit/100)
     const calculatedLoss = calculatedTradeAmount*(optionSL/100)
 
+
     
-   setOptionProfit(calculatedOptionProfit)
+
+    setOptionProfit(calculatedOptionProfit)
     setTradeQuantity(calculatedTradeQuantity)
     setTradeAmount(calculatedTradeAmount)
     setToWin(calculatedWin.toFixed(2))
     setToLose(calculatedLoss.toFixed(2))
     setCapitalExposed(Math.floor(calculatedCapitalExposed))
+    setSymbol(prop.props6.symbol)
+    setTraget(prop.props6.target)
+    setStoploss(prop.props6.stoploss)
+    
 
     
+
+
+
+},[prop])
+
+useEffect(()=>{
+  
+
+  if (tradeAmount>capital && prop.isActiveTrade){
+    
+    prop.warn('Trade amount is greater than capital')
+  }
+
+
+  if (capitalExposed>30 && prop.isActiveTrade){
+    
+    prop.warn('capital expose is greater than 30%')
+  }
+
+
+},[capitalExposed,tradeAmount])
+
+
+useEffect(()=>{
+    setPnl(prop.pnl)
 },[prop])
 
   
-
   const handlepunch = () => {
     prop.handlep()
     console.log(prop.props6)
@@ -101,8 +140,6 @@ const StockPage = (prop) => {
         symbol:prop.props6.symbol
 
     }
-
-
     // axios.post(`http://localhost:5000/punch`,trade)
     // .then((response) => {
     //     console.log(response)
@@ -119,12 +156,39 @@ const StockPage = (prop) => {
   
   };
 
+const handleExit = () =>{
+  prop.handleE()
+
+}
+  
+        // useEffect(()=>{
+      
+        // console.log(pnl)  
+        // console.log(toWin,toLose)
+        // // const pnl = pnlArray[index];
+        //   // const target = squareOffPrice-strike
+        //   // const stopLoss = strike-stopLossPrice
+          
+        // const isTargetHit = pnl >= toWin;
+        // const isStopLossHit = pnl <= toLose;
+
+        //   if (isTargetHit || isStopLossHit){
+        //   prop.handleTradeCompletion()
+         
+        //   }
+
+        // },[pnl])
+
+
+  
+
   const pageNumber = 1; // Set the default page number to 1
 
   return (
     <div>
     <div className="stock-page">
-      <h2>Trade</h2>
+    <ToastContainer/>
+      <h2>Trade {roll+1}</h2>
       <div className="input-container">
         <p>Capital </p>
         <h6>{capital}</h6> 
@@ -157,9 +221,10 @@ const StockPage = (prop) => {
           To Win: <div className='option'> {toWin} </div>
         </p>
         <p className='d-flex'>
-          To Lose: <div className='option'> {toLose}  </div>
+          To Lose: <div className='option'> -{toLose}  </div>
         </p>
-        <button onClick={handlepunch}>Punch</button>
+        <button onClick={handlepunch}>Punch</button><br></br>
+        <button onClick={handleExit} className='btn bg-warning' >Exit</button>
       </div>
 
       {/* {pnl && Object.values(pnl).map((item, index) => (
@@ -174,10 +239,10 @@ const StockPage = (prop) => {
 
         <div key ={index} 
         
-        className='stock-page'>
+        className={`stock-page ${item.pnl > 0 ? 'positive' : item.pnl < 0 ? 'negative' : ''}`} >
 
             
-            P&amp;L  {item.pnl}
+            P&amp;L  {item.pnl.toFixed(2)}
 
         </div>
  ))}

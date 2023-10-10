@@ -22,6 +22,7 @@ const KiteConnect = require("kiteconnect").KiteConnect;
 const KiteTicker = require("kiteconnect").KiteTicker;
 const WebSocket = require("ws");
 const io = require("./server");
+const { v4: uuidv4 } = require('uuid');
 
 const htmlTemplate = fs.readFileSync(
   "C:/Users/sidsi/Desktop/intern/trade/src/components/WelocomeEmail.html",
@@ -70,7 +71,9 @@ const sendEmail = async (recipient, userName) => {
 let loginAttempts = 0;
 
 module.exports = function (io) {
-  router.post("/login", (req, res) => {
+
+
+    router.post("/login", (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
@@ -295,8 +298,8 @@ module.exports = function (io) {
     );
   });
 
-  const secret = "e9jpxrsvft5jkzxpzqys62g3e5slfagn";
-  const apiKey = "thxudf2o662hgrk5";
+  const secret = "1gr9bsa88g1td3o52do2bilh74kw8a73";
+  const apiKey = "0bpuke0rhsjgq3lm";
   const kite = new KiteConnect({
     api_key: apiKey,
   });
@@ -308,55 +311,165 @@ module.exports = function (io) {
 
   // ticker.connect();
 
-  router.post("/user-info", (req, res) => {
-    function getMargins(segment) {
-      kite
-        .getMargins(segment)
-        .then(function (response) {
-          console.log(response.available);
-          const capital = response.available.live_balance;
-          res.send({ capital });
-        })
-        .catch(function (err) {
-          console.log(err);
+ router.post("/user-info", async (req, res) => {
+  try {
+    // Fetch margin data
+    const marginResponse = await getMargins(["equity"]);
+    const capital = marginResponse.available.live_balance;
+
+    // Fetch instrument data
+    const instrumentResponse = await kite.getInstruments();
+    const instruments = instrumentResponse;
+
+    // Send the response to frontend
+    res.send({ capital,instruments});
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).send({ error: 'Something went wrong' });
+  }
+});
+
+// Function to fetch margin data
+function getMargins(segment) {
+  return kite.getMargins(segment);
+}
+
+
+    let socketConnected = false
+    router.post("/trade-info", (req, res) => {
+     
+      const symbol = req.body.index;
+      const exchange = req.body.exchange
+      let strike = null;
+      const info = {};
+      const instrument=[]
+      
+      
+        const ticker = new KiteTicker({
+          api_key: "0bpuke0rhsjgq3lm",
+          access_token: access_token,
         });
-    }
+    
+          getQuote([exchange+":" + symbol]);
+    
+          function getQuote(instruments) {
+            kite
+              .getQuote(instruments)
+              .then(function (response) {
+                console.log(response);
+                const token = response[instruments[0]].instrument_token;
+                instrument.push(token)
+  
+                console.log(instrument)
+                
+                ticker.connect();
+                ticker.on("ticks", onTicks);
+                ticker.on("connect", subscribe);
+    
+              })
+              .catch(function (err) {
+                console.log(err);
+              });
+          }  
+    
+          
+        function sock (){
+         
 
-    getMargins(["equity"]);
-  });
+          setInterval(()=>{
+            strikePrice(strike)}, 2000);
+    
 
-  router.post("/trade-info", (req, res) => {
-    const symbol = req.body.index;
-    let strike = null;
-    const info = {};
+          if (socketConnected) {
+            // Disconnect the previous socket connection
+            io.close();
+            socketConnected = false;
+          }
 
-    function getQuote(instruments) {
-      kite
-        .getQuote(instruments)
-        .then(function (response) {
-          console.log(response);
-          strike = response[instruments[0]].last_price;
-          res.send({ strike });
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
 
-    function getLTP(instruments) {
-      kite
-        .getLTP(instruments)
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
+          io.on("connection", (socket) => {
+                 
+            console.log("Client connected");
+      
+            setInterval(()=>{
+              strikePrice(strike)}, 2000);
+      
+            socket.on("disconnect", () => {
+              console.log("Client disconnected");
+            });
+          });
+      
+          // socketConnected = true
 
-    getQuote(["NSE:" + symbol]);
-    getLTP(["NSE:" + symbol]);
-  });
+        }
+    
+        // sock()
+        res.send()
+        
+    
+        function onTicks(ticks) {
+         
+          currPrice = ticks[0].last_price;
+          
+          
+          ticks.forEach((tick) => {
+            const instrumentToken = tick.instrument_token;
+            const lastPrice = tick.last_price;
+            const open = tick.ohlc.open
+            // Update instrument data with the latest last price
+            strike =lastPrice
+            io.emit('strike',{strike:strike,index:symbol})
+            
+          })
+    
+        }
+    
+        function subscribe() {
+          
+          ticker.subscribe(instrument);
+          ticker.setMode(ticker.modeFull, instrument);
+        }
+    
+
+        function strikePrice(strike){
+          console.log(strike,symbol)
+            io.emit('strike',{strike:strike,index:symbol})
+
+        }
+
+
+
+
+
+        // function getQuote(instruments) {
+        //   kite
+        //     .getQuote(instruments)
+        //     .then(function (response) {
+        //       console.log(response);
+        //       strike = response[instruments[0]].last_price;
+        //       res.send({ strike });
+        //     })
+        //     .catch(function (err) {
+        //       console.log(err);
+        //     });
+        // }
+
+        function getLTP(instruments) {
+          kite
+            .getLTP(instruments)
+            .then(function (response) {
+              console.log(response);
+            })
+            .catch(function (err) {
+              console.log(err);
+            });
+        }
+
+
+       
+             
+        getLTP(["NSE:" + symbol]);
+      });
 
   router.post("/connect", (req, res) => {
     const requestToken = req.body.requestToken;
@@ -369,7 +482,7 @@ module.exports = function (io) {
         await kite.setAccessToken(access_token);
 
         const ticker = new KiteTicker({
-          api_key: "thxudf2o662hgrk5",
+          api_key: "0bpuke0rhsjgq3lm",
           access_token: access_token,
         });
 
@@ -389,394 +502,116 @@ module.exports = function (io) {
     const requestToken = req.body.requestToken;
     console.log(symbol);
     console.log(requestToken);
-    let instrumentToken = null;
+   
 
-    const param = {
-      tradingsymbol: "BCG", // Symbol of the stock
-      exchange: "NSE", // Exchange on which the stock is listed
-      transaction_type: "BUY", // Buy or Sell
-      quantity: 1, // Quantity of shares to trade
-      order_type: "MARKET", // Order type (MARKET, LIMIT, SL, SL-M)
-      product: "CNC", // Product type (CNC for delivery-based trades)
-      validity: "DAY", // Order validity (DAY, IOC, GTT)
-      // trigger_price: 16, // Trigger price for stop loss order
-    };
+  const head = {headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Referer': 'https://www.nseindia.com/',
+        // cookie:cookieJar.getCookieStringSync('https://www.nseindia.com'),
+        // cookie:'defaultLang=en; nsit=-arbJUepMbgT_ZAL13gPeFnO; AKA_A2=A; ak_bmsc=7641E6013C3ED0341E048CE9694BBD1C~000000000000000000000000000000~YAAQfidzaEhTRwGIAQAAnuHiIxP6AN4Gq9xiLAUD28mxZlBKMXm3whgrpilU0AxIKVcmZq2oAVTihecF4os1qRo9eixMJUwvunx4Y2CXqcobzyp5zm3ytsrczrxnEyN2VgoS1qxkSrVWSdcHibZACmj1ToBEXdXwxZUnRVxtArxXQKeGIGt8JY8phKLzESjv7PbNgIOkDekhP+g1/p72R+trriVbYdOV5pBlIjX0O8Rky5DcP3BSMJUxrS7LEdwX2WO8iFuNg9SX4yALTmtL34ix/AQKRIjuocXOxdYPP7rwOhjA88z7tD9iG7C33tv0eqsEG/YfRriCCLthm5qru9Tt2H2xO6sBISo4z3025JSXPpXYRNiuiPuzL+zId1CTsdIObu/yt1t8JiVxB1TlRD0J1TXwqSNvKWHshMGdzqWmRs/RiJEB6fndBJzjthNnfTl+f4QgtTRNeLBtPFyVH9eE1FFE4eWJAkm23GrOE8XpWd+IlU2svBrVkyydZA==; _gid=GA1.2.352090767.1684229924; _gat_UA-143761337-1=1; _ga=GA1.1.1973558800.1680625735; nseQuoteSymbols=[{"symbol":"SBIN","identifier":null,"type":"equity"},{"symbol":"TCS","identifier":null,"type":"equity"}]; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4NDIyOTk1NywiZXhwIjoxNjg0MjM3MTU3fQ.UyMhM21xwfMZASBJ8ii9wa_r2VD-uc_RhW7bSpMqqxk; _ga_PJSKY6CFJH=GS1.1.1684229251.92.1.1684229958.20.0.0; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lhq309xf&sl=5&tt=bxj&se=8c&bcn=//684d0d41.akstat.io/&nu=de6o9i2j&cl=wpc"; bm_sv=3E0CCDF39E76232D3BEDB526FE184FC9~YAAQfidzaMnJRwGIAQAAlrPtIxPedAvIfzWSx99xrAODOQW7gsUPTazxPp7obm6btOlPVJfXDyr0nvddsizVqbdTaxo24l1GRvB3ciOu3Ro29Xnl+hNOY9K4MCU0xr4XKcZF7L6OdqzH13zMgU4ZP3XsMd7kodpmPzniPDwKS8XeE/JoMJK7OgJCgdiS2t9yflvshL8TcQyaRZDLveLteXXXufVEvzbhR7ly23lF23fbhrdYjyoDLXwZwRS71wwnLO+F~1',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Connection': 'keep-alive',
+      }}
 
-    function subscribeToOptionChain() {
-      // Replace with your desired instrument tokens
+  axios.get('https://www.nseindia.com',head)
+  .then((response)=>{
+    console.log(response)
+    cookies = response.headers['set-cookie'];
+    console.log(cookies)
+    const cookieJar = new tough.CookieJar();
+    cookies.forEach(cookie => {
+      cookieJar.setCookieSync(cookie, 'https://www.nseindia.com');
+    });
+  })
+  .catch((error)=>{
+    console.log(error)
+  })
 
-      ticker.subscribe(instrumentToken);
-      ticker.setMode(ticker.modeFull, instrumentToken);
+  const url=`https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}&date=${expiryDate}`
+
+   
+   axios.get(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Referer': 'https://www.nseindia.com/',
+      cookie:cookieJar.getCookieStringSync('https://www.nseindia.com'),
+      // cookie:'defaultLang=en; nsit=-arbJUepMbgT_ZAL13gPeFnO; AKA_A2=A; ak_bmsc=7641E6013C3ED0341E048CE9694BBD1C~000000000000000000000000000000~YAAQfidzaEhTRwGIAQAAnuHiIxP6AN4Gq9xiLAUD28mxZlBKMXm3whgrpilU0AxIKVcmZq2oAVTihecF4os1qRo9eixMJUwvunx4Y2CXqcobzyp5zm3ytsrczrxnEyN2VgoS1qxkSrVWSdcHibZACmj1ToBEXdXwxZUnRVxtArxXQKeGIGt8JY8phKLzESjv7PbNgIOkDekhP+g1/p72R+trriVbYdOV5pBlIjX0O8Rky5DcP3BSMJUxrS7LEdwX2WO8iFuNg9SX4yALTmtL34ix/AQKRIjuocXOxdYPP7rwOhjA88z7tD9iG7C33tv0eqsEG/YfRriCCLthm5qru9Tt2H2xO6sBISo4z3025JSXPpXYRNiuiPuzL+zId1CTsdIObu/yt1t8JiVxB1TlRD0J1TXwqSNvKWHshMGdzqWmRs/RiJEB6fndBJzjthNnfTl+f4QgtTRNeLBtPFyVH9eE1FFE4eWJAkm23GrOE8XpWd+IlU2svBrVkyydZA==; _gid=GA1.2.352090767.1684229924; _gat_UA-143761337-1=1; _ga=GA1.1.1973558800.1680625735; nseQuoteSymbols=[{"symbol":"SBIN","identifier":null,"type":"equity"},{"symbol":"TCS","identifier":null,"type":"equity"}]; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4NDIyOTk1NywiZXhwIjoxNjg0MjM3MTU3fQ.UyMhM21xwfMZASBJ8ii9wa_r2VD-uc_RhW7bSpMqqxk; _ga_PJSKY6CFJH=GS1.1.1684229251.92.1.1684229958.20.0.0; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lhq309xf&sl=5&tt=bxj&se=8c&bcn=//684d0d41.akstat.io/&nu=de6o9i2j&cl=wpc"; bm_sv=3E0CCDF39E76232D3BEDB526FE184FC9~YAAQfidzaMnJRwGIAQAAlrPtIxPedAvIfzWSx99xrAODOQW7gsUPTazxPp7obm6btOlPVJfXDyr0nvddsizVqbdTaxo24l1GRvB3ciOu3Ro29Xnl+hNOY9K4MCU0xr4XKcZF7L6OdqzH13zMgU4ZP3XsMd7kodpmPzniPDwKS8XeE/JoMJK7OgJCgdiS2t9yflvshL8TcQyaRZDLveLteXXXufVEvzbhR7ly23lF23fbhrdYjyoDLXwZwRS71wwnLO+F~1',
+      'X-Requested-With': 'XMLHttpRequest',
+      'Connection': 'keep-alive',
     }
-    const strikePrice = 2000;
+  })
+  .then((response) => {
+    const { data } = response;
+    const expiries = data.records.expiryDates;
 
-    // subscribeToOptionChain()
+    const filteredData = data.filtered.data.filter(option => option.expiryDate === expiryDate);
 
-    // getQuote(["NSE:"+symbol]);
-
-    // getQuote([symbol+strikePrice+'CE']);
-
-    getInstruments("NSE", "OPT", symbol);
-    getQuote(["NSE:RELIANCE"]);
-    // getOHLC(["NSE:RELIANCE"]);
-    // getProfile()
-    // getLTP(["NSE:RELIANCE"]);
-
-    getMargins(["equity"]);
-
-    getOrderHistory();
-
-    getOrderTrades();
-    getHoldings();
-
-    // order(param);
-
-    let optionChain = {
+    const optionChain = {
       calls: [],
       puts: [],
     };
 
-    // ticker.on("ticks", function (ticks) {
-    //   // Process the option chain data here
-    //   for (const tick of ticks) {
-    //     if (tick.instrument_token === instrumentToken) {
-    //       // Extract data for call or put
-    //       if (tick.instrument_type === "CE") {
-    //         optionChain.calls.push(tick);
-    //       } else if (tick.instrument_type === "PE") {
-    //         optionChain.puts.push(tick);
-    //       }
-    //     }
-    //   }
-    // });
+    filteredData.forEach(option => {
+      const callOption = {
+      strikePrice:option.CE?.strikePrice,
+      expiryDate:option.CE?.expiryDate,
+      underlying:option.CE?.underlying,
+      identifier:option.CE?.identifier,
+      openInterest:option.CE?.openInterest,
+      changeinOpenInterest:option.CE?.changeinOpenInterest,
+      pchangeinOpenInterest:option.CE?.pchangeinOpenInterest,
+      totalTradedVolume:option.CE?.totalTradedVolume,
+      impliedVolatility:option.CE?.impliedVolatility,
+      lastPrice:option.CE?.lastPrice,
+      change:option.CE?.change,
+      pChange:option.CE?.pChange,
+      totalBuyQuantity:option.CE?.totalBuyQuantity,
+      totalSellQuantity:option.CE?.totalSellQuantity,
+      bidQty:option.CE?.bidQty,
+      bidprice:option.CE?.bidprice,
+      askQty:option.CE?.askQty,
+      askPrice:option.CE?.askPrice,
+      underlyingValue:option.CE?.underlyingValue
+      };
 
-    function getInstruments(exchange, segment, tradingsymbol) {
-      kite
-        .getInstruments(exchange, segment, tradingsymbol)
-        .then(function (response) {
-          // console.log(response);
-          const filteredInstruments = response.filter(
-            (instrument) => instrument.tradingsymbol === tradingsymbol
-          );
-          const optionPrices = filteredInstruments.map(
-            (instrument) => instrument.last_price
-          );
-          const strikePrices = filteredInstruments.map(
-            (instrument) => instrument.strike
-          );
+      const putOption = {
+        strikePrice:option.PE?.strikePrice,
+        expiryDate:option.PE?.expiryDate,
+        underlying:option.PE?.underlying,
+        identifier:option.PE?.identifier,
+        openInterest:option.PE?.openInterest,
+        changeinOpenInterest:option.PE?.changeinOpenInterest,
+        pchangeinOpenInterest:option.PE?.pchangeinOpenInterest,
+        totalTradedVolume:option.PE?.totalTradedVolume,
+        impliedVolatility:option.PE?.impliedVolatility,
+        lastPrice:option.PE?.lastPrice,
+        change:option.PE?.change,
+        pChange:option.PE?.pChange,
+        totalBuyQuantity:option.PE?.totalBuyQuantity,
+        totalSellQuantity:option.PE?.totalSellQuantity,
+        bidQty:option.PE?.bidQty,
+        bidprice:option.PE?.bidprice,
+        askQty:option.PE?.askQty,
+        askPrice:option.PE?.askPrice,
+        underlyingValue:option.PE?.underlyingValue
+        };
+        optionChain.calls.push(callOption);
+        optionChain.puts.push(putOption);
 
-          console.log("Option Prices:", optionPrices);
-          console.log("Strike Prices:", strikePrices);
-          console.log(filteredInstruments);
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
+    });
+        // console.log(optionChain)
+    res.send(optionChain)
 
-    function order(orderParams) {
-      kite
-        .placeOrder("regular", orderParams)
-        .then((response) => {
-          console.log("Stop loss order placed successfully:", response);
-        })
-        .catch((error) => {
-          console.error("Error placing stop loss order:", error);
-        });
-    }
+  }).catch((error) => {
+    console.error(error);
+    res.status(500).send('Server Error');
+  })
 
-    function getProfile() {
-      kite
-        .getProfile()
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
-
-    function getMargins(segment) {
-      kite
-        .getMargins(segment)
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
-
-    async function getHoldings() {
-      try {
-        const holdings = await kite.getHoldings();
-
-        console.log(holdings); // Print the holdings data to the console
-      } catch (error) {
-        console.error("Error fetching holdings:", error.message);
-      }
-    }
-
-    function getLTP(instruments) {
-      kite
-        .getLTP(instruments)
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
-    function getLTP(instruments) {
-      kite
-        .getLTP(instruments)
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
-    function getOHLC(instruments) {
-      kite
-        .getOHLC(instruments)
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
-
-    function getOrderHistory() {
-      kite
-        .getOrders()
-        .then(function (response) {
-          if (response.length === 0) {
-            console.log("No orders.");
-            return;
-          }
-
-          kite
-            .getOrderHistory(response[0].order_id)
-            .then(function (response) {
-              console.log(response);
-            })
-            .catch(function (err) {
-              console.log(err);
-            });
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
-
-    function getOrderTrades() {
-      kite
-        .getOrders()
-        .then(function (response) {
-          var completedOrdersID;
-          for (var order of response) {
-            if (order.status === kite.STATUS_COMPLETE) {
-              completedOrdersID = order.order_id;
-              break;
-            }
-          }
-
-          if (!completedOrdersID) {
-            console.log("No completed orders.");
-            return;
-          }
-
-          kite
-            .getOrderTrades(completedOrdersID)
-            .then(function (response) {
-              console.log(response);
-            })
-            .catch(function (err) {
-              console.log(err);
-            });
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
-
-    function getQuote(instruments) {
-      kite
-        .getQuote(instruments)
-        .then(function (response) {
-          console.log(response);
-          console.log(response["NSE:RELIANCE"].depth);
-          const { data } = response;
-          const optionChain = {
-            calls: [],
-            puts: [],
-          };
-
-          // filteredData.forEach(option => {
-          //   const callOption = {
-          //   strikePrice:option.CE?.strikePrice,
-          //   expiryDate:option.CE?.expiryDate,
-          //   underlying:option.CE?.underlying,
-          //   identifier:option.CE?.identifier,
-          //   openInterest:option.CE?.openInterest,
-          //   changeinOpenInterest:option.CE?.changeinOpenInterest,
-          //   pchangeinOpenInterest:option.CE?.pchangeinOpenInterest,
-          //   totalTradedVolume:option.CE?.totalTradedVolume,
-          //   impliedVolatility:option.CE?.impliedVolatility,
-          //   lastPrice:option.CE?.lastPrice,
-          //   change:option.CE?.change,
-          //   pChange:option.CE?.pChange,
-          //   totalBuyQuantity:option.CE?.totalBuyQuantity,
-          //   totalSellQuantity:option.CE?.totalSellQuantity,
-          //   bidQty:option.CE?.bidQty,
-          //   bidprice:option.CE?.bidprice,
-          //   askQty:option.CE?.askQty,
-          //   askPrice:option.CE?.askPrice,
-          //   underlyingValue:option.CE?.underlyingValue
-          //   };
-
-          //   const putOption = {
-          //     strikePrice:option.PE?.strikePrice,
-          //     expiryDate:option.PE?.expiryDate,
-          //     underlying:option.PE?.underlying,
-          //     identifier:option.PE?.identifier,
-          //     openInterest:option.PE?.openInterest,
-          //     changeinOpenInterest:option.PE?.changeinOpenInterest,
-          //     pchangeinOpenInterest:option.PE?.pchangeinOpenInterest,
-          //     totalTradedVolume:option.PE?.totalTradedVolume,
-          //     impliedVolatility:option.PE?.impliedVolatility,
-          //     lastPrice:option.PE?.lastPrice,
-          //     change:option.PE?.change,
-          //     pChange:option.PE?.pChange,
-          //     totalBuyQuantity:option.PE?.totalBuyQuantity,
-          //     totalSellQuantity:option.PE?.totalSellQuantity,
-          //     bidQty:option.PE?.bidQty,
-          //     bidprice:option.PE?.bidprice,
-          //     askQty:option.PE?.askQty,
-          //     askPrice:option.PE?.askPrice,
-          //     underlyingValue:option.PE?.underlyingValue
-          //     };
-          //     optionChain.calls.push(callOption);
-          //     optionChain.puts.push(putOption);
-
-          // });
-        })
-        .catch(function (err) {
-          console.log(err);
-        });
-    }
-  });
-
-  // const head = {headers: {
-  //       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-  //       'Accept-Language': 'en-US,en;q=0.9',
-  //       'Accept-Encoding': 'gzip, deflate, br',
-  //       'Referer': 'https://www.nseindia.com/',
-  //       // cookie:cookieJar.getCookieStringSync('https://www.nseindia.com'),
-  //       // cookie:'defaultLang=en; nsit=-arbJUepMbgT_ZAL13gPeFnO; AKA_A2=A; ak_bmsc=7641E6013C3ED0341E048CE9694BBD1C~000000000000000000000000000000~YAAQfidzaEhTRwGIAQAAnuHiIxP6AN4Gq9xiLAUD28mxZlBKMXm3whgrpilU0AxIKVcmZq2oAVTihecF4os1qRo9eixMJUwvunx4Y2CXqcobzyp5zm3ytsrczrxnEyN2VgoS1qxkSrVWSdcHibZACmj1ToBEXdXwxZUnRVxtArxXQKeGIGt8JY8phKLzESjv7PbNgIOkDekhP+g1/p72R+trriVbYdOV5pBlIjX0O8Rky5DcP3BSMJUxrS7LEdwX2WO8iFuNg9SX4yALTmtL34ix/AQKRIjuocXOxdYPP7rwOhjA88z7tD9iG7C33tv0eqsEG/YfRriCCLthm5qru9Tt2H2xO6sBISo4z3025JSXPpXYRNiuiPuzL+zId1CTsdIObu/yt1t8JiVxB1TlRD0J1TXwqSNvKWHshMGdzqWmRs/RiJEB6fndBJzjthNnfTl+f4QgtTRNeLBtPFyVH9eE1FFE4eWJAkm23GrOE8XpWd+IlU2svBrVkyydZA==; _gid=GA1.2.352090767.1684229924; _gat_UA-143761337-1=1; _ga=GA1.1.1973558800.1680625735; nseQuoteSymbols=[{"symbol":"SBIN","identifier":null,"type":"equity"},{"symbol":"TCS","identifier":null,"type":"equity"}]; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4NDIyOTk1NywiZXhwIjoxNjg0MjM3MTU3fQ.UyMhM21xwfMZASBJ8ii9wa_r2VD-uc_RhW7bSpMqqxk; _ga_PJSKY6CFJH=GS1.1.1684229251.92.1.1684229958.20.0.0; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lhq309xf&sl=5&tt=bxj&se=8c&bcn=//684d0d41.akstat.io/&nu=de6o9i2j&cl=wpc"; bm_sv=3E0CCDF39E76232D3BEDB526FE184FC9~YAAQfidzaMnJRwGIAQAAlrPtIxPedAvIfzWSx99xrAODOQW7gsUPTazxPp7obm6btOlPVJfXDyr0nvddsizVqbdTaxo24l1GRvB3ciOu3Ro29Xnl+hNOY9K4MCU0xr4XKcZF7L6OdqzH13zMgU4ZP3XsMd7kodpmPzniPDwKS8XeE/JoMJK7OgJCgdiS2t9yflvshL8TcQyaRZDLveLteXXXufVEvzbhR7ly23lF23fbhrdYjyoDLXwZwRS71wwnLO+F~1',
-  //       'X-Requested-With': 'XMLHttpRequest',
-  //       'Connection': 'keep-alive',
-  //     }}
-
-  // axios.get('https://www.nseindia.com',head)
-  // .then((response)=>{
-  //   console.log(response)
-  //   cookies = response.headers['set-cookie'];
-  //   console.log(cookies)
-  //   const cookieJar = new tough.CookieJar();
-  //   cookies.forEach(cookie => {
-  //     cookieJar.setCookieSync(cookie, 'https://www.nseindia.com');
-  //   });
-  // })
-  // .catch((error)=>{
-  //   console.log(error)
-  // })
-
-  // const url=`https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}&date=${expiryDate}`
-
-  //
-  //  axios.get(url, {
-  //   headers: {
-  //     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-  //     'Accept-Language': 'en-US,en;q=0.9',
-  //     'Accept-Encoding': 'gzip, deflate, br',
-  //     'Referer': 'https://www.nseindia.com/',
-  //     cookie:cookieJar.getCookieStringSync('https://www.nseindia.com'),
-  //     // cookie:'defaultLang=en; nsit=-arbJUepMbgT_ZAL13gPeFnO; AKA_A2=A; ak_bmsc=7641E6013C3ED0341E048CE9694BBD1C~000000000000000000000000000000~YAAQfidzaEhTRwGIAQAAnuHiIxP6AN4Gq9xiLAUD28mxZlBKMXm3whgrpilU0AxIKVcmZq2oAVTihecF4os1qRo9eixMJUwvunx4Y2CXqcobzyp5zm3ytsrczrxnEyN2VgoS1qxkSrVWSdcHibZACmj1ToBEXdXwxZUnRVxtArxXQKeGIGt8JY8phKLzESjv7PbNgIOkDekhP+g1/p72R+trriVbYdOV5pBlIjX0O8Rky5DcP3BSMJUxrS7LEdwX2WO8iFuNg9SX4yALTmtL34ix/AQKRIjuocXOxdYPP7rwOhjA88z7tD9iG7C33tv0eqsEG/YfRriCCLthm5qru9Tt2H2xO6sBISo4z3025JSXPpXYRNiuiPuzL+zId1CTsdIObu/yt1t8JiVxB1TlRD0J1TXwqSNvKWHshMGdzqWmRs/RiJEB6fndBJzjthNnfTl+f4QgtTRNeLBtPFyVH9eE1FFE4eWJAkm23GrOE8XpWd+IlU2svBrVkyydZA==; _gid=GA1.2.352090767.1684229924; _gat_UA-143761337-1=1; _ga=GA1.1.1973558800.1680625735; nseQuoteSymbols=[{"symbol":"SBIN","identifier":null,"type":"equity"},{"symbol":"TCS","identifier":null,"type":"equity"}]; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4NDIyOTk1NywiZXhwIjoxNjg0MjM3MTU3fQ.UyMhM21xwfMZASBJ8ii9wa_r2VD-uc_RhW7bSpMqqxk; _ga_PJSKY6CFJH=GS1.1.1684229251.92.1.1684229958.20.0.0; RT="z=1&dm=nseindia.com&si=0739144a-b036-4da5-82fa-14290217cb34&ss=lhq309xf&sl=5&tt=bxj&se=8c&bcn=//684d0d41.akstat.io/&nu=de6o9i2j&cl=wpc"; bm_sv=3E0CCDF39E76232D3BEDB526FE184FC9~YAAQfidzaMnJRwGIAQAAlrPtIxPedAvIfzWSx99xrAODOQW7gsUPTazxPp7obm6btOlPVJfXDyr0nvddsizVqbdTaxo24l1GRvB3ciOu3Ro29Xnl+hNOY9K4MCU0xr4XKcZF7L6OdqzH13zMgU4ZP3XsMd7kodpmPzniPDwKS8XeE/JoMJK7OgJCgdiS2t9yflvshL8TcQyaRZDLveLteXXXufVEvzbhR7ly23lF23fbhrdYjyoDLXwZwRS71wwnLO+F~1',
-  //     'X-Requested-With': 'XMLHttpRequest',
-  //     'Connection': 'keep-alive',
-  //   }
-  // })
-  // .then((response) => {
-  //   const { data } = response;
-  //   const expiries = data.records.expiryDates;
-
-  //   const filteredData = data.filtered.data.filter(option => option.expiryDate === expiryDate);
-
-  //   const optionChain = {
-  //     calls: [],
-  //     puts: [],
-  //   };
-
-  //   filteredData.forEach(option => {
-  //     const callOption = {
-  //     strikePrice:option.CE?.strikePrice,
-  //     expiryDate:option.CE?.expiryDate,
-  //     underlying:option.CE?.underlying,
-  //     identifier:option.CE?.identifier,
-  //     openInterest:option.CE?.openInterest,
-  //     changeinOpenInterest:option.CE?.changeinOpenInterest,
-  //     pchangeinOpenInterest:option.CE?.pchangeinOpenInterest,
-  //     totalTradedVolume:option.CE?.totalTradedVolume,
-  //     impliedVolatility:option.CE?.impliedVolatility,
-  //     lastPrice:option.CE?.lastPrice,
-  //     change:option.CE?.change,
-  //     pChange:option.CE?.pChange,
-  //     totalBuyQuantity:option.CE?.totalBuyQuantity,
-  //     totalSellQuantity:option.CE?.totalSellQuantity,
-  //     bidQty:option.CE?.bidQty,
-  //     bidprice:option.CE?.bidprice,
-  //     askQty:option.CE?.askQty,
-  //     askPrice:option.CE?.askPrice,
-  //     underlyingValue:option.CE?.underlyingValue
-  //     };
-
-  //     const putOption = {
-  //       strikePrice:option.PE?.strikePrice,
-  //       expiryDate:option.PE?.expiryDate,
-  //       underlying:option.PE?.underlying,
-  //       identifier:option.PE?.identifier,
-  //       openInterest:option.PE?.openInterest,
-  //       changeinOpenInterest:option.PE?.changeinOpenInterest,
-  //       pchangeinOpenInterest:option.PE?.pchangeinOpenInterest,
-  //       totalTradedVolume:option.PE?.totalTradedVolume,
-  //       impliedVolatility:option.PE?.impliedVolatility,
-  //       lastPrice:option.PE?.lastPrice,
-  //       change:option.PE?.change,
-  //       pChange:option.PE?.pChange,
-  //       totalBuyQuantity:option.PE?.totalBuyQuantity,
-  //       totalSellQuantity:option.PE?.totalSellQuantity,
-  //       bidQty:option.PE?.bidQty,
-  //       bidprice:option.PE?.bidprice,
-  //       askQty:option.PE?.askQty,
-  //       askPrice:option.PE?.askPrice,
-  //       underlyingValue:option.PE?.underlyingValue
-  //       };
-  //       optionChain.calls.push(callOption);
-  //       optionChain.puts.push(putOption);
-
-  //   });
-  //       // console.log(optionChain)
-  //   res.send(optionChain)
-
-  // }).catch((error) => {
-  //   console.error(error);
-  //   res.status(500).send('Server Error');
-  // })
-
-  // })
+  })
 
   router.post("/calculate-greeks", (req, res) => {
     const apiKey = "OOT5PNL8EV6DJ5J8";
@@ -799,7 +634,7 @@ module.exports = function (io) {
           "Accept-Language": "en-US,en;q=0.9",
           "Accept-Encoding": "gzip, deflate, br",
           // 'Referer': 'https://www.nseindia.com/',
-          cookie:"_ga=GA1.2.1370922286.1680970843; _gid=GA1.2.1857155133.1688725603; JSESSIONID=CC92CB4AFA98851C581E806801A96E6C; _gat=1",
+          cookie:"_ga=GA1.2.1370922286.1680970843; JSESSIONID=E79D7D0FCA2D2DC9EE3E8199FC58227B",
           "X-Requested-With": "XMLHttpRequest",
           Connection: "keep-alive",
         },
@@ -860,7 +695,7 @@ module.exports = function (io) {
           "Accept-Encoding": "gzip, deflate, br",
           Referer: "https://www.nseindia.com/",
           cookie:
-            'nsit=31mk32zNHt7zGiu65ZUiGybF; AKA_A2=A; defaultLang=en; ak_bmsc=E6C41E1B86FD06A0968867F1252A367B~000000000000000000000000000000~YAAQajLUF9/zUieJAQAAQXffLxSyn6IQlSdoKqLlppFnzo5QuUHvJZitdghlHNQyRcmk9fxXWBHOXhuJ7AbLI2+UUI1cgPS6sBF7oXzV9Re+558Ta7z1JPz50980m+A2lB89JUltJbkiHZnX6W/tMvos2mESlw36rj1LZR4o5LCfQA9WTgTPObNRywW1kKTdeY233BONTQ8cU7aHvwlcgOa754UA8jr5GaQ8QtUnGZrzHePNfrBiZ0NWRxb564uGLmtCPI3BBodd/XqWcPzTGZsjgFos9l6STXESaNokHLWq6C7XK2L3iejJQHO4TOUDkSHOMPfY92WsfgONrCBLjsvOpgMzJdbXFKG7kGgUiJYi4jXhLeLbMd9ZK5+WjFY5bDNZ+0MxXxaO5mKNql3mScIgd5wyBrq81mNe6Gsm1eCJCZ52dAwDRUV0TAHkg9Lr6FRaepTabBrjikVhkBRQurr6e7Fc7o1EtV3yKqWgjZ5DuV5aPsxkPooltw+wKQ==; _gid=GA1.2.2040011975.1688725329; _ga=GA1.1.1973558800.1680625735; nseQuoteSymbols=[{"symbol":"MARUTI","identifier":null,"type":"equity"}]; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4ODcyNTg4NywiZXhwIjoxNjg4NzMzMDg3fQ.tJTqCW6aCaUdp2C-XZDyi4l3HkyTleCxog4HtYla0ig; _ga_PJSKY6CFJH=GS1.1.1688725319.104.1.1688725886.54.0.0; RT="z=1&dm=nseindia.com&si=e19d469a-c6ff-44c1-b505-a909ae0d2136&ss=ljsfsbqy&sl=0&se=8c&tt=0&bcn=%2F%2F684d0d45.akstat.io%2F&nu=qdu7thgu&cl=7c6"; bm_sv=01B0C755800D3A25469AFA9685A2AFD9~YAAQajLUFyEgUyeJAQAAzyboLxQFLSf58vJVZarf3ctGmgiNCLQWWWqVHcrcZ3fHq1HpFhRw7o8Af1XmkEJZ8NoGfQTlQnkAwNGYmh0jSxfmlTfAJNyhlMuNu6Di+SW9O8LVBCevWAPr7t2xyLKZESCHTJRH7R9MpkPBgcLBcVQLjAims1lyzTcigR6t+yK6aiJ1obfIxwsV5W/3fM9HGDbjjCGjp7uZIlr2p98bLxuFiyKhLZPjbgwZL6FWucuGgKLa~1',
+            '_ga=GA1.1.1973558800.1680625735; defaultLang=en; nsit=pn3FUNKy90DxCqN4D7iM9A1p; AKA_A2=A; ak_bmsc=C1DE16DAA07931FA2E35D75F653A18F5~000000000000000000000000000000~YAAQRjZ6XPX6io+JAQAAQ5BFkhQNeCoiHhLxkQ45YTfHd7UdGl5Cn9fiLdG8cUZX56GUz3Du7bdl4m/QC1oyIMf71IsASspmBezY5Mq8bBbTOwzfYtqG0N0CEeh5Hus1u0TwUz+msddHV4TW9PGZ7hSSLNN5PkrskNPqmsSgOnb6fWHMK9RNCoo79l8ZEwphPHueRYFpRpN6jWclH0x/XEMnSZxc4CppnEE+ul8V+qsdzBsgeODqsgGyqEVuD7go6DQxy0ZJe6Nx6blQT4B9D9CTwjnU9E32uMrt3QcKnnBvjS9VJ7GIWOO/U4vffPs/XN061PUGrYs0ndtdduBM3SkxGyM6Ab+13X+TJpBSDjIbDjtiNtDVtzXWJrU7PNG0FnvTv2BLCTUoiLshJMj3ugmbgD+f7g1MocJVgJqBVwEQA1v18iLYyLeMw6+bWk4iAT8GCK0cvAFEMAKYqcsrVU5mUWEblniWZT9J5vIQva7jmGYEPuuHBHFynL2Q; nseQuoteSymbols=[{"symbol":"TATACONSUM","identifier":null,"type":"equity"}]; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY5MDM3NjE5NiwiZXhwIjoxNjkwMzgzMzk2fQ.liX0qdn000TB-lF9g-t_LotbLXkt_h-ltttubAbANsQ; _ga_PJSKY6CFJH=GS1.1.1690376183.108.1.1690376198.45.0.0; RT="z=1&dm=nseindia.com&si=d4b6ede0-bbc8-47e3-8269-561cca54c032&ss=lkjqbupb&sl=2&se=8c&tt=cg5&bcn=%2F%2F684dd331.akstat.io%2F&ld=ken&nu=eaogvpgq&cl=lu2"; bm_sv=EDDA093E6EF001E7EE20F6931E93B608~YAAQRjZ6XOb9io+JAQAAFeVFkhQhU1MVNlDQXwFD3uQqVQgv5fTIQyBJxu0MM/4OXdOP2XV58nG0TRG534LTPfd6KW3AtWjt3Pjgddl5i0K2oWATJOQ4i+r4Fvy9Sw/wG3WiIs6IRnzS6WuNBf8uGvlLTpAH6Uqrl02RqnJBAv608N1Tj+Z61Ihsr5bEWIsVCoRI39hEu1922SPW1MzPlMEmM48wtWvoMjYLJJk/P4ScglPkDuO7TyZ8r/0tRPTYH/5N~1',
           "X-Requested-With": "XMLHttpRequest",
           Connection: "keep-alive",
         },
@@ -936,7 +771,7 @@ module.exports = function (io) {
           "Accept-Language": "en-US,en;q=0.9",
           "Accept-Encoding": "gzip, deflate, br",
           Referer: "https://www.nseindia.com/",
-          cookie:'nsit=31mk32zNHt7zGiu65ZUiGybF; AKA_A2=A; defaultLang=en; ak_bmsc=E6C41E1B86FD06A0968867F1252A367B~000000000000000000000000000000~YAAQajLUF9/zUieJAQAAQXffLxSyn6IQlSdoKqLlppFnzo5QuUHvJZitdghlHNQyRcmk9fxXWBHOXhuJ7AbLI2+UUI1cgPS6sBF7oXzV9Re+558Ta7z1JPz50980m+A2lB89JUltJbkiHZnX6W/tMvos2mESlw36rj1LZR4o5LCfQA9WTgTPObNRywW1kKTdeY233BONTQ8cU7aHvwlcgOa754UA8jr5GaQ8QtUnGZrzHePNfrBiZ0NWRxb564uGLmtCPI3BBodd/XqWcPzTGZsjgFos9l6STXESaNokHLWq6C7XK2L3iejJQHO4TOUDkSHOMPfY92WsfgONrCBLjsvOpgMzJdbXFKG7kGgUiJYi4jXhLeLbMd9ZK5+WjFY5bDNZ+0MxXxaO5mKNql3mScIgd5wyBrq81mNe6Gsm1eCJCZ52dAwDRUV0TAHkg9Lr6FRaepTabBrjikVhkBRQurr6e7Fc7o1EtV3yKqWgjZ5DuV5aPsxkPooltw+wKQ==; _gid=GA1.2.2040011975.1688725329; _gat_UA-143761337-1=1; _ga=GA1.1.1973558800.1680625735; nseQuoteSymbols=[{"symbol":"MARUTI","identifier":null,"type":"equity"}]; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY4ODcyNTM0MSwiZXhwIjoxNjg4NzMyNTQxfQ.2TUXbZa8SSVz9C_HZ1Ebajlrw086ozjMzuLzE3s6Vlo; _ga_PJSKY6CFJH=GS1.1.1688725319.104.1.1688725339.40.0.0; RT="z=1&dm=nseindia.com&si=e19d469a-c6ff-44c1-b505-a909ae0d2136&ss=ljsfg9dy&sl=4&se=8c&tt=6uk&bcn=%2F%2F684d0d42.akstat.io%2F&ld=j9k&nu=qdu7thgu&cl=ji0"; bm_sv=01B0C755800D3A25469AFA9685A2AFD9~YAAQeDLUF4DDoySJAQAAW83fLxR+1EiCDh7b/T6zCjqtR+NlwVquhtZh2QEjYPKz4yBSLnkeeItgY2rJ0hqF+1VKC5mSn3Q2mOgBex6zmkQIIRjGLVvQfZT3+C67nVVuXV81MRYKyvVnCatb6Sx1F0zXuUHy2nDZ4piCeDn3SZJ/xCZxv1Q336UDfz7IPWIG179fypTqPLRk47RLkG46vzpbk+Vqb8AC+Vfc1GLQKKatiMFWZzUA4lBJSgtld7uCpkVW~1',
+          cookie:'_ga=GA1.1.1973558800.1680625735; defaultLang=en; nsit=pn3FUNKy90DxCqN4D7iM9A1p; AKA_A2=A; ak_bmsc=C1DE16DAA07931FA2E35D75F653A18F5~000000000000000000000000000000~YAAQRjZ6XPX6io+JAQAAQ5BFkhQNeCoiHhLxkQ45YTfHd7UdGl5Cn9fiLdG8cUZX56GUz3Du7bdl4m/QC1oyIMf71IsASspmBezY5Mq8bBbTOwzfYtqG0N0CEeh5Hus1u0TwUz+msddHV4TW9PGZ7hSSLNN5PkrskNPqmsSgOnb6fWHMK9RNCoo79l8ZEwphPHueRYFpRpN6jWclH0x/XEMnSZxc4CppnEE+ul8V+qsdzBsgeODqsgGyqEVuD7go6DQxy0ZJe6Nx6blQT4B9D9CTwjnU9E32uMrt3QcKnnBvjS9VJ7GIWOO/U4vffPs/XN061PUGrYs0ndtdduBM3SkxGyM6Ab+13X+TJpBSDjIbDjtiNtDVtzXWJrU7PNG0FnvTv2BLCTUoiLshJMj3ugmbgD+f7g1MocJVgJqBVwEQA1v18iLYyLeMw6+bWk4iAT8GCK0cvAFEMAKYqcsrVU5mUWEblniWZT9J5vIQva7jmGYEPuuHBHFynL2Q; nseQuoteSymbols=[{"symbol":"TATACONSUM","identifier":null,"type":"equity"}]; nseappid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGkubnNlIiwiYXVkIjoiYXBpLm5zZSIsImlhdCI6MTY5MDM3NjE5NiwiZXhwIjoxNjkwMzgzMzk2fQ.liX0qdn000TB-lF9g-t_LotbLXkt_h-ltttubAbANsQ; _ga_PJSKY6CFJH=GS1.1.1690376183.108.1.1690376198.45.0.0; RT="z=1&dm=nseindia.com&si=d4b6ede0-bbc8-47e3-8269-561cca54c032&ss=lkjqbupb&sl=2&se=8c&tt=cg5&bcn=%2F%2F684dd331.akstat.io%2F&ld=ken&nu=eaogvpgq&cl=lu2"; bm_sv=EDDA093E6EF001E7EE20F6931E93B608~YAAQRjZ6XOb9io+JAQAAFeVFkhQhU1MVNlDQXwFD3uQqVQgv5fTIQyBJxu0MM/4OXdOP2XV58nG0TRG534LTPfd6KW3AtWjt3Pjgddl5i0K2oWATJOQ4i+r4Fvy9Sw/wG3WiIs6IRnzS6WuNBf8uGvlLTpAH6Uqrl02RqnJBAv608N1Tj+Z61Ihsr5bEWIsVCoRI39hEu1922SPW1MzPlMEmM48wtWvoMjYLJJk/P4ScglPkDuO7TyZ8r/0tRPTYH/5N~1',
           "X-Requested-With": "XMLHttpRequest",
           Connection: "keep-alive",
         },
@@ -1001,7 +836,7 @@ module.exports = function (io) {
           maxpain.push(result);
         });
 
-        console.log(maxpain);
+          console.log(maxpain);
         res.send(maxpain);
       })
       .catch((error) => {
@@ -1011,7 +846,7 @@ module.exports = function (io) {
   });
 
   router.post("/kite", (req, res) => {
-    const apiKey = "thxudf2o662hgrk5";
+    const apiKey = "0bpuke0rhsjgq3lm";
     const redirectUri = "http://localhost:3000/scanner";
 
     const login_url = `https://kite.zerodha.com/connect/login?api_key=${apiKey}&v=3`;
@@ -1019,21 +854,14 @@ module.exports = function (io) {
     open(login_url);
   });
 
-  router.post("/punch", (req, res) => {
-    const type = req.body.type;
-    const order = req.body.order;
-    const triggerPrice = req.body.triggerPrice;
-    const pro = req.body.pro;
-    const quantity = req.body.quantity;
-    const symbol = req.body.symbol;
-    var currPrice = null;
-    var avgPrice = 0;
-    const stocks = {};
-    const instrument=[]
-    const instrumentData={}
-    const finalPnl ={}
+  router.post("/exit",(req,res)=>{
+    const type = req.body.trade.type;
+    const order = req.body.trade.order;
+    const triggerPrice = req.body.trade.triggerPrice;
+    const pro = req.body.trade.pro;
+    const quantity = req.body.trade.quantity;
+    const symbol = req.body.trade.symbol;
 
-    console.log(symbol, pro, order, type, quantity);
 
     const orderParams = {
       exchange: "NSE",
@@ -1042,81 +870,341 @@ module.exports = function (io) {
       transaction_type: type,
       order_type: order,
       product: pro,
+     
     };
 
-    // kite
-    //   .placeOrder("regular", orderParams)
-    //   .then(function (response) {
-    //     console.log(response);
-    //   })
-    //   .catch(function (err) {
-    //     console.error(err);
-    //   });
 
-    getPositions();
+    console.log(orderParams)
+
+    kite
+    .placeOrder("regular", orderParams)
+    .then(function (response) {
+      console.log(response);
+     order_id =response.order_id
+     console.log(order_id)
+
+    
+  }).catch(function (err) {
+        console.error(err);
+      });
 
 
-   
+})
 
-   
+
+
+
+
+  const updatedPnl={}
+  router.post("/punch", (req, res) => {
+
+    const type = req.body.trade.type;
+    const order = req.body.trade.order;
+    const triggerPrice = req.body.trade.triggerPrice;
+    const pro = req.body.trade.pro;
+    const quantity = req.body.trade.quantity;
+    const symbol = req.body.trade.symbol;
+    var stoploss = Number(req.body.trade.stopLoss)
+    const squareoff = Number(req.body.trade.squareOff)
+    const trailingStopPercentage = Number(req.body.trade.trailingSL)
+    var currPrice = null;
+    var avgPrice = 0;
+    const stocks = {};
+    const instrument=[]
+    const instrumentData={}
+    const finalPnl ={}
+    const tradeId = uuidv4();
+    let signalSent = false;
+    let stopSendingData = false;
+    var gttId = null;
+    
+    console.log('trailing',trailingStopPercentage)
+  ; // Adjust this percentage as needed
+    let highestPrice = 0;
+    let currentTrailingStopPrice = null // Initial stop-loss price
+     // Replace with your two-leg GTT trigger ID
+
+
+    const roll =req.body.roll
+    console.log(symbol, pro, order, type, quantity);
+    console.log(stoploss,squareoff)
+    const orderParams = {
+      exchange: "NSE",
+      tradingsymbol: symbol,
+      quantity: quantity,
+      transaction_type: type,
+      order_type: order,
+      product: pro,
+     
+    };
+    console.log(orderParams)
+
+    // if (triggerPrice) {
+    //   orderParams.trigger_price = triggerPrice;
+    // }
+    
+    
+    kite
+      .placeOrder("regular", orderParams)
+      .then(function (response) {
+        console.log(response);
+       order_id =response.order_id
+       console.log(order_id)
+      
+       kite.getOrderHistory(order_id)
+        .then(function (response) {
+          console.log(response);
+          avgPrice = response[4].average_price;
+          const quantity = response[4].quantity;
+          const token = response[4].instrument_token
+          res.send({tradeId,avgPrice});
+          if (!stocks[symbol]) {
+            stocks[symbol] = {
+              symbol,
+              token,
+              avgPrice,
+              quantity
+            };
+          }
+
+
+          const gttParams = {
+            trigger_type: 'two-leg',
+            tradingsymbol: symbol,
+            exchange: 'NSE',
+            trigger_values: [stoploss,squareoff], 
+            last_price: avgPrice, 
+            orders: [
+              {
+                tradingsymbol: symbol,
+                exchange: 'NSE',
+                transaction_type: 'SELL',
+                quantity: quantity,
+                product: pro,
+                order_type: 'MARKET',
+                price: stoploss,
+              },
+              {
+                tradingsymbol: symbol,
+                exchange: 'NSE',
+                transaction_type: 'SELL',
+                quantity: quantity,
+                product: pro,
+                order_type: 'MARKET',
+                price: squareoff,
+              }
+            ],
+          };
+
+
+          
+
+          kite.placeGTT(gttParams)
+          .then((targetGTTResponse) => {
+            gttId=targetGTTResponse.trigger_id
+            console.log("Target GTT Order Response:", targetGTTResponse);
+            console.log(gttId)
+            // Add any additional logic or handling for the target GTT order here
+          })
+          .catch((error) => {
+            console.error("Error placing Target GTT Order:", error);
+          });
+
+    
+        
+          
+        })
+        .catch(function (err) {
+          console.error(err);
+        });
+
+         
+      })
+      .catch(function (err) {
+        console.error(err);
+      });
+                 
     const ticker = new KiteTicker({
-      api_key: "thxudf2o662hgrk5",
+      api_key: "0bpuke0rhsjgq3lm",
       access_token: access_token,
     });
 
-    ticker.connect();
+      getQuote(["NSE:" + symbol]);
 
-    ticker.on("ticks", onTicks);
-    ticker.on("connect", subscribe);
-    ticker.on("order_update", onTrade);
+      function getQuote(instruments) {
+        kite
+          .getQuote(instruments)
+          .then(function (response) {
+            console.log(response);
+            const token = response[instruments[0]].instrument_token;
+            instrument.push(token)
+            console.log('okkk')
+            console.log(instrument)
+            
+            
+    
+            ticker.connect();
+            ticker.on("ticks", onTicks);
+            ticker.on("connect", subscribe);
+           
+            
+            // ticker.on('disconnect', onDisconnect);
+          })
+          .catch(function (err) {
+            console.log(err);
+          });
+      }  
+
+      
+    function sock (){
+      console.log('hello')
+      io.on("connection", (socket) => {
+       
+  
+        console.log("Client connected");
+  
+        setInterval(()=>{
+          pnlCal(symbol,socket)}, 2000);
+  
+        socket.on("disconnect", () => {
+          console.log("Client disconnected");
+        });
+      });
+  
+    }
+
+  
+
+    
+   sock()
+   ticker.on('order_update', onTrade);
 
     function onTicks(ticks) {
-      console.log("Ticks", ticks);
+      
       currPrice = ticks[0].last_price;
   
-    
+      
       ticks.forEach((tick) => {
         const instrumentToken = tick.instrument_token;
         const lastPrice = tick.last_price;
         const open = tick.ohlc.open
+
+        const isTargetHit = lastPrice >= squareoff;
+        const isStopLossHit = lastPrice <= stoploss;
+
+
+
+        if ((isTargetHit || isStopLossHit) && !signalSent) {
+
+          const hitType = isTargetHit ? 'target' : 'stopLoss';
+
+          io.emit('tradeCompleted', { status: 'completed', tradeId: tradeId, tradeType: type, tradeSymbol: symbol ,hitType: hitType , roll:roll});
+          signalSent = true
+          stopSendingData = true;
+          
+          // ... (rest of your code)
+        }
+
+        
+        if (lastPrice > highestPrice) {
+        
+          highestPrice = lastPrice;
+          console.log(highestPrice)
+        }
+
+        const newTrailingStopPrice = highestPrice * (1 - trailingStopPercentage / 100);
+
+        if (currentTrailingStopPrice === null) {
+          // Initialize currentTrailingStopPrice on the first tick
+          currentTrailingStopPrice = newTrailingStopPrice;
+          stoploss=newTrailingStopPrice
+        } else if (newTrailingStopPrice > currentTrailingStopPrice && !signalSent) {
+          // Update the current trailing stop price only if it's initialized
+          currentTrailingStopPrice = newTrailingStopPrice;
+          stoploss=newTrailingStopPrice
+          console.log(currentTrailingStopPrice)
+          console.log('stoploss',stoploss);
+          // Call a function to modify the stop-loss leg of the two-leg GTT order
+          modifyGTTStopLoss(gttId, currentTrailingStopPrice);
+        }
+    
         // Update instrument data with the latest last price
         instrumentData[instrumentToken] = {
           open:open,
           lastPrice: lastPrice,
         };
 
+  
       })
 
+    
 
     }
+
+    function modifyGTTStopLoss(gttId, newStopLossPrice) {
+      // Define the modification parameters for the stop-loss leg
+      const gttModificationParams = {
+        trigger_id:gttId,
+        trigger_type: 'two-leg',
+        tradingsymbol: symbol,
+        exchange: 'NSE',
+        trigger_values: [newStopLossPrice,squareoff], 
+        last_price: avgPrice, 
+        orders: [
+          {
+            tradingsymbol: symbol,
+            exchange: 'NSE',
+            transaction_type: 'SELL',
+            quantity: quantity,
+            product: pro,
+            order_type: 'MARKET',
+            price: newStopLossPrice,
+          },
+          {
+            tradingsymbol: symbol,
+            exchange: 'NSE',
+            transaction_type: 'SELL',
+            quantity: quantity,
+            product: pro,
+            order_type: 'MARKET',
+            price: squareoff,
+          }
+        
+        ],
+      };
+      // Call the modifyGTT method to modify the stop-loss leg
+      kite.modifyGTT(gttId, gttModificationParams)
+      .then((Response) => {
+        
+        console.log("Response:",Response);
+        // Add any additional logic or handling for the target GTT order here
+      })
+      .catch((error) => {
+        console.error("Error placing Target GTT Order:", error);
+      });; // You'll need to implement the modifyGTT function
+    }
+
 
     function subscribe() {
       
       ticker.subscribe(instrument);
       ticker.setMode(ticker.modeFull, instrument);
+  
     }
 
     function onTrade(order) {
       console.log("holaaadasd");
       console.log(order);
-    
       
+    
+           
+    }
+
+    function onDisconnect(error) {
+      console.log("Closed connection on disconnect", error);
     }
 
 
-    io.on("connection", (socket) => {
-     
-      console.log("Client connected");
-
-      setInterval(()=>{
-        pnlCal(socket)}, 2000);
-
-      socket.on("disconnect", () => {
-        console.log("Client disconnected");
-      });
-    });
-
-    
 
     function getPositions() {
       kite
@@ -1155,45 +1243,51 @@ module.exports = function (io) {
           console.log(instrument)
 
 
-          res.send(stocks);
+         
         })
         .catch(function (err) {
           console.log(err);
         });
     }
 
-    function pnlCal(){
+    function pnlCal(symbol){
+     
+      if (Object.keys(stocks).length >0 && stocks[symbol]) {
+      const token = stocks[symbol].token
+      const quantity = stocks[symbol].quantity
+     
 
-      Object.values(stocks).map(item=>{
-        const {symbol,token,avgPrice,quantity} =item
+      if( instrumentData[token]){
+      
+      
+      const lastPrice = instrumentData[token].lastPrice
+      const open = instrumentData[token].open
 
-
-        if (instrumentData[token]) {
-          const lastPrice = instrumentData[token].lastPrice;
-          const open = instrumentData[token].open
-          const pnl = (lastPrice - avgPrice) * quantity;
+      const pnl = (lastPrice - avgPrice) * quantity;
           
-          const day= ((lastPrice-open)/open)*100
+      const day= ((lastPrice-open)/open)*100
 
-          console.log(pnl)
-          const update = {
-            symbol:symbol,
-            pnl:pnl,
-            dayChange:day,
-            avgPrice:avgPrice,
-            quantity:quantity,
-            ltp:lastPrice
-           }
-         
-        finalPnl[symbol]=update
+      const update = {
+        symbol:symbol,
+        pnl:pnl,
+        dayChange:day,
+        avgPrice:avgPrice,
+        quantity:quantity,
+        ltp:lastPrice
+       }
+     
+      finalPnl[symbol]=update
+      
+      }
+    
+    }
 
-        }
+    updatedPnl[roll]=finalPnl
+    
+   
 
-
-        io.emit('holdings',finalPnl)
-      })
-
-
+    if (!stopSendingData) {
+    io.emit('holdings',updatedPnl)}
     }
 
   });
@@ -1236,7 +1330,7 @@ module.exports = function (io) {
 
 
     const ticker = new KiteTicker({
-      api_key: "thxudf2o662hgrk5",
+      api_key: "0bpuke0rhsjgq3lm",
       access_token: access_token,
     });
 

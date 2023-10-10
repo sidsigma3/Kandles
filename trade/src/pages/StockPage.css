@@ -1,11 +1,11 @@
 .stock-page {
     background-color: #f7f7f7;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 24px;
+    border-radius: 36px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   
     border: 1px solid black;
-    margin: 10px;
+    margin: 14px;
     padding: 10px;
     flex-basis: calc(25% - 20px);
     box-sizing: border-box;
@@ -60,7 +60,7 @@
   input[type="number"] {
     padding: 5px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 22px;
     font-size: 14px;
     width: 100px;
   }
@@ -91,4 +91,14 @@
     font-size: 14px;
     width: 100px;
 
+  }
+
+  .positive {
+    background-color: green; /* Set the background color to green for positive values */
+    color: white; /* Set the text color to white for better visibility */
+  }
+  
+  .negative {
+    background-color: red; /* Set the background color to red for negative values */
+    color: white; /* Set the text color to white for better visibility */
   }
