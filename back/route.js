@@ -718,7 +718,7 @@ function getMargins(segment) {
 
   const API_KEY = 'fd745e7f-f970-4bc8-b11a-703bb47420dd';
   const API_SECRET = '71z9mo074x';
-  const REDIRECT_URI = 'http://localhost:3000/dashboard'; // Make sure this matches the redirect URI in your Upstox app settings
+  const REDIRECT_URI = 'http://kandles.onrender.com/dashboard'; // Make sure this matches the redirect URI in your Upstox app settings
   // const upstox = new Upstox(API_KEY, API_SECRET);
   // const loginUrl = upstox.getLoginUri(REDIRECT_URI);
   const defaultClient = Upstox.ApiClient.instance;
