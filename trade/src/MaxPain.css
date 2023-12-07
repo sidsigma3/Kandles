@@ -1,0 +1,29 @@
+.max-pain{
+    height: 600px;
+
+}
+
+.max-pain .max-pain-canvas canvas {
+    height: 550px !important;
+    width: 95% !important;
+    padding: 10px 10px 10px 50px;
+}
+
+.max-pain .max-pain-form{
+    display: flex;
+    gap: 10px;
+  
+    justify-content: center;
+}
+
+.max-pain .max-pain-form select{
+    width: 20%;
+}
+
+.max-pain .max-pain-form button{
+    height: 45px;
+}
+
+.max-pain label h3{
+    text-align: center;
+}

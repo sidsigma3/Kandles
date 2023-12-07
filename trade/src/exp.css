@@ -1,28 +1,28 @@
-body {
-    font-family: Arial, sans-serif;
+  .option-chain{
+    height: 500px;
   }
   
-  h1 {
+ .option-chain h1 {
     text-align: center;
   }
   
-  label {
+  .option-chain label {
     font-weight: bold;
   }
   
-  input {
+  .option-chain input {
     padding: 5px;
     margin-right: 10px;
   }
   
-  button {
+  .option-chain button {
     padding: 5px 10px;
   }
-  table {
+  .option-chain table {
     border: 1px solid black;
   }
   
-  th,td {
+  .option-chain th,td {
     border: 1px solid black;
   }
 
@@ -34,3 +34,21 @@ body {
     border: 1px solid #ccc;
   }
   
+  .option-chain form{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .option-chain form select{
+    width: 20%;
+  
+  }
+
+  .option-chain form button{
+    height: 45px;
+  }
+
+  .option-chain > div >label>h3{
+    text-align: center;
+  }

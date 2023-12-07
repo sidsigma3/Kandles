@@ -11,7 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PasswordStrengthBar from 'react-password-strength-bar';
 // import Pass from './components/pass';
-import './signup.css'
+// import './signup.css'
 
 
 
@@ -19,7 +19,7 @@ import './signup.css'
 function Signup() {
   const location1 = useLocation();
   const state = location1.state;
-
+  
 
   // if (state.msg.txt) {
   //   console.log('ohhh bhaiii')

@@ -43,7 +43,7 @@ a:hover{
 	background-color: rgb(255, 255, 255);
 }
 .left{
-    background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5)), url(Content.gif);
+    background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5)), url(./../../public/logIn.svg);
     background-size: cover;
     position: relative;
 }

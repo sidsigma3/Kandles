@@ -3,6 +3,7 @@ import axios from 'axios';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Select from 'react-select';
+import './Change.css'
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -242,12 +243,12 @@ function Change() {
 
 
   return (
-    <div>
+    <div className='oi-change'>
       
       <label>
         <h3>Change Data</h3>
         <form onSubmit={handleSubmit}>
-        <Select options={op} isSearchable={true} onChange={changeHandler} />
+        <Select className='change-select' options={op} isSearchable={true} onChange={changeHandler} />
             {/* <select onChange={changeHandler} class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
           <option selected>Open Stocks</option>
           <option value='HCLTECH'>HCLTECH</option>
@@ -278,8 +279,8 @@ function Change() {
         {symbol!=='NIFTY'&& (
               <select onChange={changeHandler1} class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
              <option selected>DATE</option>
-            <option value='27-Apr-2023'>27-Apr-2023</option>
-            <option value='25-May-2023'>25-May-2023</option>
+            <option value='30-Nov-2023'>30-Nov-2023</option>
+            <option value='28-Dec-2023'>28-Dec-2023</option>
             <option value='29-Jun-2023'>29-Jun-2023</option>
 
             </select>

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './pages/start.css'
+// import './pages/start.css'
 
 function Start (){
 

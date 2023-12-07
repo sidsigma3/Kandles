@@ -77,8 +77,8 @@ function Greek() {
         {symbol!=='NIFTY'&& (
               <select onChange={changeHandler1} class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
              <option selected>DATE</option>
-            <option value='27APR2023'>27-Apr-2023</option>
-            <option value='25MAY2023'>25-May-2023</option>
+            <option value='30NOV2023'>30-Nov-2023</option>
+            <option value='28DEC2023'>28-Dec-2023</option>
             <option value='29JUN2023'>29-Jun-2023</option>
 
             </select>

@@ -1,0 +1,24 @@
+.oi-change form{
+    display: flex;
+    gap: 10px;
+   justify-content: center;
+
+}
+
+.oi-change form select ,.change-select{
+    width: 20%;
+}
+
+.oi-change canvas{
+    height: 550px !important;
+    width: 95% !important;
+    padding: 10px 10px 10px 50px;
+}
+
+.oi-change form button{
+    height: 45px;
+}
+
+.oi-change label h3{
+    text-align: center;
+}

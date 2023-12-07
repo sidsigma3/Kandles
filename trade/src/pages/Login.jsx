@@ -11,7 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PasswordStrengthBar from 'react-password-strength-bar';
 // import Pass from './components/pass';
-import './login.css'
+// import './login.css'
 
 
 function Login() {
@@ -45,7 +45,7 @@ function Login() {
       console.log(res.data.stat)
       if (res.data.stat===200){
         toast.success(res.data.msg, {autoClose:3000})
-        navigate('/homepage',{replace:true})
+        navigate('/dashboard',{replace:true})
 
       }
       else if(res.data.stat==401){

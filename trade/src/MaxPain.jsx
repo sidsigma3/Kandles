@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './MaxPain.css'
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -80,6 +81,7 @@ function MaxPain() {
           text: symbol,
         },
       },
+      
     };
     
     labels = stockData.map((option)=>{
@@ -104,11 +106,11 @@ function MaxPain() {
 
 
   return (
-    <div>
+    <div className='max-pain'>
       
       <label>
         <h3>MaxPain Data</h3>
-        <form onSubmit={handleSubmit}>
+        <form className='max-pain-form' onSubmit={handleSubmit}>
             <select onChange={changeHandler} class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
           <option selected>Open Stocks</option>
           <option value='HCLTECH'>HCLTECH</option>
@@ -139,8 +141,8 @@ function MaxPain() {
         {symbol!=='NIFTY'&& (
               <select onChange={changeHandler1} class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
              <option selected>DATE</option>
-            <option value='27-Apr-2023'>27-Apr-2023</option>
-            <option value='25-May-2023'>25-May-2023</option>
+            <option value='28-Nov-2023'>28-Nov-2023</option>
+            <option value='30-Dec-2023'>30-Dec-2023</option>
             <option value='29-Jun-2023'>29-Jun-2023</option>
 
             </select>
@@ -154,7 +156,7 @@ function MaxPain() {
 
   {stockData && ( 
   
-  <div>
+  <div className='max-pain-canvas'>
   <Bar options={options} data={data} />
   </div>
   

@@ -1,5 +1,5 @@
 import React, { Component ,useEffect,useState,useRef} from 'react';
-import './homepage.css'
+// import './homepage.css'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import queryString from 'query-string';

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios'
-import './StockPage.css'
+// import './StockPage.css'
 import io from 'socket.io-client';
 
 

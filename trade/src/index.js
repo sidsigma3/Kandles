@@ -17,6 +17,15 @@ import MaxPain from './MaxPain';
 import Scanner from './Scanner';
 import Trading from './pages/Trading';
 import TradePage from './pages/TradePage';
+import Landing from './components/new/Landing/Landing';
+import AboutUs from './components/new/AboutUs/AboutUs';
+import WhyUs from './components/new/WhyUs/WhyUs';
+import News from './components/new/News/News';
+import LogIn from './components/new/LogIn/LogIn';
+import SignUp from './components/new/SignUp/SignUp';
+import Log from './components/new/LogIn/Log';
+import Dashboard from './components/new/Dashboard/Dashboard';
+import SystemTrading from './components/new/Dashboard/systemTrading/SystemTrading';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -29,6 +38,15 @@ root.render(
     {/* <Exp></Exp> */}
     {/* <Pass></Pass> */}
     <Home></Home>
+    {/* <SystemTrading></SystemTrading> */}
+    {/* <Dashboard></Dashboard> */}
+    {/* <Landing></Landing> */}
+    {/* <AboutUs></AboutUs> */}
+    {/* <Log></Log> */}
+    {/* <WhyUs></WhyUs> */}
+    {/* <News></News> */}
+    {/* <LogIn></LogIn> */}
+{/* <SignUp></SignUp> */}
     {/* <Trading></Trading> */}
     {/* <TradePage></TradePage> */}
     {/* <Start></Start> */}

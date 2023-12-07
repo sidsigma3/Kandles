@@ -1,0 +1,11 @@
+.overview-graph {
+    position: relative;
+    height: 95%;
+}
+
+.overview-graph h4{
+    position: absolute;
+    right: 450px;
+    color: #0C7FDA;
+    top: 30px;
+}

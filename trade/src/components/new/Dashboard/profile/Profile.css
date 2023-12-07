@@ -1,0 +1,38 @@
+.profile-page{
+   align-items: center;
+    height: 100%;
+    margin-left: 40px;
+}
+
+.profile-page .profile-top{
+    background-color: #CFE8FC;
+    height: 40%;
+    width: 95%;
+    border-radius: 10px;
+    display: flex;
+    padding: 20px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 20px;
+
+}
+
+.profile-page .profile-top img{
+    height: 250px;
+    border-radius: 175px;
+    width: 250px;
+}
+
+.profile-page .profile-top .profile-edit{
+    margin-top: 40px;
+    display: flex;
+    gap: 10px;
+}
+
+
+.profile-page .profile-buttom .range-inputs{
+    display: flex;
+    gap: 50px ;
+
+}

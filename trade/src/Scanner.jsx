@@ -6,6 +6,7 @@ import Exp from './Exp';
 import Greek from './Greek';
 import axios from 'axios';
 import queryString from 'query-string';
+import './Scanner.css'
 function Scanner(){
     // const [requestToken,setrequestToken] = useState(null)
     // const hasExecuted = useRef(false);
@@ -42,26 +43,28 @@ function Scanner(){
     //     },[requestToken])
 
     return(
+      <div className='scanner'>
         <Tabs
         defaultActiveKey="profile"
         id="uncontrolled-tab-example"
-        className="mb-3"
+        className="scanner-tab"
+        
       >
         <Tab eventKey="oi" title="Open Interest">
-         <Change></Change>
+         <Change className="tab-content"></Change>
         </Tab>
         <Tab eventKey="maxpain" title="Max Pain">
-        <MaxPain></MaxPain>
+        <MaxPain className="tab-content"></MaxPain>
         </Tab>
         <Tab eventKey="optionchain" title="Option Chain Data">
-          <Exp></Exp>
+          <Exp className="tab-content"></Exp>
         </Tab>
         <Tab eventKey="greek" title="Greek Data">
-          <Greek></Greek>
+          <Greek className="tab-content"></Greek>
           </Tab>
       </Tabs>
 
-
+      </div>
     )
 }
 

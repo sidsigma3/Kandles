@@ -1,0 +1,196 @@
+.login-container{
+    display: flex;
+    
+    justify-content: center;
+    align-items: flex-start;
+    flex-shrink: 0;
+    }
+    
+    
+    .login-container .left{
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+        height: 1104px;
+        flex-shrink: 0; 
+        background: linear-gradient(0deg, rgba(17, 17, 17, 0.25) 0%, rgba(17, 17, 17, 0.25) 100%), url(../../../../public/logIn.svg);
+        background-repeat: no-repeat;
+        background-size: cover;
+    
+    }
+    
+    .login-container .left h2{
+        color: #FFF;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 56px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 64px; /* 114.286% */
+    }
+    
+    
+    .login-container .left p{
+        color: #FFF;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    }
+    
+    .login-container .right .form .name .full-name{
+        display: flex;
+        
+    }
+    
+    .login-container .right .form .phone{
+        width: 556px;
+    }
+    .login-container .right .top{
+        display: flex;
+    padding: 2px;
+    align-items: flex-start;
+    gap: 10px;
+    
+    
+    color: #333;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    }
+    
+    .login-container .right .bottom{
+        display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 48px;
+    }
+    
+    
+    .login-container .right .bottom h3{
+        text-align: start;
+        color: #333;
+    font-family: Poppins;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    }
+    
+    .login-container .right .bottom .social-media{
+        display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    }
+    .login-container .right .bottom .social-media .google,.login-container .right .bottom .social-media .twitter{
+        display: flex;
+    width: 568px;
+    height: 64px;
+    padding: 16.5px 154px 17.5px 155px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 40px;
+    border: 1px solid #333;
+    background: #FFF;
+    }
+    
+    .login-container .right .bottom .form {
+        display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    }
+
+    .login-container .right .bottom .form .name {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .login-container .right .bottom .form .name .full-name{
+        
+        width: 568px;
+        align-items: flex-start;
+        gap: 4px;
+
+    }
+    
+    .login-container .right .bottom .form .email,.login-container .right .bottom .form .password{
+        display: flex;
+    width: 568px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    }
+    
+    .login-container .right .bottom .form .email h4 , .login-container .right .bottom .form .password h4,.login-container .right .bottom .form .name h4,.login-container .right .bottom .form .user-name h4,.login-container .right .bottom .form .phone h4{
+        color: #666;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    }
+    .login-container .right .bottom .form .name .full-name input{
+        width: 272px;
+    }
+    
+    .login-container .right .bottom .form input{
+         height: 56px;
+    align-self: stretch;
+        border-radius: 12px;
+    border: 1px solid rgba(102, 102, 102, 0.35);
+        width:556px ;
+    }
+
+    .login-container .right .bottom .form .email input , .login-container .right .bottom .form .password input,.login-container .right .bottom .form .name .full-name input,.login-container .right .bottom .form .email input{
+        height: 56px;
+    align-self: stretch;
+        border-radius: 12px;
+    border: 1px solid rgba(102, 102, 102, 0.35);
+    }
+    
+    .login-container .right .bottom .form .phone input{
+        width:553px
+    } 
+
+    .login-container .right .bottom .form .password h5{
+        color: #111;
+    text-align: right;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-decoration-line: underline;
+    }
+    
+    .login-container .right .bottom .form .submit{
+        display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    }
+    
+    .login-container .right .bottom .form .submit button{
+        display: flex;
+    width: 180px;
+    padding: 20px 32px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+        border-radius: 8px;
+    background: var(--primary-500, #2196F3);
+    }
+    
+    .login-container .right .bottom .form .submit h5{
+        color: #333;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    }

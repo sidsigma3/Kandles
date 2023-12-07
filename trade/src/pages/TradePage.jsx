@@ -1,6 +1,6 @@
 import React, { useState ,useEffect,useRef} from 'react';
 import axios from 'axios';
-import './TradePage.css';
+// import './TradePage.css';
 import StockPage from './StockPage';
 import io from 'socket.io-client';
 import { ToastContainer, toast } from 'react-toastify';
@@ -24,7 +24,7 @@ const TradePage = () => {
   const [buyAtLowValue, setBuyAtLowValue] = useState(0);
   const [protectProfit, setProtectProfit] = useState(false);
   const [protectProfitType, setProtectProfitType] = useState('%');
-  const [protectProfitValue, setProtectProfitValue] = useState(0);
+  const [protectProfitValue, setProtectProfitValue] = useState();
   const [takeProfit, setTakeProfit] = useState(false);
   const [takeProfitType, setTakeProfitType] = useState('%');
   const [takeProfitValue, setTakeProfitValue] = useState(0);
@@ -58,6 +58,10 @@ const TradePage = () => {
   const [selectedValue, setSelectedValue] = useState("")
   const [exchange, setExchange] = useState()
   const [remainingTime, setRemainingTime] = useState(null)
+  const [timerValue,setTimerValue] = useState()
+
+
+
 
   const rollRef = useRef(null);
   const socketRef = useRef(null);
@@ -481,7 +485,8 @@ const TradePage = () => {
             symbol:index,
             stopLoss:stopLossPrice,
             squareOff:squareOffPrice,
-            trailingSL:trailingSLValue
+            trailingSL:trailingSLValue,
+            protectProfit:protectProfitValue
         }
         rollRef.current = roll;
         console.log(trade)
@@ -772,6 +777,12 @@ const TradePage = () => {
 
 }
 
+const handleTimerValue = (e) =>{
+      setTimerValue(Number(e.target.value))
+      setRemainingTime(Number(e.target.value));
+      localStorage.setItem('timer', e.target.value)
+}
+
 
   const [resetCount, setResetCount] = useState(0);
 
@@ -1001,10 +1012,10 @@ useEffect(()=>{
         clearTimeout(tradeTimeout); // Clear the timer
         setRemainingTime(null); // Reset remaining time when the timer expires
         handleTradeCompletion(tradeId);
-      }, 1 * 60 * 1000); // 10 minutes in milliseconds
+      }, timerValue * 60 * 1000); // 10 minutes in milliseconds
 
       // Display the timer in the frontend
-      setRemainingTime(1 * 60)
+      setRemainingTime(timerValue * 60)
 
      
       
@@ -1077,7 +1088,7 @@ useEffect(() => {
                 </label>
                 </div>
                 <div class="form-check col">
-                <input class="form-check-input" type="radio" name="flexRadioDefault2" id="flexRadioDefault2" checked={product==='CNC'} onChange={handleProductChange} value='CNC'/>
+                <input class="form-check-input" type="radio" name="flexRadioDefault2" id="flexRadioDefault2" checked={product==='NRML'} onChange={handleProductChange} value='NRML'/>
                 <label class="form-check-label" for="flexRadioDefault2">
                     Longterm
                 </label>
@@ -1247,7 +1258,7 @@ useEffect(() => {
 
           <div className="Type_Value">
 
-          <div className='row'>
+          {/* <div className='row'> */}
             {/* <div class="form-check col">
                     <input class="form-check-input" type="radio" name="flexRadioDefault10" id="flexRadioDefault1" onChange={(e)=>{setValidity(e.target.value)}} value='DAY'/>
                     <label class="form-check-label" for="flexRadioDefault1">
@@ -1271,7 +1282,7 @@ useEffect(() => {
                     </div> */}
                    
 
-            </div>
+            {/* </div> */}
             {/* <div>
             <select class="form-select" aria-label="Default select example">
                 <option selected>Minutes</option>
@@ -1353,11 +1364,11 @@ useEffect(() => {
             )}
 
           <div className="input-field-7">
-                  <label htmlFor="trailingSL-type">Timer option:</label>
+                  <label htmlFor="timer">Timer option:</label>
                 
                   <div className="input-field-14">
                  
-                  <input type="number" id="protectProfitValue" value={protectProfitValue} onChange={handleProtectProfitValueChange} />
+                  <input type="number" value={timerValue} onChange={handleTimerValue} ></input>
                 </div>
           
             </div>
