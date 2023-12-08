@@ -79,7 +79,7 @@ const changeHandler=(e)=>{
       else{
           if (refp.test(user1.password)){
             
-            axios.post("http://localhost:5000/signup",user1)
+            axios.post("https://kandles-back.onrender.com/signup",user1)
             .then((res)=>{
            
             if (res.data.stat===200){
