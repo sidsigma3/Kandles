@@ -49,19 +49,19 @@ const navigate = useNavigate()
             <ul>
 
                 <li>
-                    <a href='#' onClick={()=>navigate('/about-us')}>
+                    <a onClick={()=>navigate('/about-us')}>
                     About Us    
                     </a>
                 </li>
                
                 <li className='why-us'>
-                    <a href='#' onClick={()=>navigate('/why-Us')}>
+                    <a  onClick={()=>navigate('/why-Us')}>
                         Why Us?
                     </a>
 
                 </li>
                 <li className='Blog'>
-                    <a href='#' onClick={()=>navigate('/blog')}>
+                    <a  onClick={()=>navigate('/blog')}>
                         Blog
                     </a>
 

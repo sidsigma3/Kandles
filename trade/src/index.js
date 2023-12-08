@@ -15,7 +15,7 @@ import Greek from './Greek';
 import Change from './Change';
 import MaxPain from './MaxPain';
 import Scanner from './Scanner';
-import Trading from './pages/Trading';
+// import Trading from './pages/Trading';
 import TradePage from './pages/TradePage';
 import Landing from './components/new/Landing/Landing';
 import AboutUs from './components/new/AboutUs/AboutUs';
