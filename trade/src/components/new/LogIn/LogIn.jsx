@@ -49,8 +49,8 @@ const LogIn = () => {
 
 
     const[eye,seteye]=useState(true);
-  const[password,setpassword]=useState("password");
-  const[type,settype]=useState(false);
+    const[password,setpassword]=useState("password");
+    const[type,settype]=useState(false);
 
     const showPassword = ()=>{
         if(password=="text"){

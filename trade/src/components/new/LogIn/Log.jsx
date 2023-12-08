@@ -39,7 +39,7 @@ const changeHandler=(e)=>{
 
   const submitHandler= (e)=>{
     e.preventDefault()
-    axios.post("http://localhost:5000/login",user)
+    axios.post("https://kandles-back.onrender.com/login",user)
     .then((res)=>{
       console.log(res.data.stat)
       if (res.data.stat===200){
