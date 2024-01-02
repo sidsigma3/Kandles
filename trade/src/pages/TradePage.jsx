@@ -157,7 +157,7 @@ const TradePage = () => {
 //     storePageStateInStorage(pageState);
 //   }, [capitalRiskPerDay, strike,capital,numTrade,numTrades,index ,strike,type,stopLoss,product,orderType,triggerPrice,rewardToRisk,quantity,tradingInfo]); 
 
-
+ 
   function storePageStateInStorage(pageState) {
     const serializedState = JSON.stringify(pageState);
     localStorage.setItem('pageState', serializedState); 
@@ -252,6 +252,8 @@ const TradePage = () => {
 
         },[])
 
+
+
         useEffect(()=>{
             const riskCapital= (capitalRiskPerDay/100)*capital
             setQuantity((riskCapital/((stopLoss/100)*strike)).toFixed(1))
@@ -260,6 +262,8 @@ const TradePage = () => {
         },[capitalRiskPerDay,capital,stopLoss,strike])
 
 
+
+        
         useEffect(()=>{
 
           const rewardRatio = (rewardToRisk*stopLoss )/ 100;

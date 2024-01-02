@@ -115,7 +115,7 @@ const showPassword = ()=>{
             <link rel="stylesheet" href="PasswordReset.css"></link>
             <title>Password Reset</title>
         </head>
-        <body>
+        <body className='pass-reset'>
             <ToastContainer></ToastContainer>
             <div class="split-screen">
                 <div class="left">

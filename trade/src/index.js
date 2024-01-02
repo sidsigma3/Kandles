@@ -5,6 +5,9 @@ import './bootstrap/css/bootstrap.css'
 // import App from './App';
 import Reset from './pages/Reset';
 import Home from './Home';
+
+import Subscribe from './components/new/Dashboard/subscription/Subscribe';
+
 import HomePage from './pages/Homepage';
 // import Signup from './Signup';
 import Start from './Start';
@@ -26,11 +29,13 @@ import SignUp from './components/new/SignUp/SignUp';
 import Log from './components/new/LogIn/Log';
 import Dashboard from './components/new/Dashboard/Dashboard';
 import SystemTrading from './components/new/Dashboard/systemTrading/SystemTrading';
-
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  <GoogleOAuthProvider clientId="377046758434-nnu0bme8nrlogj08vuk72e8ss20b10a1.apps.googleusercontent.com">
   <React.StrictMode>
+    
     {/* <Scanner></Scanner> */}
     {/* <MaxPain></MaxPain> */}
     {/* <Change></Change> */}
@@ -38,6 +43,7 @@ root.render(
     {/* <Exp></Exp> */}
     {/* <Pass></Pass> */}
     <Home></Home>
+    {/* <Subscribe></Subscribe> */}
     {/* <SystemTrading></SystemTrading> */}
     {/* <Dashboard></Dashboard> */}
     {/* <Landing></Landing> */}
@@ -56,6 +62,7 @@ root.render(
     {/* <Login></Login> */}
     {/* <Signup></Signup> */}
   </React.StrictMode>
+  </GoogleOAuthProvider>
 );
 
 

@@ -73,7 +73,7 @@ a:hover{
 .right form{
     width: 328px;
 }
-form input[type="text"], form input[type="email"],form input[type="password"]{
+.pass-reset form input[type="text"],.pass-reset form input[type="email"],.pass-reset input[type="password"]{
     display: block;
     width: 100%;
     box-sizing: border-box;

@@ -1,7 +1,14 @@
+
+.order{
+  padding-right: 20px;
+}
+
+
 .order-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    
   }
   
   .order-table th, .order-table td {

@@ -24,6 +24,14 @@ const KiteTicker = require("kiteconnect").KiteTicker;
 const io = require("./server");
 const { v4: uuidv4 } = require('uuid');
 const Upstox = require('upstox-js-sdk');
+const puppeteer = require('puppeteer');
+const otplib = require('otplib');
+const Razorpay = require('razorpay');
+
+const { Builder, By, until } = require('selenium-webdriver');
+const chrome = require('selenium-webdriver/chrome');
+
+
 const htmlTemplate = fs.readFileSync(
   "./../trade/src/components/WelocomeEmail.html",
   "utf8"
@@ -47,7 +55,10 @@ const cookieJar = new tough.CookieJar();
 
 
 // const stream = fs.createReadStream('config/instrument.csv', 'utf8');
-
+const razorpay = new Razorpay({
+  key_id: 'rzp_test_u9YDoBJGjerFbp',
+  key_secret: 'tD1op5y9kL0Xa9S6gnbeXrMY',
+});
 
 
 const sendEmail = async (recipient, userName) => {
@@ -115,10 +126,14 @@ module.exports = function (io) {
           });
         } else {
           if (result.length > 0) {
+
+            const token = jwt.sign({ email: result[0].email, userId: result[0].id }, 'secret-key', { expiresIn: '1h' });
+
             loginAttempts = 0;
             res.json({
               stat: 200,
               msg: "Sucessfully entered website",
+              token: token,
             });
           } else {
             loginAttempts++;
@@ -134,6 +149,28 @@ module.exports = function (io) {
       }
     );
   });
+
+
+  router.post('/payment', async (req,res)=>{
+
+    const amount = req.body.amount
+    
+
+    const options = {
+      amount: 50000,
+      currency: 'INR',
+      receipt: 'receipt_order_74394',
+      payment_capture: 1,
+    };
+
+
+    try {
+      const response = await razorpay.orders.create(options);
+      res.json(response);
+    } catch (error) {
+      console.log(error);
+    }
+  })
 
 
   router.post('/api/instruments',(req,res)=>{
@@ -153,31 +190,154 @@ module.exports = function (io) {
     stream.pipe(csv())
     .on('data', (row) => {
       // Assuming your instrument names are in the 'name' column
-      if (row.name) {
-       
-        instrumentNames.push(row.name);
+      if (row.name && row.instrument_key) {
+        const instrument = {
+          name: row.name,
+          instrument_key: row.instrument_key
+        };
+        instrumentNames.push(instrument);
       }
     })
     .on('end', () => {
-      console.log(instrumentNames,'hello')
+     
+      res.json({ instrumentNames });
+    });
+
+  })
+
+  router.post('/api/instrumentslist',(req,res)=>{
+    const instrumentNames = [];
+    const stream = fs.createReadStream('./config/instruments.csv', 'utf8');
+    // csv.parse(instrumentfile, { headers: true })
+    // .on('data', (row) => {
+    //   // Assuming your instrument names are in the 'name' column
+    //   if (row.name) {
+    //     instrumentNames.push(row.name);
+    //   }
+    // })
+    // .on('end', () => {
+    //   res.json({ instrumentNames });
+    // });
+
+    stream.pipe(csv())
+    .on('data', (row) => {
+      // Assuming your instrument names are in the 'name' column
+      if (row.name && row.tradingsymbol) {
+        const instrument = {
+          name: row.name,
+          instrument_key: row.tradingsymbol,
+          expiry:row.expiry
+        };
+        instrumentNames.push(instrument);
+      }
+    })
+    .on('end', () => {
+     
       res.json({ instrumentNames });
     });
 
   })
 
 
+
+  router.post("/get-master-quote", async (req, res) => {
+    // Initialize a cookie jar
+    const cookieJar = new tough.CookieJar();
+    
+    // Define headers with the cookie jar
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Referer': 'https://www.nseindia.com/',
+      'X-Requested-With': 'XMLHttpRequest',
+      'Connection': 'keep-alive',
+    };
+  
+    // Make the initial request to obtain cookies
+    try {
+      const response = await axios.get('https://www.nseindia.com', { headers });
+      const cookies = response.headers['set-cookie'];
+  
+      // Set cookies in the cookie jar
+      cookies.forEach(cookie => {
+        cookieJar.setCookieSync(cookie, 'https://www.nseindia.com');
+      });
+    } catch (error) {
+      console.error('Error setting initial cookies:', error);
+      return res.status(500).send('Server Error');
+    }
+  
+    // Use the cookie jar for the subsequent request
+    const url = 'https://www.nseindia.com/api/master-quote';
+  
+    try {
+      const response = await axios.get(url, {
+        withCredentials: true,
+        jar: cookieJar,
+        headers: {
+          ...headers,
+          cookie: cookieJar.getCookieStringSync('https://www.nseindia.com'),
+        },
+      });
+  
+      // Process the response and send the data back
+      const { data } = response;
+      console.log(data);
+  
+      // Send the data back to the client
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching master quote:', error);
+      res.status(500).send('Server Error');
+    }
+  });
+
+
   router.post("/signup", (req, res) => {
     console.log(req.body);
+    const registrationMethod = req.body.registrationMethod;
+    let firstName =''
+    let lastName ='';
+    let userName ='' ;
+    let email =''
+    let password ='';
+    let repassword ='';
+    let phoneNumber ='';
+    let id =''
 
-    const firstName = req.body.fname;
-    const LastName = req.body.lname;
-    const userName = req.body.username;
-    const email = req.body.email;
-    const password = req.body.password;
-    const repassword = req.body.rePassword;
-    const phoneNumber = req.body.phone;
+    let fullName = '';
 
-    const fullName = firstName + " " + LastName;
+    if (registrationMethod === "email") {
+      // Handle email signup logic
+       firstName = req.body.name;
+     
+       userName = req.body.username;
+       email = req.body.email;
+       password = req.body.password;
+       repassword = req.body.rePassword;
+       phoneNumber = req.body.phone;
+  
+       fullName = firstName 
+  
+      // Your existing email signup logic here
+    } else if (registrationMethod === "google") {
+      // Handle Google signup logic
+      
+       firstName = req.body.name
+       userName = req.body.name;
+       email = req.body.email;
+       phoneNumber = req.body.password;
+       password = req.body.password;
+     
+  
+       fullName = firstName 
+  
+      // Your existing Google signup logic here
+    }
+
+
+  
 
     db.query(
       "SELECT * FROM login.user WHERE email=? ",
@@ -242,6 +402,7 @@ module.exports = function (io) {
           },
         });
 
+    
         let mailOptions = transporter
           .sendMail({
             from: "sidsigma3@gmail.com",
@@ -482,10 +643,13 @@ module.exports = function (io) {
         ) {
           // Extract last price and change from decoded data
           const lastPrice = decodedData.feeds[symbol].ff.indexFF.ltpc.ltp;
-          const change = decodedData.feeds[symbol].ff.indexFF.ltpc.cp;
-      
+          const cp = decodedData.feeds[symbol].ff.indexFF.ltpc.cp;
+
+          const priceChange = lastPrice - cp;
+          const percentageChange = ((lastPrice - cp) / cp) * 100;
+          
           // Emit last price and change to connected clients
-          io.emit('marketDataUpdate', { lastPrice, indices });
+          io.emit('marketDataUpdate', { lastPrice, indices ,percentageChange,priceChange});
         } else {
           console.error('Expected properties not found in the data structure.');
         }
@@ -536,9 +700,9 @@ module.exports = function (io) {
  router.post("/getGraph",(req,res)=>{
 
   const today = new Date().toISOString().split('T')[0];
-  const selectedInstrument = req.body.selectedInstrument || "Nifty 50";
+  const selectedInstrument = req.body.selectedInstrument || "NSE_INDEX|Nifty 50";
   let api = new Upstox.HistoryApi();
-  let instrumentKey = "NSE_INDEX|"+selectedInstrument; // String | 
+  let instrumentKey = selectedInstrument; // String | 
   let interval = "day"; // String | 
   let toDate = today; // String | 
   api.getHistoricalCandleData(instrumentKey, interval, toDate, apiVersion, (error, data, response) => {
@@ -552,6 +716,35 @@ module.exports = function (io) {
 
  })
 
+
+ router.post("/top-movers", async (req, res) => {
+
+  const url = 'https://iislliveblob.niftyindices.com/jsonfiles/equitystockwatch/EquityStockWatchNIFTY%2050.json?{}&_=' + Date.now();
+
+axios.get(url, {
+  headers: {
+    'Accept': 'application/json, text/javascript, */*; q=0.01',
+    'Sec-Fetch-Mode': 'cors',
+    // Add other headers as needed
+  },
+})
+  .then(response => {
+    console.log(response.data);
+    res.send(response.data)
+  })
+  .catch(error => {
+    console.error(error);
+    // Handle errors here
+  });
+
+
+
+ })
+
+
+
+
+
  router.post("/user-info", async (req, res) => {
   try {
     // Fetch margin data
@@ -561,7 +754,7 @@ module.exports = function (io) {
     // Fetch instrument data
     const instrumentResponse = await kite.getInstruments();
     const instruments = instrumentResponse;
-
+    
     // Send the response to frontend
     res.send({ capital,instruments});
   } catch (error) {
@@ -718,7 +911,7 @@ function getMargins(segment) {
 
   const API_KEY = 'fd745e7f-f970-4bc8-b11a-703bb47420dd';
   const API_SECRET = '71z9mo074x';
-  const REDIRECT_URI = 'http://kandles.onrender.com/dashboard'; // Make sure this matches the redirect URI in your Upstox app settings
+  const REDIRECT_URI = 'http://localhost:3000/dashboard'; // Make sure this matches the redirect URI in your Upstox app settings
   // const upstox = new Upstox(API_KEY, API_SECRET);
   // const loginUrl = upstox.getLoginUri(REDIRECT_URI);
   const defaultClient = Upstox.ApiClient.instance;
@@ -730,7 +923,7 @@ function getMargins(segment) {
   const accessTokenUrl = 'https://api-v2.upstox.com/login/authorization/token';
   const authUrl = `${AUTH_URL}?client_id=${API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`
  
-
+  const otplibAuthenticator = otplib.authenticator;
 
   // let apiInstance = new UpstoxClient.HistoryApi();
   // let instrumentKey = "NSE_INDEX|Nifty 50"; // String | 
@@ -892,8 +1085,11 @@ function getMargins(segment) {
     }
   
     // Use the cookie jar for subsequent requests
-    const url = `https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}&date=${expiryDate}`;
-  
+    const url1 = `https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}&date=${expiryDate}`;
+    const url2 = `https://www.nseindia.com/api/option-chain-indices?symbol=${symbol}`;
+    const url = (symbol === 'NIFTY' || symbol==='BANKNIFTY' || symbol ==='MIDCPNIFTY' || symbol==='FINNIFTY') ? url2 : url1;
+
+    
     try {
       const response = await axios.get(url, {
         headers: {
@@ -901,6 +1097,7 @@ function getMargins(segment) {
           cookie: cookieJar.getCookieStringSync('https://www.nseindia.com'),
         },
       });
+      console.log('stock he kya',response.data)
   
       // Process the response and send the data back
       
@@ -908,9 +1105,9 @@ function getMargins(segment) {
   
       const { data } = response;
       const expiries = data.records.expiryDates;
-  
-      const filteredData = data.filtered.data.filter(option => option.expiryDate === expiryDate);
-  
+      console.log('data he',data)
+      const filteredData = data.filtered.data
+      console.log('filtered',filteredData)
       const optionChain = {
         calls: [],
         puts: [],
@@ -1131,8 +1328,8 @@ function getMargins(segment) {
 
   // Use the cookie jar for subsequent requests
   const url1 = `https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}&date=${expiryDate}`;
-  const url2 = `https://www.nseindia.com/api/option-chain-indices?symbol=${symbol}`;
-  const url = (symbol === 'NIFTY') ? url2 : url1;
+  const url2 = `https://www.nseindia.com/api/option-chain-indices?symbol=${symbol}&date=${expiryDate}`;
+  const url = (symbol === 'NIFTY' || symbol==='BANKNIFTY' || symbol ==='MIDCPNIFTY' || symbol==='FINNIFTY') ? url2 : url1;
 
   try {
     const response = await axios.get(url, {
@@ -1189,7 +1386,7 @@ function getMargins(segment) {
 
   router.post("/max-pain", async (req, res) => {
     const symbol = req.body.symbol;
-  
+    
     // Initialize a cookie jar
     const cookieJar = new tough.CookieJar();
   
@@ -1221,7 +1418,7 @@ function getMargins(segment) {
     const expiryDate = req.body.date;
     const url1 = `https://www.nseindia.com/api/option-chain-equities?symbol=${symbol}&date=${expiryDate}`;
     const url2 = `https://www.nseindia.com/api/option-chain-indices?symbol=${symbol}`;
-    const url = (symbol === 'NIFTY') ? url2 : url1;
+    const url = (symbol === 'NIFTY' || symbol==='BANKNIFTY' || symbol ==='MIDCPNIFTY' || symbol==='FINNIFTY') ? url2 : url1;
   
     try {
       const response = await axios.get(url, {
@@ -1235,9 +1432,10 @@ function getMargins(segment) {
   
       // Process the response and send the data back
       const { data } = response;
-      const expiries = data.records.expiryDate;
+      console.log(response)
       const filteredData = data.filtered.data;
-  
+      console.log(data)
+
       const callPain = [];
       const putPain = [];
       let maxpain = [];
@@ -1283,13 +1481,13 @@ function getMargins(segment) {
       filteredData.forEach((option, index) => {
         const result = {
           strikePrice: option.CE.strikePrice,
-          maxPain: (callPain[index] + pPain[index]) * 75,
+          maxPain: (callPain[index] + pPain[index]) * 100,
         };
   
         maxpain.push(result);
       });
   
-      console.log(maxpain);
+    
       res.send(maxpain);
     } catch (error) {
       console.error('Error making request:', error);
@@ -1310,7 +1508,87 @@ function getMargins(segment) {
   });
 
 
-  router.post("/upstox", (req, res) => {
+  router.post("/upstox", async (req, res) => {
+    // const totpCode = otplibAuthenticator.generate('7IUFMEYXZGOW2RDWQNOMMET3GV6URFYW' );
+
+    // const options = new chrome.Options();
+   
+
+    // const driver = await new Builder()
+    //   .forBrowser('chrome')
+    //   .setChromeOptions(options) // Set to true for headless mode
+    //   .build();
+
+    // await driver.get(authUrl);
+
+
+
+    // await driver.findElement(By.id('mobileNum')).sendKeys('7077376003');
+    
+    // await driver.findElement(By.id('getOtp')).click();
+
+    // await driver.wait(until.elementLocated(By.id('otpNum')), 5000);
+
+    // // Now, interact with the element
+
+    // await driver.findElement(By.id('otpNum')).sendKeys(totpCode);
+
+    // await driver.findElement(By.id('continueBtn')).click();
+
+    // await driver.wait(until.elementLocated(By.id('pinCode')), 5000);
+
+    // await driver.findElement(By.id('pinCode')).sendKeys('789123');
+
+    // await driver.findElement(By.id('pinContinueBtn')).click();
+
+    // res.status(200);
+
+    // try {
+      
+    //   const browser = await puppeteer.launch({ headless: false });
+    //   const page = await browser.newPage();
+    // await page.setViewport({ width: 1550, height: 650});
+    // // Navigate to the Upstox login page  
+    // await page.goto(authUrl);
+
+    // // Find and fill in the login form
+    // await page.waitForSelector('#mobileNum');
+    // await page.type('#mobileNum', '7077376003');
+    // await page.click('#getOtp');
+    
+    // await page.waitForSelector('#otpNum');
+
+    // const totpCode = otplibAuthenticator.generate('7IUFMEYXZGOW2RDWQNOMMET3GV6URFYW' );
+    
+    // console.log(totpCode)
+    // await page.type('#otpNum', totpCode);
+
+    // await page.click('#continueBtn');
+    // // Wait for the PIN input field to appear
+    // await page.waitForSelector('#pinCode');
+
+    // // Enter the 6-digit PIN
+    // await page.type('#pinCode', '789123'); // Replace '789123' with your actual 6-digit PIN
+
+    // // Click the submit button
+    // await page.click('#pinContinueBtn');
+
+    // // Wait for the login to complete
+    // // You may need to adjust the selector or add appropriate wait logic
+
+    // // Extract the cookies
+    // const cookies = await page.cookies();
+    
+
+    // // Close the browser
+    // // await browser.close();
+    // // Send the cookies back to your server
+    // res.status(200).json({ cookies });
+    
+    // } catch (error) {
+    //   console.error('Error during Upstox login:', error);
+    //   res.status(500).json({ error: 'Internal Server Error' });
+    // }
    
     // const apiKey = "0bpuke0rhsjgq3lm";
     // const redirectUri = "http://localhost:3000/scanner";

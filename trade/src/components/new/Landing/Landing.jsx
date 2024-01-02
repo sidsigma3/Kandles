@@ -98,9 +98,9 @@ const navigate = useNavigate()
 
     <div className='section-1'>
         <div className='sec-1-left'>
-            <h4>Smart Investation</h4>
+            <h4>Smart Trading</h4>
            
-            <h2>Invest Your Money With Us and <span>Get Amazing Profit</span></h2>
+            <h2>Trade With <span>Risk Management</span></h2>
             <div className='content'>
             <text>Maximize your investment in the capital market world with the </text>
             <text>convenience and various features provided by Tradiant.</text>
@@ -127,16 +127,20 @@ const navigate = useNavigate()
 
     <div className='section-2'>
         <h3>
-        Invest in their stock and be part of the business
+        Elevate Your Trading Experience with Risk Management Features Across Diverse Broker Platforms
         </h3>
 
-        <ul className='logo-list'>
+        <div className='flow-container'>
+            <img src='/newflow.svg'></img>
+        </div>
+
+        {/* <ul className='logo-list'>
             <li>
-                <img src='/group.svg'></img>
+                <img src='/Zerodha.svg'></img>
             </li>
 
             <li>
-                <img src='/group1.svg'></img>
+                <img src='/Zerodha.svg'></img>
             </li>
 
             <li>
@@ -160,12 +164,22 @@ const navigate = useNavigate()
             </li>
           
 
-        </ul>
+        </ul> */}
 
     </div>
 
     <div className='section-3'>
-        <div className='heading'>
+        <div className='section-3-top'>
+            <h2>
+            Why <span>Tradiant?</span>
+            </h2>
+
+            <p>
+            At Tradiant, you will benefit from us, such as many conveniences in transactions, user-friendly transparency, and many others
+            </p>
+
+        </div>
+        {/* <div className='heading'>
             <h4>Why Choose Tradiant</h4>
        
 
@@ -229,7 +243,174 @@ const navigate = useNavigate()
             </li>
 
 
-        </ul>
+        </ul> */}
+
+<ul className='info-list'>
+                <li className='info-1'>
+                    <div className='top'>
+                        <img src='/high-standards.svg'>
+                        </img>
+                    </div>
+
+                    <div className='bottom'>
+                        <h4>
+                        Trailing Stoploss
+                        </h4>
+
+                        <p>
+                        At Tradiant, we prioritize user safety and comfort. Experience enhanced risk management with our dynamic trailing stop-loss feature.
+                        </p>
+                         
+                    </div>
+
+                </li>
+
+                <li className='info-2'>
+                    <div className='top'>
+                        <img src='/invention.svg'>
+                        </img>
+                    </div>
+
+                    <div className='bottom'>
+                        <h4>
+                       Protect Profit
+                        </h4>
+
+                        <p>
+                        At Tradiant, safeguard your gains with our robust profit protection tools, ensuring a secure and rewarding trading experience
+                        </p>
+                         
+                    </div>
+
+                </li>
+
+
+                <li className='info-3'>
+                    <div className='top'>
+                        <img src='/simplicity.svg'>
+                        </img>
+                    </div>
+
+                    <div className='bottom'>
+                        <h4>
+                        Buy At Low
+                        </h4>
+
+                        <p>
+                        At Tradiant, seize opportunities to buy low with our strategic insights, empowering you to make informed and advantageous investment decisions
+
+                        </p>
+                         
+                    </div>
+
+                </li>
+
+
+
+                <li className='info-4'>
+                    <div className='top'>
+                        <img src='/transparency.svg'>
+                        </img>
+                    </div>
+
+                    <div className='bottom'>
+                        <h4>
+                        Maximum Capital Exposure
+                        </h4>
+
+                        <p>
+                        At Tradiant, our cutting-edge scanner provides real-time data on OI changes, Max Pain, and Option Chain, empowering traders with comprehensive insights for informed decision-making.
+                        </p>
+                         
+                    </div>
+
+                </li>
+
+            </ul>
+
+
+            <ul className='info-list'>
+                <li className='info-1'>
+                    <div className='top'>
+                        <img src='/buy-sell.svg'>
+                        </img>
+                    </div>
+
+                    <div className='bottom'>
+                        <h4>
+                        Incremental Buy And Sell
+                        </h4>
+
+                        <p>
+                        At Tradiant, we prioritize user safety and comfort. Experience enhanced risk management with our dynamic trailing stop-loss feature.
+                        </p>
+                         
+                    </div>
+
+                </li>
+
+                <li className='info-2'>
+                    <div className='top'>
+                        <img src='/search.svg'>
+                        </img>
+                    </div>
+
+                    <div className='bottom'>
+                        <h4>
+                      User Define Capital Risk
+                        </h4>
+
+                        <p>
+                        At Tradiant, safeguard your gains with our robust profit protection tools, ensuring a secure and rewarding trading experience
+                        </p>
+                         
+                    </div>
+
+                </li>
+
+
+                <li className='info-3'>
+                    <div className='top'>
+                        <img src='/quantity.svg'>
+                        </img>
+                    </div>
+
+                    <div className='bottom'>
+                        <h4>
+                      Risk Based Quantity
+                        </h4>
+
+                        <p>
+                        At Tradiant, seize opportunities to buy low with our strategic insights, empowering you to make informed and advantageous investment decisions
+
+                        </p>
+                         
+                    </div>
+
+                </li>
+
+
+
+                <li className='info-4'>
+                    <div className='top'>
+                        <img src='/essentional.svg'>
+                        </img>
+                    </div>
+
+                    <div className='bottom'>
+                        <h4>
+                       Reward To Risk
+                        </h4>
+
+                        <p>
+                        At Tradiant, our cutting-edge scanner provides real-time data on OI changes, Max Pain, and Option Chain, empowering traders with comprehensive insights for informed decision-making.
+                        </p>
+                         
+                    </div>
+
+                </li>
+
+            </ul>
 
     </div>
 
@@ -253,12 +434,12 @@ const navigate = useNavigate()
                     </h4>
 
                     <h2>
-                    Receive update market quickly everytime
+                    Empowering Your Trading Journey with <span>Risk Management </span>features
                     </h2>
 
 
                     <text>
-                    Equipped with comprehensive analysis tools and Artificial Intelligent, it makes it easier and gives you a profitable experience in the form of market updates quickly everytime, so it is not too late to make the best investment decisions.
+                    Unlock a world of financial intelligence with our platform's diverse features. Stay ahead of market events with our Economic Calendar, track market dynamics with real-time updates on Top Gainers and Losers, and stay informed with a curated News Feed. Elevate your trading experience by accessing a comprehensive suite of tools that empowers you with the knowledge needed to make strategic decisions in the ever-evolving financial landscape.
                     </text>
 
                     
@@ -285,13 +466,13 @@ const navigate = useNavigate()
                     </h4>
 
                     <h2>
-                    Easy Way to Invest and Get Profit 
+                    Get sense of market direction from <span>Option Scanner</span>
                     </h2>
 
 
                     <text>
-                    Using the Tradiant Application is an easy way to invest
-and benefit, equipped with comprehensive analysis tools and Artificial Intelligent (AI) that helps automation in monitoring and transactions.
+                    Experience the power of our cutting-edge scanner feature that revolutionizes your trading decisions. Gain valuable insights into Open Interest changes, identify Max Pain levels, and access comprehensive Option Chain and Greek data.Empowering you to make informed and precise decisions in the dynamic world of finance.
+
                     </text>
 
                     

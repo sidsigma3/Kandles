@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 const app = express();
-const port = process.env.PORT || 5000;
+
 const httpServer = require("http").createServer(app);
 app.use(express.json());
 app.use(cors());
@@ -11,7 +11,7 @@ app.use(cors());
 const socketIO = require("socket.io");
 const io = socketIO(httpServer, {
   cors: {
-    origin: "https://kandles.onrender.com",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
   },
@@ -27,6 +27,6 @@ app.use("/", routeurl);
 //   });
 // });
 
-httpServer.listen(port, () => {
-  console.log("Server is running on port "+port );
+httpServer.listen(5000, () => {
+  console.log("Server is running on port 5000");
 });

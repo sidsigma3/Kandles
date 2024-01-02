@@ -2,12 +2,13 @@
     display: flex;
     justify-content: space-between;
     height: 100%;
+    padding-right: 20px;
    
 }
 
 .system-trading-left{
     width: 100%;
-    
+    position: relative;
 
 }
 .system-trading-left .system-trading-input .centered-row{
@@ -16,67 +17,90 @@
     margin-bottom: 10px;
     justify-content: space-evenly;
     margin-top: 15px;
+    height: 300px;
 }
 
+.system-trading-left .system-trading-input .centered-row .input-field-1{
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-around;
+}
 
 .system-trading-left .system-trading-input .Capital_Value{
     background-color: #6EBBF7;
     width: 33%;
-    padding: 10px;
     text-align: center;
     border-radius: 12px;
     border: 1px solid var( #56a6eb);
-    background:  #95CDF9;
+    background:  #BFD7ED;
     /* shadow1 */
-    box-shadow: 0px 8px 12px 0px rgba(136, 205, 227, 0.938);
-    
+    box-shadow: 0px 8px 12px 0px #60A3D9;
+    padding: 10px 10px;
 }
 
 .system-trading-left .system-trading-input .Capital_Value .input-capital{
     display: flex;
-   
+    width: 100%; 
     justify-content: space-between;
-    padding: 0 35px 0 150px;
+    padding: 0 31px 0 61px;
 }
 
 .system-trading-left .system-trading-input .Capital_Value .trade-type-input{
     display: flex;
     justify-content: space-between;
-    padding: 20px 35px 20px 50px;
+    padding: 0 31px;
+   
+}
+
+.system-trading-left .system-trading-input .Capital_Value .trade-type-input select{
+    width: 90px;
+    border-radius: 5px;
+    text-align: center;
+    height: 100%;
+}
+
+.system-trading-left .system-trading-input .Capital_Value .trade-type-input div{
+    display: flex;
+    
 }
 
 .system-trading-left .system-trading-input .Capital_Value .trade-type-input div,.system-trading-left .system-trading-input .Capital_Value .reward-risk-input div,.system-trading-left .system-trading-input .Capital_Value .stoploss-input div{
     display: flex;
     gap: 10px;
-    align-items: center;
+    
 
 }
 
 
 
 .system-trading-container input[type="number"] ,.system-trading-container select {
-    width: 100px;
+    width: 90px;
     border-radius: 5px;
     text-align: center;
+    height: 30px;
 }
 
 .system-trading-container .quantity-input input{
-    width: 100px;
+    width: 90px;
     border-radius: 5px;
     text-align: center;
 }
 
 
-.capital-risk-input{
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 15px 10px 50px;
-}
+
 
 .system-trading-left .system-trading-input .Capital_Value .capital-risk-input{
     display: flex;
     justify-content: space-between;
     width: 100%;
+    padding: 0 6px 0 31px;
+    
+}
+
+.capital-risk-input div{
+    display: flex;
+    gap: 10px;
 }
 
 .system-trading-left .system-trading-input .Capital_Value .capital-risk-input .risk-range{
@@ -85,13 +109,14 @@
 
 }
 .system-trading-left .system-trading-input .Capital_Value .capital-risk-input input{
-    width: 70px;
+    width: 60px;
+    height: 30px;
 }
 
 .system-trading-left .system-trading-input .Capital_Value .risk-input{
     display: flex;
     flex-direction: column;
-    padding: 30px 5px 10px 20px;
+ 
     gap: 20px;
 }
 
@@ -111,9 +136,9 @@
     width: 33%;
     border-radius: 12px;
     border: 1px solid var( #56a6eb);
-    background:  #95CDF9;
+    background:  #BFD7ED;
     /* shadow1 */
-    box-shadow: 0px 8px 12px 0px rgba(136, 205, 227, 0.938);
+    box-shadow: 0px 8px 12px 0px #60A3D9;
 }
 
 
@@ -124,18 +149,24 @@
     padding: 10px 10px;
 }
 
+.system-trading-left .system-trading-input .Trade_Value .input-field-strike,.system-trading-left .system-trading-input .Trade_Value .input-field-trigger{
+    display: flex;
+    padding: 0 0 0 31px;
+   
+}
+
 .system-trading-left .system-trading-input .Trade_Value  .col{
     display: flex;
     padding: 10px;
     justify-content: space-between;
-    padding: 10px 50px 10px 50px;
+    padding: 0px 23px 10px 15px;
 }
 
 
 .system-trading-left .system-trading-input .Trade_Value .order-type-input{
     display: flex;
-    gap: 20px;
-    padding: 10px 50px 10px 50px;
+    
+   padding: 0 0 0 31px;
     justify-content: space-between;
 
 }
@@ -154,13 +185,14 @@
 .system-trading-left .system-trading-input .Trade_Value .buy-sell-input{
     display: flex;
     justify-content: space-between;
-    padding: 10px 50px 10px 50px;
+   padding: 0 0 0 31px;
 }
 
 .system-trading-left .system-trading-input .Trade_Value .quantity-input{
     display: flex;
     justify-content: space-between;
-    margin: 0 50px 0 50px;
+    padding: 0 0 0 31px;
+   
 }
 
 
@@ -173,12 +205,20 @@
     justify-content: space-around;
     border-radius: 12px;
     border: 1px solid var( #56a6eb);
-    background:  #95CDF9;
+    background:  #BFD7ED;
     /* shadow1 */
-    box-shadow: 0px 8px 12px 0px rgba(136, 205, 227, 0.938);
+    box-shadow: 0px 10px 20px 0px #60A3D9;
+    padding: 20px 0 5px 0;
 
 }
 
+
+.system-trading-left .system-trading-input .Type_Value .blurred-field button{
+    border: none;
+    background-color: #56a6eb;
+    color: whitesmoke;
+    border-radius: 5px;
+}
 
 /* .system-trading-left .system-trading-input .Type_Value .input-field-6,.system-trading-left .system-trading-input .Type_Value .input-field-9,.system-trading-left .system-trading-input .Type_Value .input-field-12{
     display: flex;
@@ -195,9 +235,14 @@
 
 } */
 
-.input-field-protect-profit , .input-field-trailing-sl , .input-field-buy-at-low{
+.input-field-protect-profit , .input-field-trailing-sl , .input-field-buy-at-low ,.input-field-incremental-buy{
     display: flex;
-    width: 80%;
+    width: 90%;
+    gap: 15px;
+}
+
+.system-trading-left .system-trading-input .Type_Value .col{
+    display: flex;
     justify-content: space-between;
 }
 
@@ -219,8 +264,18 @@
 }
 
 
+.system-trading-left .system-trading-input .Type_Value .blurred-field{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.system-trading-left .system-trading-input .Type_Value .blurred-field button{
+    width: 150px;
+}
+
 .centered-row label{
-    font-size: 16px;
+    font-size: 0.8em;
 }
 
 
@@ -230,13 +285,8 @@
     background-color: steelblue;
     width: 30%;
     height: 100%;
+ 
 }
-
-
-
-
-
-
 
 
 
@@ -249,10 +299,29 @@
     margin-top: 30px;
 }
 
+.system-trading-position .position-table{
+    width: 100%;
+    text-align: center;
+}
 
 
+.system-trading-position th, .system-trading-position td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .system-trading-position thead {
+    background-color: #95CDF9;
 
-.system-trading-position .trade-seq{
+
+  }
+  
+  .system-trading-position tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+/* .system-trading-position .trade-seq{
     background-color:#CFE8FC;
     display: flex;
     gap: 40px;
@@ -269,7 +338,7 @@
 }
 .system-trading-position .position-table tbody tr:nth-child(even) {
     background-color: #f9f9f9;
-  }
+  } */
 
 .system-trading-position .position-table button{
     background-color: orangered;
@@ -280,14 +349,28 @@
 }
 
 
-.system-trading-position  .total-pnl-section{
-    background-color: honeydew;
+.system-trading-left .total-pnl-section{
+   
     width: 100%;
     display: flex;
-    margin-top: 300px;
+    
     text-align: center;
     justify-content: center;
     align-items: center;
     gap: 15px;
-    
+    position: sticky;
+    bottom: 10px;
+}
+
+
+.system-trading-container .login-container button{
+   width: 150px;
+   height: 100px;
+    border: 0;
+
+}
+
+.system-trading-container .login-container button img{
+    width: 100%;
+    height: 100%;
 }

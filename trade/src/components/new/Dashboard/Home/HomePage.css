@@ -6,7 +6,7 @@
 .home-sec-1{
     display: flex;
     width: 100%;
-   
+    margin-bottom: 40px;
     justify-content: space-around;
     height: 160px;
     gap: 20px;
@@ -26,7 +26,7 @@
 
 .home-sec-1 .index ul li{
     background-color: dodgerblue;
-    height: 110px;
+    height: 150px;
     width: 270px;
     text-align: center;
     border-radius: 18.313px;
@@ -55,14 +55,14 @@
 
 .home-sec-2{
    
-    height: 400px;
+    height: 437px;
     display: flex;
     justify-content: space-around;
     gap: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 37px;
 }
 .home-sec-2 .sec-2-overview{
-    width: 80%;
+    width: 75%;
     height: 100%;
 }
 
@@ -78,7 +78,7 @@ box-shadow: 0px 4.88333px 39.06667px 0px rgba(0, 0, 0, 0.07);
 
 .home-sec-2 .watch-list-container{
     height: 100%;
-    width: 20%;
+    width: 25%;
 }
 
 .home-sec-2 .watch-list{
@@ -104,7 +104,7 @@ box-shadow: 0px 4.88333px 39.06667px 0px rgba(0, 0, 0, 0.07);
 }
 .home-sec-3{
     /* background-color: cadetblue; */
-    height: 240px;
+    height: 300px;
     display: flex;
     gap: 10px;
     padding-top: 13px;
@@ -123,6 +123,7 @@ height: 100%;
 
 .home-sec-3 .calender-container,  .home-sec-3 .news-container, .home-sec-3 .trend-container{
     width: 33%;
+    height: 430px;
 }
 
 .home-sec-3 .result , .home-sec-3 .result{

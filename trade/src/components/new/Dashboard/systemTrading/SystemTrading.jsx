@@ -9,8 +9,11 @@ import './SystemTrading.css'
 import queryString from 'query-string';
 import io from 'socket.io-client';
 import { FaInfoCircle } from 'react-icons/fa';
+import Subscribe from '../subscription/Subscribe';
 
-const SystemTrading = ({ trades, setTrades }) => {
+import useRazorpay from "react-razorpay";
+
+const SystemTrading = ({ trades, setTrades ,setRenderedContent}) => {
     const [capitalRiskPerDay, setCapitalRiskPerDay] = useState();
   const [capital, setCapital] = useState(0);
   const [numTrades, setNumTrades] = useState(0);
@@ -64,7 +67,8 @@ const SystemTrading = ({ trades, setTrades }) => {
   // const [trades, setTrades] = useState([]);
   const [systemTrades,setSystemTrades] = useState([])
   const [lotSize,setLotSize] = useState()
-
+  const [isSubscriber, setIsSubscriber] = useState(true)
+  const [incrementalBuy,setIncrementalBuy] = useState()
   const [blurred, setBlurred] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [isConnectComplete, setConnectComplete] = useState(false);
@@ -203,6 +207,10 @@ const SystemTrading = ({ trades, setTrades }) => {
     setProtectProfitValue(Number(e.target.value));
   };
 
+  const handleIncrementalBuy = (e) =>{
+    setIncrementalBuy(e.target.value)
+  }
+
   const handleTakeProfitChange = (e) => {
     setTakeProfit(e.target.checked);
   };
@@ -277,44 +285,128 @@ const handleTimerValue = (e) =>{
       localStorage.setItem('timer', e.target.value)
 }
 
-const renderSuggestion = (suggestion) => <div>{suggestion}</div>;
+const styles = {
+  suggestion: {
+    fontWeight: 'bold',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+    backgroundColor: '#fafafa',
+    cursor: ' pointer',
+  },
+};
 
-// Render a virtualized list of suggestions
-const renderSuggestionsContainer = ({ containerProps, children }) => {
-    if (suggestions.length === 0) {
-        return null; // Don't render the container if there are no suggestions
-      }
+const renderSuggestion = (suggestion) => {
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSuggestionSelected(null, { suggestion });
+    }
+  };
+
   return (
     <div
-    {...containerProps}
-    style={{
-      position: 'absolute',
-      zIndex: 1,
-      width: '20%',
-      maxHeight: '200px',
-      background: 'white', // Set the background color to white or any desired color
-      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', // Add a subtle box shadow for depth
-      overflowY: 'auto', // Enable vertical scrolling if needed
-    }}
-  >
-    <List
-      width={300}
-      height={200}
-      rowCount={suggestions.length}
-      rowHeight={30}
-      rowRenderer={({ index, key, style }) => (
-        <div
-          key={key}
-          style={{ ...style, cursor: 'pointer' }}
-          onClick={() => handleSuggestionSelected(null, { suggestion: suggestions[index] })}
-        >
-          {renderSuggestion(suggestions[index])}
-        </div>
-      )}
+      {...styles.suggestion}
+      onClick={() => handleSuggestionSelected(null, { suggestion })}
+      onKeyDown={handleKeyDown}
     >
-      {children}
-    </List>
-  </div>
+      {suggestion}
+    </div>
+  );
+};
+
+// Render a virtualized list of suggestions
+// const renderSuggestionsContainer = ({ containerProps, children }) => {
+//     if (suggestions.length === 0) {
+//         return null; // Don't render the container if there are no suggestions
+//       }
+//   return (
+//     <div
+//     {...containerProps}
+//     style={{
+//       position: 'absolute',
+//       zIndex: 1,
+//       width: '20%',
+//       maxHeight: '200px',
+//       background: 'white', // Set the background color to white or any desired color
+//       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', // Add a subtle box shadow for depth
+//       overflowY: 'auto', // Enable vertical scrolling if needed
+//     }}
+//   >
+//     <List
+//       width={300}
+//       height={200}
+//       rowCount={suggestions.length}
+//       rowHeight={30}
+//       rowRenderer={({ index, key, style }) => (
+//         <div
+//           key={key}
+//           style={{ ...style, cursor: 'pointer' }}
+//           onClick={() => handleSuggestionSelected(null, { suggestion: suggestions[index] })}
+//         >
+//           {renderSuggestion(suggestions[index])}
+//         </div>
+//       )}
+//     >
+//       {children}
+//     </List>
+//   </div>
+//   );
+// };
+
+
+const renderSuggestionsContainer = ({ containerProps, children }) => {
+  if (suggestions.length === 0) {
+    return null; // Don't render the container if there are no suggestions
+  }
+
+  // Sort the suggestions based on whether they include "NIFTY" or not
+  const sortedSuggestions = suggestions.sort((a, b) => {
+    const isANiftyOption = a.includes('NIFTY');
+    const isBNiftyOption = b.includes('NIFTY');
+
+    if (isANiftyOption && !isBNiftyOption) {
+      return -1; // NIFTY options come first
+    } else if (!isANiftyOption && isBNiftyOption) {
+      return 1; // NIFTY options come first
+    } else {
+      return 0; // Keep the original order for other suggestions
+    }
+  });
+
+  return (
+    <div
+      {...containerProps}
+      style={{
+        position: 'absolute',
+        zIndex: 1,
+        width: '20%',
+        maxHeight: '200px',
+        background: 'white',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+        overflowY: 'auto',
+      }}
+    >
+      <List
+        width={300}
+        height={200}
+        rowCount={sortedSuggestions.length}
+        rowHeight={30}
+        rowRenderer={({ index, key, style }) => (
+          <div
+            key={key}
+            style={{ ...style, cursor: 'pointer' }}
+            onClick={() => {
+              console.log('Clicked on suggestion:', sortedSuggestions[index]);
+              handleSuggestionSelected(null, { suggestion: sortedSuggestions[index] });
+            }}
+          >
+            {renderSuggestion(sortedSuggestions[index])}
+          </div>
+        )}
+      >
+        {children}
+      </List>
+    </div>
   );
 };
 
@@ -333,22 +425,96 @@ const inputProps = {
   
 };
 
+// const handleSuggestionSelected = (_, { suggestion }) => {
+//     const { tradingsymbol, exchange , lotsize } = instruments.find(
+//       (instrument) => instrument.tradingsymbol === suggestion
+//     );
+//     console.log(tradingsymbol,exchange)
+//     setExchange(exchange);
+//     localStorage.setItem('exchange', exchange)
+//     localStorage.setItem('index',suggestion)
+//     setSelectedValue(suggestion); // Set the selected value in the state
+//     setSuggestions([]);
+//     setIndex(suggestion)
+//     setValue(suggestion)
+//     setLotSize(lotsize)
+//     socketRef.current.disconnect()
+//   };
+
 const handleSuggestionSelected = (_, { suggestion }) => {
-    const { tradingsymbol, exchange , lotsize } = instruments.find(
-      (instrument) => instrument.tradingsymbol === suggestion
-    );
-    console.log(tradingsymbol,exchange)
+  console.log('Selected suggestion:', suggestion);
+  const matchingInstrument = instruments.find(
+    (instrument) => instrument.tradingsymbol === suggestion
+  );
+
+  if (matchingInstrument) {
+    // Check if the selected suggestion is a Nifty option
+    const isNiftyOption = matchingInstrument.tradingsymbol.includes('NIFTY');
+
+    // Continue with the rest of the logic based on the selected suggestion
+    const { tradingsymbol, exchange, lotsize } = matchingInstrument;
+    console.log(tradingsymbol, exchange);
     setExchange(exchange);
-    setSelectedValue(suggestion); // Set the selected value in the state
+    localStorage.setItem('exchange', exchange);
+    localStorage.setItem('index', suggestion);
+    setSelectedValue(suggestion);
     setSuggestions([]);
-    setIndex(suggestion)
-    setValue(suggestion)
-    setLotSize(lotsize)
-    socketRef.current.disconnect()
-  };
+    setIndex(suggestion);
+    setValue(suggestion);
+    setLotSize(lotsize);
+    socketRef.current.disconnect();
+  }
+};
+
+  const [Razorpay] = useRazorpay();
+  const subscribeHandle = () => {
+    setRenderedContent(<Subscribe />);
+
+    // console.log('achha')
+    //     axios.post('http://localhost:5000/payment')
+    //     .then((res)=>{
+          
+
+    //         const data =res.data
+
+    //         const options = {
+    //             key: 'rzp_test_u9YDoBJGjerFbp', // Enter the Key ID generated from the Dashboard
+    //             amount: "50000", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    //             currency: "INR",
+    //             name: "Tradiant",
+    //             description: "Subscription Payment",
+    //             // image: "https://example.com/your_logo",
+    //             order_id: data.id, //This is a sample Order ID. Pass the `id` obtained in the response of createOrder().
+    //             handler: function (response) {
+    //               alert(response.razorpay_payment_id);
+    //               alert(response.razorpay_order_id);
+    //               alert(response.razorpay_signature);
+    //             },
+    //             prefill: {
+    //               name: "Piyush Garg",
+    //               email: "youremail@example.com",
+    //               contact: "9999999999",
+    //             },
+    //             notes: {
+    //               address: "Razorpay Corporate Office",
+    //             },
+    //             theme: {
+    //               color: "#3399cc",
+    //             },
+    //           };
+
+            
+
+    //           const rzp1 = new Razorpay(options);
+    //           rzp1.open();
 
 
+    //     })
+    //     .catch((err)=>{
+    //         console.log(err)
+    //     })
 
+  }
 
   const handlePunch = () => {
     
@@ -786,6 +952,7 @@ useEffect(()=>{
     axios.post(`http://localhost:5000/user-info`)
         .then((response) => {
             setCapital(response.data.capital)
+            console.log(response.data)
             const fetchedInstruments = response.data.instruments
             const flattenedInstruments = [].concat(...fetchedInstruments);
             // setInstruments(flattenedInstruments);
@@ -799,6 +966,7 @@ useEffect(()=>{
 
             }));
 
+            
             console.log(instrumentNames)
 
             setInstruments(instrumentNames)
@@ -818,7 +986,7 @@ useEffect(()=>{
 
 
 
-
+    
 
     useEffect(()=>{
       axios.post(`http://localhost:5000/trade-info`,{index,exchange})
@@ -921,7 +1089,7 @@ useEffect(()=>{
               useEffect(() => {
     
    
-  
+                setExchange(localStorage.getItem('exchange'))
                 setCapital(localStorage.getItem('capital'))
                 setCapitalRiskPerDay(localStorage.getItem('capitalRiskPerDay'))
                 setNumTrades(localStorage.getItem('numTrades'));
@@ -979,13 +1147,15 @@ useEffect(()=>{
                                 <label htmlFor="capital">Capital:</label>
                                 <input  type='number' id="capital" value={Math.round(capital)} onChange={handleCapitalChange} /> 
                                 </div>     
-                                <div class='trade-type-input'>   
-                                <span className="info-icon" title="Select the type of product you want to trade:
+                                <div class='trade-type-input'> 
+                                <div>  
+                                 <span className="info-icon" title="Select the type of product you want to trade:
                                                         - Intraday (MIS): Short-term trades within a single day.
                                                         - Longterm (CNC): Trades with no intraday restrictions.">
                                           <FaInfoCircle />
                                         </span>
                                 <label htmlFor="product-type">Product type:</label>
+                                </div>
                                      <div>
                                         <select id="product-type" value={product || ''} onChange={handleProductChange} defaultValue="default">
                                           <option value="default">--select--</option>
@@ -1020,12 +1190,14 @@ useEffect(()=>{
                                 
                                
                                 <div className='capital-risk-input'>
+                                  <div>
                                 <span className="info-icon" title=" Enter the minimumand maximum percentage of your capital that you are willing
                                                                            to risk on trades in a single day.">
                                     <FaInfoCircle />
                                   </span>
 
                                 <label htmlFor="minCapitalRisk">Capital risk per day(%):</label>
+                                </div>
                                 <div className='risk-range'>
                                 <input
                                     type="number"
@@ -1051,11 +1223,13 @@ useEffect(()=>{
                                 <div className='risk-input'>
                                     <div className='reward-risk-input'>
 
+                                      <div>
                                     <span className="info-icon" title=" Enter the desired ratio of potential profit to potential loss for
                                                                         your trades.">
                                     <FaInfoCircle />
                                   </span>
                                     <label htmlFor="rewardToRisk">Reward to Risk:</label>
+                                    </div>
                                    <div>
                                     <input
                                     min={0}
@@ -1070,12 +1244,13 @@ useEffect(()=>{
                                     </div>
                                     </div>
                                     <div className='stoploss-input'>
+                                      <div>
                                     <span className="info-icon" title=" Enter the percentage at which you want to set your stop loss. This
                                                                              is the maximum acceptable loss for your trade.">
                                     <FaInfoCircle />
                                   </span>
                                         <label>Stop loss(%)</label>
-
+                                    </div>
                                         <div>
                                         <input min={0} type='number' value={stopLoss} onChange={handleStopLossChange} ></input>
                                      
@@ -1116,13 +1291,16 @@ useEffect(()=>{
 
 
                                 <div className="input-field-strike">
-                                    <div className='col' >
+                                   <div className='info-col'>
                                     <span className="info-icon" title="Select the type of product you want to trade:
                                                         - Intraday (MIS): Short-term trades within a single day.
                                                         - Longterm (CNC): Trades with no intraday restrictions.">
                                           <FaInfoCircle />
                                         </span>
+                                    </div>
+                                        <div className='col' >
                                 <label htmlFor="strike">Strike Price:</label>
+
                                 <input type="number" id="strike" value={strike} onChange={handleStrikeChange} />
                                 </div>
                         
@@ -1130,12 +1308,16 @@ useEffect(()=>{
 
 
                                 <div className='input-field-trigger'>
-                                    <div className='col'>
-                                    <span className="info-icon" title="Select the type of product you want to trade:
+                                  <div className='info-col'>
+                                  <span className="info-icon" title="Select the type of product you want to trade:
                                                         - Intraday (MIS): Short-term trades within a single day.
                                                         - Longterm (CNC): Trades with no intraday restrictions.">
                                           <FaInfoCircle />
                                         </span>
+                                  </div>
+
+                                    <div className='col'>
+                                   
                                     <label>Trigger Price</label>
                                     <input type='number' value={triggerPrice} onChange={handleTriggerPriceChange}></input>
                                 </div>  
@@ -1145,11 +1327,14 @@ useEffect(()=>{
 
 
                                 <div className='order-type-input'>
+                                  <div>
                                 <span className="info-icon" title="Select the type of product you want to trade:
                                                         - Intraday (MIS): Short-term trades within a single day.
                                                         - Longterm (CNC): Trades with no intraday restrictions.">
                                           <FaInfoCircle />
                                         </span>
+                                        </div>
+                                        <div className='col'>
                                     <label htmlFor="order-type">Order Type:</label>
                                     <select id="order-type" value={orderType || ''} onChange={handleOrderTypeChange} defaultValue="default">
                                         <option value="default">--select--</option>
@@ -1159,6 +1344,7 @@ useEffect(()=>{
                                         <option value="SL-M">SL-M</option>
                                     </select>
 
+                                      </div>
 
                                          {/* <div class="form-check ">
                                         <input class="form-check-input" type="radio" name="flexRadioDefault1" id="flexRadioDefault1" checked={orderType==='MARKET'} onChange={handleOrderTypeChange} value='MARKET'/>
@@ -1192,11 +1378,14 @@ useEffect(()=>{
 
 
                                 <div className="buy-sell-input">
+                                  <div>
                                 <span className="info-icon" title="Select the type of product you want to trade:
                                                         - Intraday (MIS): Short-term trades within a single day.
                                                         - Longterm (CNC): Trades with no intraday restrictions.">
                                           <FaInfoCircle />
                                         </span>
+                                        </div>
+                                        <div className='col' >
                                 <label htmlFor="type">Sell / Buy </label>
                                 <select id="type" value={type || ''} onChange={handleTypeChange} defaultValue="default">
                                     <option value="default">--select--</option>
@@ -1204,15 +1393,20 @@ useEffect(()=>{
                                     <option value="BUY">BUY</option>
                                 </select>
                                 </div>
+                                </div>
 
                                 <div className='quantity-input'>
+                                  <div>
                                 <span className="info-icon" title="Select the type of product you want to trade:
                                                         - Intraday (MIS): Short-term trades within a single day.
                                                         - Longterm (CNC): Trades with no intraday restrictions.">
                                           <FaInfoCircle />
                                         </span>
+                                        </div>
+                                        <div className='col' >
                                   <label>Quantity</label>
                                   <input  value={Math.round(quantity)}></input>
+                                  </div>
                                 </div>
                                 
                                 
@@ -1225,45 +1419,173 @@ useEffect(()=>{
                             </div>
 
                             <div className="Type_Value">
+                              {isSubscriber ? (
+                                <>
 
-                           
-                                {/* <div>
-                                <select class="form-select" aria-label="Default select example">
-                                    <option selected>Minutes</option>
-                                    <option value="1">1 min</option>
-                                    <option value="2">2 min</option>
-                                    <option value="3">3 min</option>
-                                    <option value="5">5 min</option>
-                                    <option value="10">10 min</option>
-                                    <option value="30">30 min</option>
-
-
-                                    </select>
-                                </div>
-                                <div>
-                                    <label>Disclosed Quantity</label>
-                                    <input type='number'></input>
-                                </div> */}
-
-                        
+                                  <div className="input-field-trailing-sl">
+                                  
+                                  <div>
+                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                                      - Intraday (MIS): Short-term trades within a single day.
+                                                      - Longterm (CNC): Trades with no intraday restrictions.">
+                                        <FaInfoCircle />
+                                      </span>
+                                 
+                                 </div>
+                                 <div className='col'>
+                                  <label htmlFor="trailingSL-value">Trailing Stop Loss :</label>
+                                  <div className="input-field-8">
+                               
+                                  <input type="number"  value={trailingSLValue} onChange={handleTrailingSLValueChange} ></input>
+                                  <select id="trailingSL-type" value={trailingSLType} onChange={handleTrailingSLTypeChange}>
+                                      <option value="%">%</option>
+                                      <option value="POINTS">.</option>
+                                  </select>
+                                  </div>
+                                  </div>
+                                  </div>
+                            
+                                  <div className="input-field-buy-at-low">
                                 
+                                <div>
+                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                                      - Intraday (MIS): Short-term trades within a single day.
+                                                      - Longterm (CNC): Trades with no intraday restrictions.">
+                                        <FaInfoCircle />
+                                      </span>
+                                  </div>
+                                  <div className='col'>
+                                  <label htmlFor="buyAtLowValue">Buy at Low :</label>
+                                  <div className="input-field-11">
+                                  <input type="number" id="buyAtLowValue" value={buyAtLowValue} onChange={handleBuyAtLowValueChange} />
+                                  <select id="buyAtLowType" value={buyAtLowType} onChange={handleBuyAtLowTypeChange}>
+                                      <option value="%">%</option>
+                                      <option value="POINTS">.</option>
+                                  </select>
+                                  </div>
+                                  </div>
+                                  </div>
+                            
+                                  <div className="input-field-protect-profit">
+                                 
+                                 <div>
+                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                                      - Intraday (MIS): Short-term trades within a single day.
+                                                      - Longterm (CNC): Trades with no intraday restrictions.">
+                                        <FaInfoCircle />
+                                      </span>
+                                  
+                                 </div>
+                                 <div className='col'>
+                                  <label htmlFor="protectProfitValue">Protect Profit :</label>
+                                  <div className="input-field-14">
+                                  <input type="number" id="protectProfitValue" value={protectProfitValue} onChange={handleProtectProfitValueChange} />
+                                  <select id="protectProfitType" value={protectProfitType} onChange={handleProtectProfitTypeChange}>
+                                      <option value="%">%</option>
+                                      <option value="POINTS">.</option>
+                                  </select>
+                                  </div>
+                                  </div>
+                                  </div>
 
 
-                                {/* <div className="input-field-6">
-                                <input type="checkbox" id="trailingSL" checked={trailingSL} onChange={handleTrailingSLChange} />
-                                <label htmlFor="trailingSL">Trailing Stop Loss</label>
-                                </div> */}
-                                {/* {trailingSL && (
-                                <> */}
+                                  <div className="input-field-incremental-buy">
+                                 
+                                 <div>
+                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                                      - Intraday (MIS): Short-term trades within a single day.
+                                                      - Longterm (CNC): Trades with no intraday restrictions.">
+                                        <FaInfoCircle />
+                                      </span>
+                                  
+                                 </div>
+                                 <div className='col'>
+                                  <label htmlFor="incremental-value">Incremental Buy/Sell :</label>
+                                  <div className="input-field-14">
+                                  <input disabled='true' type="number" id="protectProfitValue" value={incrementalBuy} onChange={handleIncrementalBuy} />
+                                  <select disabled='true' id="protectProfitType" value={protectProfitType} onChange={handleProtectProfitTypeChange}>
+                                      <option value="%">%</option>
+                                      <option value="POINTS">.</option>
+                                  </select>
+                                  </div>
+                                  </div>
+                                  </div>
+
+                                  <div className="input-field-incremental-buy">
+                                 
+                                 <div>
+                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                                      - Intraday (MIS): Short-term trades within a single day.
+                                                      - Longterm (CNC): Trades with no intraday restrictions.">
+                                        <FaInfoCircle />
+                                      </span>
+                                  
+                                 </div>
+                                 <div className='col'>
+                                  <label htmlFor="incremental-value">Timer Purchase:</label>
+                                  <div className="input-field-14">
+                                  <input disabled='true' type="number" id="protectProfitValue" value={incrementalBuy} onChange={handleIncrementalBuy} />
+                                  <select disabled='true' id="protectProfitType" value={protectProfitType} onChange={handleProtectProfitTypeChange}>
+                                      <option value="%">%</option>
+                                      <option value="POINTS">.</option>
+                                  </select>
+                                  </div>
+                                  </div>
+                                  </div>
+
+
+
+                                  <div className="input-field-incremental-buy">
+                                 
+                                 <div>
+                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                                      - Intraday (MIS): Short-term trades within a single day.
+                                                      - Longterm (CNC): Trades with no intraday restrictions.">
+                                        <FaInfoCircle />
+                                      </span>
+                                  
+                                 </div>
+                                 <div className='col'>
+                                  <label htmlFor="incremental-value">Breakout/Breakdown buy:</label>
+                                  <div className="input-field-14">
+                                  <input disabled='true' type="number" id="protectProfitValue" value={incrementalBuy} onChange={handleIncrementalBuy} />
+                                  <select disabled='true' id="protectProfitType" value={protectProfitType} onChange={handleProtectProfitTypeChange}>
+                                      <option value="%">%</option>
+                                      <option value="POINTS">.</option>
+                                  </select>
+                                  </div>
+                                  </div>
+                                  </div>
+                            
+                          
+                              <button className='punch' onClick={handlePunch}>Punch</button>
+                                 
+                                </>
+                              ) : (
+                                <>
+                                  {/* Render the blurred fields or subscribe message for non-subscribers */}
+                                  <div className="blurred-field">
+                                    <p>Subscribe to activate advance feature</p>
+                                    <button onClick={subscribeHandle}>Subscribe Now</button>
+                                  </div>
+                                  <button className='punch' onClick={handlePunch}>Punch</button>
+                                </>
+                              )}
+                            </div>
+
+                            {/* <div className="Type_Value">
+
                                     <div className="input-field-trailing-sl">
                                   
+                                    <div>
                                     <span className="info-icon" title="Select the type of product you want to trade:
                                                         - Intraday (MIS): Short-term trades within a single day.
                                                         - Longterm (CNC): Trades with no intraday restrictions.">
                                           <FaInfoCircle />
                                         </span>
                                    
-                                   
+                                   </div>
+                                   <div className='col'>
                                     <label htmlFor="trailingSL-value">Trailing Stop Loss :</label>
                                     <div className="input-field-8">
                                  
@@ -1274,23 +1596,18 @@ useEffect(()=>{
                                     </select>
                                     </div>
                                     </div>
-                                {/* </>
-                                )} */}
-                                {/* <div className="input-field-9">
-                                <input type="checkbox" id="buyAtLow" checked={buyAtLow} onChange={handleBuyAtLowChange} />
-                                <label htmlFor="buyAtLow">Buy at Low</label>
-                                </div> */}
-                                {/* {buyAtLow && (
-                                <> */}
+                                    </div>
+                              
                                     <div className="input-field-buy-at-low">
                                   
-                                  
+                                  <div>
                                     <span className="info-icon" title="Select the type of product you want to trade:
                                                         - Intraday (MIS): Short-term trades within a single day.
                                                         - Longterm (CNC): Trades with no intraday restrictions.">
                                           <FaInfoCircle />
                                         </span>
-                                    
+                                    </div>
+                                    <div className='col'>
                                     <label htmlFor="buyAtLowValue">Buy at Low :</label>
                                     <div className="input-field-11">
                                     <input type="number" id="buyAtLowValue" value={buyAtLowValue} onChange={handleBuyAtLowValueChange} />
@@ -1300,23 +1617,19 @@ useEffect(()=>{
                                     </select>
                                     </div>
                                     </div>
-                                {/* </>
-                                )} */}
-                                {/* <div className="input-field-12">
-                                <input type="checkbox" id="protectProfit" checked={protectProfit} onChange={handleProtectProfitChange} />
-                                <label htmlFor="protectProfit">Protect Profit</label>
-                                </div> */}
-                                {/* {protectProfit && (
-                                <> */}
+                                    </div>
+                              
                                     <div className="input-field-protect-profit">
                                    
+                                   <div>
                                     <span className="info-icon" title="Select the type of product you want to trade:
                                                         - Intraday (MIS): Short-term trades within a single day.
                                                         - Longterm (CNC): Trades with no intraday restrictions.">
                                           <FaInfoCircle />
                                         </span>
                                     
-                                   
+                                   </div>
+                                   <div className='col'>
                                     <label htmlFor="protectProfitValue">Protect Profit :</label>
                                     <div className="input-field-14">
                                     <input type="number" id="protectProfitValue" value={protectProfitValue} onChange={handleProtectProfitValueChange} />
@@ -1326,22 +1639,12 @@ useEffect(()=>{
                                     </select>
                                     </div>
                                     </div>
-                                {/* </>
-                                )} */}
-
-                            {/* <div className="input-field-7">
-                                    <label htmlFor="timer">Timer option:</label>
-                                    
-                                    <div className="input-field-14">
-                                    
-                                    <input type="number" value={timerValue} onChange={handleTimerValue} ></input>
                                     </div>
-                            
-                                </div> */}
+                              
                             
                                 <button className='punch' onClick={handlePunch}>Punch</button>
 
-                            </div>
+                            </div> */}
                             </div>
 
 
@@ -1369,7 +1672,7 @@ useEffect(()=>{
                                 <tbody>
                                   {systemTrades && systemTrades.map((trade, index) => (
                                     <tr key={index}>
-                                      <td>{trade.status}</td>
+                                       <td style={{ color: trade.status === 'Completed' ? 'green' : 'orange' }}>{trade.status}</td>
                                       <td>{index+1}</td>
                                       <td>{trade.symbol}</td>
                                       <td>{trade.optionPrice}</td>
@@ -1382,8 +1685,10 @@ useEffect(()=>{
                                       <td>{trade.toWin}</td>
                                       <td>{trade.toLoss}</td>
                                       <td style={{ color: trade.pnl >= 0 ? 'green' : 'red' }}>{trade.pnl ? trade.pnl.toFixed(2) : '0'}</td>
-                                      <td><button onClick={()=>handleExit(index)}>Exit</button></td>
-                                      
+                                      {trade.status !== 'Completed' && (
+                                          <button onClick={() => handleExit(index)}>Exit</button>
+                                        )}
+                                                                            
                                       {/* Add other trade details here */}
                                     </tr>
                                   ))}
@@ -1391,19 +1696,19 @@ useEffect(()=>{
                               </table>
 
 
-                                <div className='total-pnl-section'>
-
-                                 
-                                    <h2>Total PNL</h2>
-                                  
-                                    <h5 style={{ color: totalPnl >= 0 ? 'green' : 'red' }}>{totalPnl}</h5>
-                                    <h5 style={{ color: totalPnl >= 0 ? 'green' : 'red' }}>({pnlPercentage})%</h5>
-                        
-                                 
-                                </div>
+                               
                     </div>
 
-                   
+                    <div className='total-pnl-section'>
+
+                                 
+                            <h2>Total PNL</h2>
+                          
+                            <h5 style={{ color: totalPnl >= 0 ? 'green' : 'red' }}>{totalPnl}</h5>
+                            <h5 style={{ color: totalPnl >= 0 ? 'green' : 'red' }}>({pnlPercentage})%</h5>
+                
+                          
+                        </div>
 
 
 
@@ -1416,7 +1721,7 @@ useEffect(()=>{
 
               <div className="login-container" style={{width:'100%' , alignItems:'center'}}>
               {/* Render login button or image */}
-              <button onClick={handleLogin}>Login to Kite</button>
+              <button onClick={handleLogin}><img src='/kite.png'></img><span>Login To Kite</span></button>
             </div>
           )}
     </div>

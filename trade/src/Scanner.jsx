@@ -10,6 +10,48 @@ import './Scanner.css'
 function Scanner(){
     // const [requestToken,setrequestToken] = useState(null)
     // const hasExecuted = useRef(false);
+    const [instrumentList,setinstrumentList] = useState()
+
+
+
+    // useEffect(() => {
+    //   const fetchInstrumentNames = async () => {
+    //     try {
+    //       console.log('hoga ki nahin')
+    //       const response = await axios.post('http://localhost:5000/api/instrumentslist');
+    //       setinstrumentList(response.data.instrumentNames);
+    //       console.log(response.data.instrumentNames)
+    //       localStorage.setItem('instrumnetNames',response.data.instrumentNames)
+    //       console.log('achha')
+    //     } catch (error) {
+    //       console.error('Error fetching instrument names:', error);
+    //     }
+    //   };
+      
+    //   fetchInstrumentNames();
+    // }, []);
+
+
+    useEffect(()=>{
+      const fetchInstrumentNames = async () => {
+        try {
+          console.log('hoga ki nahin')
+          const response = await axios.post('http://localhost:5000/get-master-quote');
+          
+          const instrumentName= response.data
+          console.log(response.data)
+          const additionalInstruments = ['NIFTY', 'BANKNIFTY', 'FINNIFTY', 'MIDCPNIFTY'];
+          setinstrumentList([...instrumentName,...additionalInstruments]);
+          // localStorage.setItem('instrumnetNames',response.data.instrumentNames)
+          console.log('achha')
+        } catch (error) {
+          console.error('Error fetching instrument names:', error);
+        }
+      };
+      
+      fetchInstrumentNames();
+
+    },[])
 
 
     // useEffect(() => {
@@ -45,22 +87,22 @@ function Scanner(){
     return(
       <div className='scanner'>
         <Tabs
-        defaultActiveKey="profile"
+        defaultActiveKey="oi"
         id="uncontrolled-tab-example"
         className="scanner-tab"
         
       >
         <Tab eventKey="oi" title="Open Interest">
-         <Change className="tab-content"></Change>
+         <Change className="tab-content" instrumentList={instrumentList}></Change>
         </Tab>
         <Tab eventKey="maxpain" title="Max Pain">
-        <MaxPain className="tab-content"></MaxPain>
+        <MaxPain className="tab-content" instrumentList={instrumentList}></MaxPain>
         </Tab>
         <Tab eventKey="optionchain" title="Option Chain Data">
-          <Exp className="tab-content"></Exp>
+          <Exp className="tab-content" instrumentList={instrumentList}></Exp>
         </Tab>
         <Tab eventKey="greek" title="Greek Data">
-          <Greek className="tab-content"></Greek>
+          <Greek className="tab-content" instrumentList={instrumentList}></Greek>
           </Tab>
       </Tabs>
 

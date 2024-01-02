@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import './reset.css'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './reset.css'
+// import './reset.css'
 
 function Reset(){
     const [user,setUser]= useState({email:''})

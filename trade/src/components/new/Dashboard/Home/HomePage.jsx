@@ -11,12 +11,17 @@ import Calender from '../overview/Calender'
 import { IoBarChartOutline } from "react-icons/io5";
 import { MdOutlineDelete } from "react-icons/md";
 import ProfileSec from '../overview/ProfileSec'
+import Movers from '../overview/Movers'
+import Losers from '../overview/Losers'
 
 const HomePage = () => {
     const [selectedInstrument, setSelectedInstrument] = useState('');
     const [watchlist, setWatchlist] = useState([]);
+    const [graphInstrument,setGraphInstrumnent] = useState()
 
     const handleSelectInstrument = (selectedInstrument) => {
+      setGraphInstrumnent(selectedInstrument.instrument_key)
+      console.log(selectedInstrument)
         if (selectedInstrument) {
           // Add the selected instrument to the watchlist
           setWatchlist((prevWatchlist) =>{
@@ -29,8 +34,11 @@ const HomePage = () => {
       };
 
       const handleSelectedInstrument = (instrument) => {
-        setSelectedInstrument(instrument)
+        console.log(instrument)
+        setSelectedInstrument(instrument.instrument_key)
       };
+
+
       const handleRemoveInstrument = (instrument) => {
         setWatchlist((prevWatchlist) => {
         const temp=prevWatchlist.filter(item => item !== instrument)
@@ -112,7 +120,7 @@ const HomePage = () => {
         <ul>
           {watchlist.map((instrument) => (
             <li key={instrument}>
-              {instrument} 
+              <h8> {instrument.name} </h8> 
               <div>
               <button className='watch-select btn' onClick={()=>handleSelectedInstrument(instrument)}><IoBarChartOutline /></button>
               <button className='watch-delete btn' onClick={() => handleRemoveInstrument(instrument)}><MdOutlineDelete /></button>
@@ -140,16 +148,18 @@ const HomePage = () => {
             </div>
 
             <div className='news-container'>
-            <h4>News Feed</h4>
+            <h4>Top Gainers</h4>
             <div className='news'>
+            <Movers></Movers>
                     {/* <NewsFeed></NewsFeed> */}
             </div>
             </div>
 
             <div className='trend-container'>
-            <h4>Top Movers</h4>
+            <h4>Top Losers</h4>
             <div className='trend'>
-                    {/* <NewsFeed></NewsFeed> */}
+                
+                   <Losers></Losers>
             </div>
             </div>
         </div>

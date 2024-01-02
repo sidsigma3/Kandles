@@ -1,0 +1,28 @@
+.watchlist .react-autosuggest__suggestions-container{
+    position: absolute;
+    z-index: 999;
+    max-height: 400px; /* Set your desired max height */
+    overflow-y: auto; /* Enable vertical scrolling if needed */
+    background-color: #fff; /* Set your desired background color */
+    border: 1px solid #ccc; /* Add a border for a clear separation */
+    width: 100%;
+   
+    display: none;
+}
+
+.watchlist .react-autosuggest__suggestions-container--open{
+    display: block;
+}
+.watchlist{
+    position: relative;
+}
+
+.watchlist .react-autosuggest__suggestion {
+   padding-left: 0;
+    cursor: pointer;
+  }
+  
+  .watchlist .react-autosuggest__suggestion--highlighted {
+    background-color: #5075ef;
+    color: white    ; /* Set the background color for highlighted suggestion */
+  }

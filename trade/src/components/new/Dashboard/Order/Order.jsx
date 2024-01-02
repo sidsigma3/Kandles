@@ -26,16 +26,16 @@ const Order = ({ trades ,setTrades }) => {
         </tr>
       </thead>
       <tbody>
-        {trades.map((order, index) => (
+        {trades && trades.map((order, index) => (
           <tr key={index}>
-            <td>{order.time.toLocaleString()}</td>
-            <td>{order.type}</td>
-            <td>{order.symbol}</td>
-            <td>{order.pro}</td>
-            <td>{order.quantity}</td>
-            <td>{order.optionPrice}</td>
-            <td>{order.status}</td>
-          </tr>
+          <td>{order.time.toLocaleString()}</td>
+          <td style={{ color: order.type === 'BUY' ? '#0074B7' : 'orange' }}>{order.type}</td>
+          <td>{order.symbol}</td>
+          <td>{order.pro}</td>
+          <td>{order.quantity}</td>
+          <td>{order.optionPrice}</td>
+          <td style={{ color: order.status === 'completed' ? 'green' : 'inherit' }}>{order.status}</td>
+        </tr>
         ))}
       </tbody>
     </table>

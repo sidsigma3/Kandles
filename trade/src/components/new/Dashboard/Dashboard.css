@@ -4,9 +4,13 @@
     text-align: center;
 }
 
+.dashboard{
+    height: 100vh;
+}
+
 .dash{
     display: flex;
-    height: 800px;
+    height: 100%;
     /* background-color: aquamarine; */
 
 }
@@ -18,10 +22,10 @@
     background: var(--White, #FFF);
     border-radius: 18.313px;
     box-shadow: 0px 4.88333px 39.06667px 0px rgba(0, 0, 0, 0.07);
-    margin-right: 11px;
-    margin-left: 18px;
-    width: 15%;
-    padding: 0 20px 0 20px;
+    margin-right: 15px;
+    margin-left: 10px;
+    width: 250px;
+    padding: 0 10px 0 10px;
 }
 
 .dashboard .dash .side-bar ul{
@@ -38,6 +42,7 @@
     align-items: center;
     color: var(--text-80, #969696);
     padding-left: 10px;
+    height: 70px;
 }
 
 .dashboard .dash .side-bar ul .dash-logo{
@@ -47,7 +52,7 @@
 }
 
 .dashboard .dash .side-bar ul .dash-logo img{
-    width: 50px;
+    width: 35px;
 
 }
 .dashboard .dash .side-bar ul .dash-logo b{
@@ -63,7 +68,7 @@
 .dashboard .dash .side-bar ul li h3{
     color: var(--text-80, #969696);
 font-family: Poppins;
-font-size: 17.092px;
+font-size: 14px;
 font-style: normal;
 font-weight: 400;
 line-height: normal;
@@ -92,6 +97,36 @@ line-height: normal;
     color: #007bff;
 }
 
-.dashboard .dash .side-bar svg{
+.dashboard .dash .side-bar .dash-icons{
+    width: 25px;
+    height: 25px;
+
     
+}
+
+.dashboard .dash .side-bar h3{
+    margin: 0;
+}
+
+
+
+
+@media only screen and (max-width: 768px) {
+    .sidebar-container {
+        flex-direction: column; /* Stack elements vertically */
+    }
+
+    .side-bar {
+        width: 100%; /* Take full width on smaller screens */
+        display: none; /* Initially hide the sidebar */
+    }
+
+    .content {
+        width: 100%;
+        margin-left: 0; /* Adjust margin when sidebar is hidden */
+    }
+
+    .show-sidebar .side-bar {
+        display: block; /* Show the sidebar when the container has the 'show-sidebar' class */
+    }
 }

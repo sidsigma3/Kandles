@@ -3,7 +3,7 @@
 
 }
 
-.max-pain .max-pain-canvas canvas {
+.max-pain .max-pain-canvas  {
     height: 550px !important;
     width: 95% !important;
     padding: 10px 10px 10px 50px;
@@ -17,7 +17,8 @@
 }
 
 .max-pain .max-pain-form select{
-    width: 20%;
+    width: 15%;
+    font-size: 18px;
 }
 
 .max-pain .max-pain-form button{
@@ -26,4 +27,37 @@
 
 .max-pain label h3{
     text-align: center;
+    margin-bottom: 30px;
 }
+
+
+.max-pain .react-autosuggest__suggestions-container {
+    position: absolute;
+    z-index: 1;
+    max-height: 200px; /* Set your desired max height */
+    overflow-y: auto; /* Enable vertical scrolling if needed */
+    background-color: #fff; /* Set your desired background color */
+    border: 1px solid #ccc; /* Add a border for a clear separation */
+    width: 220px;
+    display: none; 
+}
+
+.max-pain .react-autosuggest__suggestions-container--open{
+    display: block;
+}
+
+
+.max-pain .react-autosuggest__container{
+    position: relative;
+}
+  
+  .max-pain .react-autosuggest__suggestion {
+   padding-left: 0;
+    cursor: pointer;
+  }
+  
+  .max-pain .react-autosuggest__suggestion--highlighted {
+    background-color: #325ce4;
+    color: white    ; /* Set the background color for highlighted suggestion */
+  }
+   

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import './Log.css'; // Import your CSS file
 import axios from 'axios'
 import 'react-phone-number-input/style.css'
@@ -10,6 +10,11 @@ import { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 // import '@fortawesome/fontawesome-free/css/all.css';
 import 'font-awesome/css/font-awesome.min.css';
+// import { GoogleLoginProvider, useGoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google'
+import { jwtDecode } from "jwt-decode";
+import FacebookLogin from '@greatsumini/react-facebook-login';
+import { FaFacebook } from "react-icons/fa";
 
 const Log = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -27,23 +32,48 @@ const [user1,setUser1] = useState({
 const navigate = useNavigate();
 
 
+// const googleLogin = useGoogleLogin({
+//   clientId: '377046758434-nnu0bme8nrlogj08vuk72e8ss20b10a1.apps.googleusercontent.com',
+//   onSuccess: (user) => {
+//     console.log('Google login success:', user);
+
+//     // Access user information
+//     const email = user.profileObj.email;
+//     const name = user.profileObj.name;
+//     // You can add more fields as needed
+
+//     // Perform sign-up or login with the retrieved information
+//     // ...
+
+//     // Handle successful login
+//   },
+//   onFailure: (error) => {
+//     console.error('Google login error:', error);
+//     // Handle login error
+//   },
+// });
+
 const changeHandler=(e)=>{
     const {name,value}=e.target
     setUser({...user,[name]:value})
   }
  
-  const changeHandler1=(e)=>{
-    const {name,value}=e.target
-    setUser1({...user1,[name]:value})
-  }
-
+  const changeHandler1 = (e) => {
+    const { name, value } = e.target;
+    setUser1({ ...user1, [name]: value, 'registrationMethod': 'email' });
+    console.log(user1)
+}
   const submitHandler= (e)=>{
     e.preventDefault()
-    axios.post("https://kandles-back.onrender.com/login",user)
+    axios.post("http://localhost:5000/login",user)
     .then((res)=>{
+      console.log(res)
       console.log(res.data.stat)
       if (res.data.stat===200){
         toast.success(res.data.msg, {autoClose:3000})
+        localStorage.setItem('authToken',res.data.token)
+
+
         navigate('/dashboard',{replace:true})
 
       }
@@ -57,9 +87,103 @@ const changeHandler=(e)=>{
     }
       )
   }
-
   
- 
+  const responseMessage = (response) => {
+    const decoded=jwtDecode(response.credential)
+    console.log(decoded)
+    console.log(response)
+    const name =decoded.name
+    const email = decoded.email
+    const id = decoded.sub
+    console.log(name,email)    
+    setUser1({'name':name,'email':email ,'password':id ,registrationMethod:'google'})
+    // axios.post("http://localhost:5000/signup",user1)
+    // .then((res)=>{
+   
+    // if (res.data.stat===200){
+    //     toast.success(res.data.msg, {autoClose:3000})     
+    // }
+    // else{
+    //   toast.warning(res.data.msg, {autoClose:10000})
+    // }
+    //   }
+    // )
+      
+
+    
+  };
+
+
+  useEffect(() => {
+    // Make the Axios request when the user state is updated
+    if (user1.email && user1.password && user1.registrationMethod==='google') {
+      axios.post('http://localhost:5000/signup', user1).then((res) => {
+        if (res.data.stat === 200) {
+          toast.success(res.data.msg, { autoClose: 3000 });
+        } else {
+          toast.warning(res.data.msg, { autoClose: 10000 });
+        }
+      });
+    }
+  }, [user1]);
+
+  const responseMessage1 = (response) => {
+    const decoded=jwtDecode(response.credential)
+    console.log(decoded)
+    const password =decoded.sub
+    const email = decoded.email
+    
+    setUser({'email':email ,'password': password})
+    console.log(user)
+    // axios.post("http://localhost:5000/login",user)
+    // .then((res)=>{
+    //   console.log(res.data.stat)
+    //   if (res.data.stat===200){
+    //     toast.success(res.data.msg, {autoClose:3000})
+    //     localStorage.setItem('authToken',res.data.token)
+        
+
+    //     navigate('/dashboard',{replace:true})
+
+    //   }
+    //   else if(res.data.stat==401){
+    //     toast.error(res.data.msg,{autoClose:7000})
+    //   }
+    //   else{
+    //     toast.warning(res.data.msg, {autoClose:10000})
+    //   }
+    
+    // }
+    //   )
+    
+
+    ;
+  };
+
+  useEffect(() => {
+    // Make the Axios request when the user state is updated
+    if (user.email && user.password) {
+      axios.post('http://localhost:5000/login', user).then((res) => {
+        if (res.data.stat === 200) {
+          toast.success(res.data.msg, { autoClose: 3000 });
+         
+          localStorage.setItem('authToken',res.data.token)
+        navigate('/dashboard',{replace:true})
+
+        } else {
+          toast.warning(res.data.msg, { autoClose: 10000 });
+        }
+      });
+    }
+  }, [user]);
+
+  const errorMessage = (error) => {
+      console.log(error);
+  };
+    
+  const errorMessage1 = (error) => {
+    console.log(error);
+};
   const submitHandler1= (e)=>{
   
   
@@ -70,7 +194,7 @@ const changeHandler=(e)=>{
     console.log(user1)
 
     if(re.test(user1.email)){
-
+      
       if (isValidPhoneNumber(user1.phone) === false){
         toast.warning('Not a valid Number',{autoClose:10000})
 
@@ -79,7 +203,7 @@ const changeHandler=(e)=>{
       else{
           if (refp.test(user1.password)){
             
-            axios.post("https://kandles-back.onrender.com/signup",user1)
+            axios.post("http://localhost:5000/signup",user1)
             .then((res)=>{
            
             if (res.data.stat===200){
@@ -99,6 +223,7 @@ const changeHandler=(e)=>{
 }
     }
     else{
+      console.log(user1)
       toast.warning('Not a valid email')
     }
     
@@ -126,7 +251,34 @@ const showPassword = ()=>{
   }
   }
 
+  const responseMessageFacebook = (response) => {
+    if (response.status === 'connected') {
+      const name = response.name;
+      const email = response.email;
+      const id = response.id;
+      console.log(response)
+      // Use the retrieved information as needed
+      // ...
+    } else {
+      // Handle login error
+      console.error('Facebook login error:', response);
+    }
+  };
 
+  const responseMessageFacebook1 = (response) => {
+    if (response.status === 'connected') {
+      const name = response.name;
+      const email = response.email;
+      const id = response.id;
+  
+      console.log(response)
+      // Use the retrieved information as needed
+      // ...
+    } else {
+      // Handle login error
+      console.error('Facebook login error:', response);
+    }
+  };
 
 
   return (
@@ -137,9 +289,24 @@ const showPassword = ()=>{
           <form action="#" onSubmit={submitHandler1}>
             <h1>Create Account</h1>
             <div className="social-container">
-              <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
+              {/* <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
               <a href="#" className="social"><i className="fab fa-google-plus-g"></i></a>
-              <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a>
+              <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a> */}
+              <GoogleLogin onSuccess={responseMessage} onError={errorMessage} />
+              {/* <FacebookLogin
+                  appId="1381167079441158"
+                  autoLoad={false}
+                  fields="name,email,picture"
+                  callback={responseMessageFacebook1}
+                  
+                  render={(renderProps) => (
+                    <button onClick={renderProps.onClick} className="facebook-btn">
+                     <FaFacebook  className='fb-logo'/>
+                    </button>
+                  )}
+
+                  
+                /> */}
             </div>
             <span>or use your email for registration</span>
             <input type="text" placeholder="Name" name='name' onChange={changeHandler1} required></input>
@@ -170,9 +337,23 @@ const showPassword = ()=>{
           <form action="#" onSubmit={submitHandler}>
             <h1>Sign in</h1>
             <div className="social-container">
-              <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
+              {/* <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
               <a href="#" className="social"><i className="fab fa-google-plus-g"></i></a>
-              <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a>
+              <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a> */}
+            <GoogleLogin onSuccess={responseMessage1} onError={errorMessage1} />
+
+                {/* <FacebookLogin
+                  appId="1381167079441158"
+                  autoLoad={false}
+                  fields="name,email,picture"
+                  callback={responseMessageFacebook}
+                  render={(renderProps) => (
+                    <button onClick={renderProps.onClick} className="facebook-btn">
+                     <FaFacebook  className='fb-logo'/>                 
+                    </button>
+                  )}
+                /> */}
+            
             </div>
             <span>or use your account</span>
             <input type="email" placeholder="Email" name='email'  onChange={changeHandler} />
@@ -204,13 +385,13 @@ const showPassword = ()=>{
           </div>
         </div>
       </div>
-      <footer>
+      {/* <footer>
         <p>
           Created with <i className="fa fa-heart"></i> by
           <a target="_blank" href="https://florin-pop.com">Florin Pop</a> - Read how I created this and how you can join the challenge
           <a target="_blank" href="https://www.florin-pop.com/blog/2019/03/double-slider-sign-in-up-form/">here</a>.
         </p>
-      </footer>
+      </footer> */}
     </div>
   );
 };
