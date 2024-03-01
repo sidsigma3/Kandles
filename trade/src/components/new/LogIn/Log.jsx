@@ -162,7 +162,8 @@ const changeHandler=(e)=>{
 
   useEffect(() => {
     // Make the Axios request when the user state is updated
-    if (user.email && user.password) {
+    if (user.email && user.password && user.registrationMethod==='google') {
+      console.log(user)
       axios.post('http://localhost:5000/login', user).then((res) => {
         if (res.data.stat === 200) {
           toast.success(res.data.msg, { autoClose: 3000 });

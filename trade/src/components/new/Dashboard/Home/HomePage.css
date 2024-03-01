@@ -1,20 +1,29 @@
 .home{
     width: 100%;
+    padding-top: 30px;
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: #F5F5F5;
 }
 
+
+.home h4{
+    font-family:'poppins';
+    margin-bottom: 10px;
+}    
 
 .home-sec-1{
     display: flex;
     width: 100%;
     margin-bottom: 40px;
-    justify-content: space-around;
+    justify-content: space-between;
     height: 160px;
     gap: 20px;
 }
 
 .home-sec-1 .index{
-    background-color: var(--White, #FFF);
-    width: 80%;
+    
+    width: 74%;
 }
 .home-sec-1 .index ul{
     display: flex;
@@ -37,13 +46,13 @@
 
 .home-sec-1  .profile{
     /* background-color: royalblue; */
-    width: 20%;
+    width: 30%;
     text-align: center;
     border-radius: var(--Users, 20px);
     background: var(--White, #FFF);
     box-shadow: 0px 4.88333px 39.06667px 0px rgba(0, 0, 0, 0.07);
-    margin-top: 10px;
-    margin-bottom: 12px;
+    margin-top: 36px;
+    margin-bottom: -30px;
 }
 
 .home-sec-1 .profile img{
@@ -64,6 +73,7 @@
 .home-sec-2 .sec-2-overview{
     width: 75%;
     height: 100%;
+    margin-top: 10px;
 }
 
 .home-sec-2 .graph{
@@ -107,7 +117,7 @@ box-shadow: 0px 4.88333px 39.06667px 0px rgba(0, 0, 0, 0.07);
     height: 300px;
     display: flex;
     gap: 10px;
-    padding-top: 13px;
+    padding-top: 35px;
 }
 
 
@@ -127,7 +137,10 @@ height: 100%;
 }
 
 .home-sec-3 .result , .home-sec-3 .result{
-      /* background-color: lightsteelblue; */
+    background-image: url('./../../../../../public/trending.svg');
+    background-size: cover;
+      /* backgroundImage: url(./trending.svg);
+    backgroundSize: cover; */
       width: 100%;
       border-radius: 18.313px;
   background: var(--White, #FFF);
@@ -142,3 +155,8 @@ background: var(--White, #FFF);
 box-shadow: 0px 4.88333px 39.06667px 0px rgba(0, 0, 0, 0.07);
 
 }
+
+/* .home .home-sec-3 .result img{
+    width: 50%;
+    height: 150%;
+} */

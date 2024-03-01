@@ -35,7 +35,7 @@ const HomePage = () => {
 
       const handleSelectedInstrument = (instrument) => {
         console.log(instrument)
-        setSelectedInstrument(instrument.instrument_key)
+        setSelectedInstrument(instrument)
       };
 
 
@@ -65,7 +65,7 @@ const HomePage = () => {
             <div className='index'>
               <h4>Indices</h4>
                 <ul>
-                    <li> <Map1 indices={'Nifty 50'}></Map1></li>
+                    {/* <li> <Map1 indices={'Nifty 50'}></Map1></li>
 
                     <li> <Map1 indices={'Nifty Bank'}> </Map1>    </li>
 
@@ -73,7 +73,42 @@ const HomePage = () => {
 
                     <li> <Map1 indices={'Nifty IT'}> </Map1> </li>
 
-                    <li> <Map1 indices={'Nifty Midcap 50'}> </Map1> </li>
+                    <li> <Map1 indices={'Nifty Midcap 50'}> </Map1> </li> */}
+
+                    <li> <div>
+      <h5>NIfty 50</h5>
+      <h5 style={{color:'red'}}>22212.70</h5>
+      <h5 style={{color:'red'}}>-4.75</h5>
+      <h5 style={{color:'red'}}>-0.02%</h5>
+    </div></li>
+
+    <li> <div>
+      <h5>Nifty Bank</h5>
+      <h5 style={{color:'red'}}>46811.75</h5>
+      <h5 style={{color:'red'}}>-108.05</h5>
+      <h5 style={{color:'red'}}>-0.23%</h5>
+    </div></li>
+
+    <li> <div>
+      <h5>Fin Nifty</h5>
+      <h5 style={{color:'green'}}>20677.10</h5>
+      <h5 style={{color:'green'}}>11.20</h5>
+      <h5 style={{color:'green'}}>0.05%</h5>
+    </div></li>
+
+    <li> <div>
+      <h5>Nifty IT</h5>
+      <h5 style={{color:'red'}}>38045.65</h5>
+      <h5 style={{color:'red'}}>-84.50</h5>
+      <h5 style={{color:'red'}}>-0.22%</h5>
+    </div></li>
+
+    <li> <div>
+      <h5>Nifty Midcap 50</h5>
+      <h5 style={{color:'green'}}>14062.20</h5>
+      <h5 style={{color:'green'}}>100.25</h5>
+      <h5 style={{color:'green'}}>0.72%</h5>
+    </div></li>
                 </ul>
 
             </div>
@@ -140,11 +175,21 @@ const HomePage = () => {
         <div className='home-sec-3'>
             
             <div className='calender-container'>
-            <h4>Economic calender</h4>
-            <div className='result'>
-                    
-                   <Calender></Calender>
+            <h4>Trending Stock</h4>
+
+            <div className='result' style={{
+                backgroundImage: 'url(./trending.svg)',
+                backgroundSize: 'cover', // Ensure it covers the full div
+                backgroundPosition: 'center', // Center the background image
+                height: '100%', // Set to desired height
+                width: '100%' // Set to desired width
+            }}>
+                {/* <Calender></Calender> */}
             </div>
+            {/* <div className='result'>
+                 <img src='./trending.svg' ></img>   
+                   <Calender></Calender>
+            </div> */}
             </div>
 
             <div className='news-container'>

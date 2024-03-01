@@ -153,11 +153,11 @@ module.exports = function (io) {
 
   router.post('/payment', async (req,res)=>{
 
-    const amount = req.body.amount
-    
+    const amount = Number(req.body.price +'00')
+
 
     const options = {
-      amount: 50000,
+      amount: amount,
       currency: 'INR',
       receipt: 'receipt_order_74394',
       payment_capture: 1,
@@ -199,9 +199,12 @@ module.exports = function (io) {
       }
     })
     .on('end', () => {
-     
       res.json({ instrumentNames });
-    });
+    })
+    .on('error', (error) => {
+      console.error('Error processing CSV:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    })
 
   })
 
@@ -589,7 +592,7 @@ module.exports = function (io) {
       const ws = new WebSocket(wsUrl, {
         headers: {
           "Api-Version": apiVersion,
-          Authorization: "Bearer " + OAUTH2.accessToken,
+          Authorization: "Bearer " + accessToken,
         },
         followRedirects: true,
       });
@@ -664,7 +667,7 @@ module.exports = function (io) {
   
   // Function to initialize the protobuf part
   const initProtobuf = async () => {
-    protobufRoot = await protobuf.load('C:/Users/sidsi/Desktop/intern/back/config/MarketDataFeed.proto');
+    protobufRoot = await protobuf.load('./config/MarketDataFeed.proto');
     console.log("Protobuf part initialization complete");
     
   };
@@ -700,7 +703,7 @@ module.exports = function (io) {
  router.post("/getGraph",(req,res)=>{
 
   const today = new Date().toISOString().split('T')[0];
-  const selectedInstrument = req.body.selectedInstrument || "NSE_INDEX|Nifty 50";
+  const selectedInstrument = req.body.instrument || "NSE_INDEX|Nifty 50";
   let api = new Upstox.HistoryApi();
   let instrumentKey = selectedInstrument; // String | 
   let interval = "day"; // String | 
@@ -742,6 +745,22 @@ axios.get(url, {
  })
 
 
+router.post("/kiteInstrumentList",async(req,res)=>{
+    try{
+      const instrumentResponse = await kite.getInstruments();
+      const instruments = instrumentResponse;
+      res.send({instruments});
+    }
+    catch (error) {
+      console.error('Error fetching data:', error);
+      res.status(500).send({ error: 'Something went wrong' });
+    }
+
+   
+
+})
+
+
 
 
 
@@ -752,11 +771,11 @@ axios.get(url, {
     const capital = marginResponse.available.live_balance;
 
     // Fetch instrument data
-    const instrumentResponse = await kite.getInstruments();
-    const instruments = instrumentResponse;
-    
+    // const instrumentResponse = await kite.getInstruments();
+    // const instruments = instrumentResponse;
+      
     // Send the response to frontend
-    res.send({ capital,instruments});
+    res.send({ capital});
   } catch (error) {
     console.error('Error fetching data:', error);
     res.status(500).send({ error: 'Something went wrong' });
@@ -771,6 +790,7 @@ function getMargins(segment) {
 
     let socketConnected = false
 
+    let currentSocket = null;
 
     router.post("/trade-info", (req, res) => {
      
@@ -876,9 +896,6 @@ function getMargins(segment) {
         }
 
 
-
-
-
         // function getQuote(instruments) {
         //   kite
         //     .getQuote(instruments)
@@ -902,10 +919,7 @@ function getMargins(segment) {
               console.log(err);
             });
         }
-
-
-       
-             
+           
         getLTP(["NSE:" + symbol]);
       });
 
@@ -1342,7 +1356,7 @@ function getMargins(segment) {
     // Process the response and send the data back
     const { data } = response;
     const filteredData = data.filtered.data;
-
+ 
     const optionChain = {
       calls: [],
       puts: [],
@@ -1357,6 +1371,7 @@ function getMargins(segment) {
         lastPrice: option.CE?.lastPrice,
         openInterest: option.CE?.openInterest,
         changeinOpenInterest: option.CE?.changeinOpenInterest,
+        underlyingValue:option.CE?.underlyingValue
       };
 
       const putOption = {
@@ -1366,6 +1381,7 @@ function getMargins(segment) {
         lastPrice: option.PE?.lastPrice,
         openInterest: option.PE?.openInterest,
         changeinOpenInterest: option.PE?.changeinOpenInterest,
+        underlyingValue:option.PE?.underlyingValue
       };
       optionChain.calls.push(callOption);
       optionChain.puts.push(putOption);
@@ -1374,7 +1390,7 @@ function getMargins(segment) {
       optionChain.pcr.push(ratio);
     });
 
-    console.log(optionChain);
+   
     res.send(optionChain);
   } catch (error) {
     console.error('Error making request:', error);
@@ -1594,10 +1610,12 @@ function getMargins(segment) {
     // const redirectUri = "http://localhost:3000/scanner";
 
     // const login_url = `https://kite.zerodha.com/connect/login?api_key=${apiKey}&v=3`;
-
+    
     // open(login_url);
-
-    open(authUrl)
+    // res.send(authUrl)
+    // open(authUrl)
+    console.log(authUrl)
+    res.json({ authUrl });
   });
 
   router.post("/exit", (req, res) => {
@@ -1608,7 +1626,11 @@ function getMargins(segment) {
     const quantity = req.body.exitTrade.quantity;
     const symbol = req.body.exitTrade.symbol;
     const exchange = req.body.exitTrade.exchange;
-  
+    const gtt = req.body.exitTrade.gttId  
+    const stoploss = Number(req.body.exitTrade.stopLoss)
+    const target =  Number(req.body.exitTrade.squareOff)
+    const leftQuantity = req.body.exitTrade.left
+
     const orderParams = {
       exchange: exchange,
       tradingsymbol: symbol,
@@ -1617,7 +1639,7 @@ function getMargins(segment) {
       order_type: order,
       product: pro,
     };
-  
+
     console.log(orderParams);
   
     kite
@@ -1631,9 +1653,73 @@ function getMargins(segment) {
           .getOrderHistory(order_id)
           .then(function (response) {
             console.log(response);
-            avgPrice = response[4].average_price;
+            const avgPrice = response[4].average_price;
             const quantity = response[4].quantity;
             const token = response[4].instrument_token;
+
+
+            if (leftQuantity===0){
+
+              kite.deleteGTT(gtt)
+              .then(res=>console.log(res))
+              .catch(err=>console.log(err))
+      
+            }
+              
+            else{
+              function modifyGTTStopLoss(gttId) {
+             
+                const gttModificationParams = {
+                  trigger_id:gttId,
+                  trigger_type: 'two-leg',
+                  tradingsymbol: symbol,
+                  exchange: 'NSE',
+                  trigger_values: [stoploss,target], 
+                  last_price: avgPrice, 
+                  orders: [
+                    {
+                      tradingsymbol: symbol,
+                      exchange: 'NSE',
+                      transaction_type: 'SELL',
+                      quantity: leftQuantity,
+                      product: pro,
+                      order_type: 'MARKET',
+                      price: stoploss,
+                    },
+                    {
+                      tradingsymbol: symbol,
+                      exchange: 'NSE',
+                      transaction_type: 'SELL',
+                      quantity: leftQuantity,
+                      product: pro,
+                      order_type: 'MARKET',
+                      price: target,
+                    }
+                  
+                  ],
+                };
+                
+                console.log(gttModificationParams,'modify')
+                kite.modifyGTT(gttId, gttModificationParams)
+                .then((Response) => {
+                  
+                  console.log("Response:",Response);
+               
+                })
+                .catch((error) => {
+                  console.error("Error placing Target GTT Order:", error);
+                });; 
+              }
+          
+          
+              modifyGTTStopLoss(gtt)
+      
+            }
+      
+
+
+
+
             res.send({ avgPrice });
           })
           .catch(function (err) {
@@ -1663,6 +1749,8 @@ function getMargins(segment) {
     const squareoff = Number(req.body.trade.squareOff)
     const trailingStopPercentage = Number(req.body.trade.trailingSL)
     const protectProfit = Number(req.body.trade.protectProfit)
+    const timer = Number(req.body.trade.timer)
+  
     var currPrice = null;
     var avgPrice = 0;
     const stocks = {};
@@ -1684,6 +1772,8 @@ function getMargins(segment) {
     const roll =req.body.roll
     console.log(symbol, pro, order, type, quantity);
     console.log(stoploss,squareoff)
+
+
     const orderParams = {
       exchange: exchange,
       tradingsymbol: symbol,
@@ -1713,7 +1803,7 @@ function getMargins(segment) {
           avgPrice = response[4].average_price;
           const quantity = response[4].quantity;
           const token = response[4].instrument_token
-          res.send({tradeId,avgPrice});
+         
 
           if (!stocks[symbol]) {
             stocks[symbol] = {
@@ -1728,22 +1818,22 @@ function getMargins(segment) {
           const gttParams = {
             trigger_type: 'two-leg',
             tradingsymbol: symbol,
-            exchange: 'NFO',
+            exchange: exchange,
             trigger_values: [stoploss,squareoff], 
             last_price: avgPrice, 
             orders: [
               {
                 tradingsymbol: symbol,
-                exchange: 'NFO',
+                exchange: exchange,
                 transaction_type: 'SELL',
-                quantity: 50,
+                quantity: quantity,
                 product: pro,
                 order_type: 'MARKET',
                 price: stoploss,
               },
               {
                 tradingsymbol: symbol,
-                exchange: 'NFO',
+                exchange: exchange,
                 transaction_type: 'SELL',
                 quantity: quantity,
                 product: pro,
@@ -1756,16 +1846,17 @@ function getMargins(segment) {
 
           
 
-          // kite.placeGTT(gttParams)
-          // .then((targetGTTResponse) => {
-          //   gttId=targetGTTResponse.trigger_id
-          //   console.log("Target GTT Order Response:", targetGTTResponse);
-          //   console.log(gttId)
-          //   // Add any additional logic or handling for the target GTT order here
-          // })
-          // .catch((error) => {
-          //   console.error("Error placing Target GTT Order:", error);
-          // });
+          kite.placeGTT(gttParams)
+          .then((targetGTTResponse) => {
+            gttId=targetGTTResponse.trigger_id
+            console.log("Target GTT Order Response:", targetGTTResponse);
+            console.log(gttId)
+            res.send({tradeId,avgPrice,gttId});
+            // Add any additional logic or handling for the target GTT order here
+          })
+          .catch((error) => {
+            console.error("Error placing Target GTT Order:", error);
+          });
 
     
         
@@ -1831,7 +1922,7 @@ function getMargins(segment) {
     }
 
   
-
+  
     
    sock()
    ticker.on('order_update', onTrade);
@@ -1869,6 +1960,7 @@ function getMargins(segment) {
           console.log(highestPrice)
         }
 
+
         const newTrailingStopPrice = highestPrice * (1 - trailingStopPercentage / 100);
 
         if (currentTrailingStopPrice === null) {
@@ -1902,7 +1994,7 @@ function getMargins(segment) {
           modifyGTTStopLoss(gttId, newProtectProfit);
         }
 
-        
+           
 
         // Update instrument data with the latest last price
         instrumentData[instrumentToken] = {
@@ -1949,15 +2041,15 @@ function getMargins(segment) {
         ],
       };
       // Call the modifyGTT method to modify the stop-loss leg
-      // kite.modifyGTT(gttId, gttModificationParams)
-      // .then((Response) => {
+      kite.modifyGTT(gttId, gttModificationParams)
+      .then((Response) => {
         
-      //   console.log("Response:",Response);
-      //   // Add any additional logic or handling for the target GTT order here
-      // })
-      // .catch((error) => {
-      //   console.error("Error placing Target GTT Order:", error);
-      // });; // You'll need to implement the modifyGTT function
+        console.log("Response:",Response);
+        // Add any additional logic or handling for the target GTT order here
+      })
+      .catch((error) => {
+        console.error("Error placing Target GTT Order:", error);
+      });; // You'll need to implement the modifyGTT function
     }
 
 
@@ -1969,7 +2061,7 @@ function getMargins(segment) {
     }
 
     function onTrade(order) {
-      console.log("holaaadasd");
+      console.log("holaaa amigos");
       console.log(order);
       if (order.status === 'COMPLETE' && order.transaction_type === 'SELL') { 
         io.emit('tradeCompleted', { 
@@ -2068,12 +2160,9 @@ function getMargins(segment) {
     
     }
 
-    
-    
-   
-
     if (!stopSendingData) {
-    io.emit('holdings',{tradeId,finalPnl})}
+    io.emit('holdings',{tradeId,finalPnl})
+  }
     }
 
   });

@@ -27,4 +27,28 @@
   }
 
 
-  
+  .movers img{
+    width: 50%;
+    
+  }
+
+  .movers th , .movers td{
+    text-align: center;
+  }
+
+
+  .movers{
+    height: 100%;
+    overflow-y: scroll;
+  }
+  .movers table{
+    width: 100%;
+    overflow-y: scroll;
+    height: 20px;
+
+  }
+
+  .movers table th,  .movers table td{
+    border-left: none;
+    border-right: none;
+  }

@@ -39,7 +39,8 @@ const Order = ({ trades ,setTrades }) => {
         ))}
       </tbody>
     </table>
-
+    <img src="https://logo.clearbit.com/ADANIPORTS.com" ></img>
+    <img src="https://app.outboundsales.io/api/logo/GOOGLE.com" />
 
 
     </div>

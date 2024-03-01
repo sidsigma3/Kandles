@@ -1,0 +1,59 @@
+.compete-rank{
+    padding: 1rem;
+    background-color: whitesmoke;
+    height: 100%;
+}
+
+
+.compete-rank .top{
+    background-color: #0000FF;
+    color: antiquewhite;
+    height: 15rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.compete-rank .top button{
+    border-radius: 5px;
+}
+
+.compete-rank .bottom{
+    margin-top: 1rem;
+    display: flex;
+}
+
+.compete-rank .bottom .bottom-left{
+    width: 75%;
+}
+
+.compete-rank .bottom .bottom-left table{
+    width: 95%;
+}
+
+
+.compete-rank .bottom .bottom-left table tr{
+    border-color: #0000FF;
+}
+
+.compete-rank .bottom .bottom-right{
+    background-color: white;
+    padding: 1rem;
+}
+
+.compete-rank .bottom .bottom-right .rank-stat{
+    background-color: #0000FF;
+    color: whitesmoke;
+}
+
+.compete-rank .bottom .bottom-right .duration , .compete-rank .bottom .bottom-right .partcipant{
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.compete-rank .bottom .bottom-right .rules{
+    margin-top: 1rem;
+}

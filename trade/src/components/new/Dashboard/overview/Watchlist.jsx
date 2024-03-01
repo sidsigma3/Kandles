@@ -91,12 +91,20 @@ const Watchlist = ({ onSelectInstrument , selectInstrument }) => {
 
  
   useEffect(() => {
+
+    const cachedInstruments = localStorage.getItem('instrumentNames')
+
+    if (cachedInstruments) {
+      setInstrumentNames(JSON.parse(cachedInstruments))
+    }
+
+    else{
     const fetchInstrumentNames = async () => {
       try {
         const response = await axios.post('http://localhost:5000/api/instruments');
         setInstrumentNames(response.data.instrumentNames);
         console.log(response.data.instrumentNames)
-        localStorage.setItem('instrumnetNames',response.data.instrumentNames)
+        localStorage.setItem('instrumentNames',JSON.stringify(response.data.instrumentNames))
         console.log('achha')
       } catch (error) {
         console.error('Error fetching instrument names:', error);
@@ -104,13 +112,12 @@ const Watchlist = ({ onSelectInstrument , selectInstrument }) => {
     };
 
     fetchInstrumentNames();
+  }
+
   }, []);
 
 
-  useEffect(()=>{
-    setInstrumentNames(localStorage.getItem('instrumentNames'))
-    console.log(localStorage.getItem('instrumentNames'))
-  },[])
+  
 
 
   return (

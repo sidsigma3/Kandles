@@ -25,7 +25,7 @@ import Log from './components/new/LogIn/Log';
 import Dashboard from './components/new/Dashboard/Dashboard';
 import HomePage from './components/new/Dashboard/Home/HomePage';
 import SystemTrading from './components/new/Dashboard/systemTrading/SystemTrading';
-
+import CompeteRank from './components/new/Dashboard/Competition/CompeteRank';
 import Graph from './components/new/Dashboard/Graph/Graph';
 const browserHistory = createBrowserHistory({forceRefresh:true})
 
@@ -68,7 +68,7 @@ return(
                     <Route exact path='/resetPassword' element={<Reset></Reset>}/> */}
                 <Route exact path='/pass' element={<Pass></Pass>}/>
 
-                
+                <Route exact path='/rank' element={<CompeteRank></CompeteRank>}/>
 
                 </Routes>
         </Router>

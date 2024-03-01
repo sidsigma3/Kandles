@@ -1,5 +1,6 @@
 .subscribe-page{
     background-color: #FFFFFF;
+    padding: 0.5rem;
 }
 
 
@@ -113,3 +114,99 @@ align-items: center;
   .sub-table tbody tr:nth-child(even) {
     background-color: #f9f9f9;
   }
+
+.struggling{
+    margin-top: 7rem;
+    background-color: #C6CFD7;
+    height: 4rem;
+    padding: 1rem;
+}
+
+.fundtrade{
+    background-color:#f4f4f4;
+    margin-top: 50px;
+    margin: 1rem;
+}
+.fundtrade .fundtrade-head {
+    padding: 1rem;
+    background-color: #95CDF9;
+    border-radius: 5px;
+}
+
+
+.fundtrade .fundtrade-head h4{
+    color: #2196F3;
+    font-family: poppins;
+    text-align: center;
+    padding-top: 20px;
+    margin-bottom: 3rem;
+ 
+}
+
+.fundtrade .fundtrade-head {
+    color:#074C83;
+
+}
+
+.fundtrade .how-it-works{
+    padding: 1rem;
+    margin-top: 1rem;
+}
+.fundtrade .how-it-works h4{
+    margin-bottom: 2rem;
+}
+
+  .fundtrade .top{
+    background-color: azure;
+    height: 420px;
+    padding: 10px;
+}
+
+
+.fundtrade .top{
+    display: flex;
+    justify-content: space-around;
+    margin: 10px;
+    margin-top: 100px;
+}
+
+.fundtrade .top table td{
+    width: 200px;
+}
+
+.fundtrade .bottom{
+    padding-top: 50px;
+}
+
+.fundtrade .bottom ul{
+    display: flex;
+    justify-content: space-around;
+    margin-top: 3rem;
+}
+
+.fundtrade .bottom li{
+    background-color: aqua;
+   
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid var(--gray-200, #C6CFD7);
+    background: var(--gray-0, #FFF);
+    box-shadow: 0px 8px 12px 0px rgba(0, 0, 0, 0.08);
+}
+
+.fundtrade .bottom ul button{
+    background-color: black;
+    color: aliceblue;
+    border-radius: 10px;
+    font-size: medium;
+    margin-left: 10px;
+}
+
+
+.fundtrade .bottom ul h2{
+    margin-top: 100px;
+}
+
+.fundtrade .bottom ul h4{
+    margin-bottom: 50px;
+}

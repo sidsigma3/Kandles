@@ -34,5 +34,11 @@
 .profile-page .profile-buttom .range-inputs{
     display: flex;
     gap: 50px ;
+    justify-content: space-around;
 
+}
+
+.profile-page .profile-buttom .range-inputs .equity,.profile-page .profile-buttom .range-inputs .Commodity{
+    background-color: aliceblue;
+    padding: 1rem;
 }

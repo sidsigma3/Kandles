@@ -10,11 +10,16 @@ import queryString from 'query-string';
 import io from 'socket.io-client';
 import { FaInfoCircle } from 'react-icons/fa';
 import Subscribe from '../subscription/Subscribe';
-
+import ToggleButton from 'react-bootstrap/ToggleButton'
 import useRazorpay from "react-razorpay";
+import Form from 'react-bootstrap/Form';
+// import Modal from 'react-modal';
+import { Modal, Button } from 'react-bootstrap';
+import { ToggleButtonGroup } from 'react-bootstrap';
+
 
 const SystemTrading = ({ trades, setTrades ,setRenderedContent}) => {
-    const [capitalRiskPerDay, setCapitalRiskPerDay] = useState();
+  const [capitalRiskPerDay, setCapitalRiskPerDay] = useState();
   const [capital, setCapital] = useState(0);
   const [numTrades, setNumTrades] = useState(0);
   const [numTrade, setNumTrade] = useState(0);
@@ -26,7 +31,7 @@ const SystemTrading = ({ trades, setTrades ,setRenderedContent}) => {
   const [trailingSLValue, setTrailingSLValue] = useState();
   const [buyAtLow, setBuyAtLow] = useState(false);
   const [buyAtLowType, setBuyAtLowType] = useState('%');
-  const [buyAtLowValue, setBuyAtLowValue] = useState(0);
+  const [buyAtLowValue, setBuyAtLowValue] = useState();
   const [protectProfit, setProtectProfit] = useState(false);
   const [protectProfitType, setProtectProfitType] = useState('%');
   const [protectProfitValue, setProtectProfitValue] = useState();
@@ -64,11 +69,18 @@ const SystemTrading = ({ trades, setTrades ,setRenderedContent}) => {
   const [exchange, setExchange] = useState()
   const [remainingTime, setRemainingTime] = useState(null)
   const [timerValue,setTimerValue] = useState()
+  const [timerType,setTimerType] = useState('sec')
+  const [convertedTimerValue, setConvertedTimerValue] = useState(0);
+
+  const [breakoutBuyValue,setBreakoutBuyValue] = useState()
+  const [breakoutType,setBreakoutBuyType]=useState()
   // const [trades, setTrades] = useState([]);
   const [systemTrades,setSystemTrades] = useState([])
   const [lotSize,setLotSize] = useState()
   const [isSubscriber, setIsSubscriber] = useState(true)
   const [incrementalBuy,setIncrementalBuy] = useState()
+  const [incrementalBuyType,handleincrementalBuyType] =useState()
+  const [incrementalBuyPercentage,setIncrementalBuyPercentage] = useState()
   const [blurred, setBlurred] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [isConnectComplete, setConnectComplete] = useState(false);
@@ -77,14 +89,53 @@ const SystemTrading = ({ trades, setTrades ,setRenderedContent}) => {
 
   const rollRef = useRef(null);
   const socketRef = useRef(null);
+  const systemTradesRef = useRef();
 
   const navigate = useNavigate();
 
 
+  const [incrementalLoop,setIncrementaLoop] = useState(true)
+  const [isIncrementalBuyEnabled,setisIncrementalBuyEnabled] = useState(false)
+  const [istimerEnabled, setIstimerEnabled] = useState(false);
 
-   
+
+  const [isBuyAtLowEnabled,setIsBuyAtLowEnabled] = useState(false)
+  const [rewardToRiskEnabled, setRewardToRiskEnabled] = useState(false);
+  const [stopLossEnabled, setStopLossEnabled] = useState(false);
 
 
+  const [isBreakoutBuyEnabled,setIsbreakoutEnabled] = useState(false)
+
+
+
+  const [accountType, setAccountType] = useState('live')
+
+
+  const [riskMode, setRiskMode] = useState(false)
+
+
+  const handleToggle = () => {
+    setIstimerEnabled((prev) => !prev); // Toggle the state
+  };
+
+  const handleIncrementalBuyToggle = () => {
+    setisIncrementalBuyEnabled((prev)=> !prev)
+    
+  }
+
+
+  const handleBuyAtLowToggle = () => {
+    setIsBuyAtLowEnabled((prev)=> !prev)
+  }
+
+  const handleRewardToRiskToggle = () => {
+    setRewardToRiskEnabled((prev) => !prev);
+    
+  };
+
+  const handleStopLossToggle = () => {
+    setStopLossEnabled((prev) => !prev);
+  };
 
   const getSuggestions = (inputValue) => {
     const inputValueLowerCase = inputValue.toLowerCase();
@@ -127,11 +178,6 @@ const SystemTrading = ({ trades, setTrades ,setRenderedContent}) => {
       console.error('Error initiating login:', error);
     }
   };
-
-
-
-
-
 
 
 
@@ -211,6 +257,37 @@ const SystemTrading = ({ trades, setTrades ,setRenderedContent}) => {
     setIncrementalBuy(e.target.value)
   }
 
+
+  const handleIncrementalPercentage = (e) =>{
+    setIncrementalBuyPercentage(e.target.value)
+  }
+
+  const handleTimerType = (e) =>{
+    setTimerType(e.target.value)
+    console.log(e.target.value)
+  }
+
+  const  handleTimerValue = (e) =>{
+    setTimerValue(Number(e.target.value))
+  }
+
+
+  const handleBreakoutbuy = (e) =>{
+      setBreakoutBuyValue(Number(e.target.value))
+  }
+
+
+
+
+  const handleBreakoutTypeChange = (e)=>{
+    setBreakoutBuyType(e.target.value)
+  }
+
+
+  const handleBreakout = () =>{
+    setIsbreakoutEnabled((prev)=> !prev)
+  }
+
   const handleTakeProfitChange = (e) => {
     setTakeProfit(e.target.checked);
   };
@@ -252,10 +329,10 @@ const SystemTrading = ({ trades, setTrades ,setRenderedContent}) => {
     localStorage.setItem('quantity', e.target.value); 
   };
 
-  // const handleCapitalRiskPerDayChange = (e) => {
-  //   setCapitalRiskPerDay(e.target.value);
-  //   localStorage.setItem('capitalRiskPerDay',e.target.value); 
-  // };
+  const handleCapitalRiskPerDayChange = (e) => {
+    setCapitalRiskPerDay(e.target.value);
+    localStorage.setItem('capitalRiskPerDay',e.target.value); 
+  };
 
   const handleTriggerPriceChange = (e) => {
     setTriggerPrice(e.target.value);
@@ -279,11 +356,11 @@ const SystemTrading = ({ trades, setTrades ,setRenderedContent}) => {
 
 }
 
-const handleTimerValue = (e) =>{
-      setTimerValue(Number(e.target.value))
-      setRemainingTime(Number(e.target.value));
-      localStorage.setItem('timer', e.target.value)
-}
+// const handleTimerValue = (e) =>{
+//       setTimerValue(Number(e.target.value))
+//       setRemainingTime(Number(e.target.value));
+//       localStorage.setItem('timer', e.target.value)
+// }
 
 const styles = {
   suggestion: {
@@ -462,6 +539,7 @@ const handleSuggestionSelected = (_, { suggestion }) => {
     setIndex(suggestion);
     setValue(suggestion);
     setLotSize(lotsize);
+    localStorage.setItem('lotSize', lotsize);
     socketRef.current.disconnect();
   }
 };
@@ -516,43 +594,327 @@ const handleSuggestionSelected = (_, { suggestion }) => {
 
   }
 
-  const handlePunch = () => {
+  const strikeRef = useRef(strike);
+
+  const getStrike = () => {
+    console.log(strikeRef.current, 'yeahh');
+    return strikeRef.current;
+  };
+
+ 
+
+  useEffect(() => {
+    strikeRef.current = strike;
+  }, [strike]);
+
+  let tradeTimer
+
+  const handleExit = (roll) => {
+    clearTimeout(tradeTimer);
+  //   setTrades((prevTrades) => {
+  //     const updatedTrades = [...prevTrades];
+  
+  //     // Check if the trade at the specified index exists
+  //     if (updatedTrades[roll]) {
+  //         updatedTrades[roll].status = 'Completed';
+  //         localStorage.setItem('trades', JSON.stringify(updatedTrades));
+  //     } else {
+  //         console.error(`Trade at index ${roll} does not exist.`);
+  //     }
+
+  //     return updatedTrades;
+  // });
+
     
-    const isOption = (symbol) => {
-      return symbol.includes('CE') || symbol.includes('PE');
-    };
-
-    const exchange = isOption(index) ? 'NFO' : 'NSE';
-
-    const trade = {
-      pro:product,
-      order:orderType,
-      triggerPrice:triggerPrice,
-      type:type,
-      quantity:Math.floor(quantity),
-      symbol:index,
-      stopLoss:stopLossPrice,
-      squareOff:squareOffPrice,
-      trailingSL:trailingSLValue,
-      protectProfit:protectProfitValue,
-      exchange:exchange
-  }
-  // rollRef.current = roll;
-  console.log(trade)
 
 
-  const last  = [...tradedArray]
-  // last[roll] = true
-  setTradedArray(last)
 
+    let quant
+
+  
+    if (isIncrementalBuyEnabled){
+      setIncrementaLoop(false)
+    }
+
+      console.log(systemTrades)
+     if (systemTrades[roll]) {
+      // Access trade details
+      const { pro, order, triggerPrice, type, quantity, remainingQuantity,symbol, stopLoss, squareOff ,optionPrice,exchange,tradeNum,gtt} =   systemTrades[roll];
+      const currentTime =  new Date().toLocaleString()
+      // Create trade object for exit
+
+      const LeftQuantity = remainingQuantity - exitQuantity;
+
+      if (exitQuantity){
+        quant = exitQuantity   
+      }
+
+      else{
+        quant = quantity
+      }
+    
+
+      const exitTrade = {
+        pro: pro,
+        order: order,
+        triggerPrice:triggerPrice,
+        type: type === 'BUY' ? 'SELL' : 'BUY', // Toggle BUY/SELL
+        quantity: Math.floor(quant),
+        symbol: symbol,
+        stopLoss: stopLoss,
+        squareOff: squareOff,
+        exchange:exchange,
+        gttId:gtt,
+        left:LeftQuantity
+      }
+
+    
+
+    console.log(type) 
+    console.log(exitTrade)
+
+     axios.post(`http://localhost:5000/exit`,{exitTrade,roll})
+     .then((response) => {
+         console.log(response)
+         toast.success('order Exit', {autoClose:3000})
+
+          const avgPrice = response.data.avgPrice
+          const finalPnl=(avgPrice-optionPrice) *quant
+          const tempTrade = {
+            symbol:symbol,
+            tradeNum:tradeNum,
+           
+            // optionSl:stopLoss,
+            optionPrice:response.data.avgPrice,
+            // capitalRisk:capitalRiskPerDay,
+            // tradeAmount:calculatedTradeAmount,
+            // capitalExposed:Math.floor(calculatedCapitalExposed),
+            // toWin:Math.round(calculatedWin),
+            // toLoss:Math.round(calculatedLoss),
+            // pnl: 0,
+            status: 'completed',
+            pro:pro,
+            order:order,
+            // triggerPrice:triggerPrice,
+            type: type === 'BUY' ? 'SELL' : 'BUY',
+            quantity:Math.floor(quant),
+            // stopLoss:stopLossPrice,
+            // squareOff:squareOffPrice,
+            // trailingSL:trailingSLValue,
+            // protectProfit:protectProfitValue,
+            time:currentTime,
+            exchange:exchange
+    
+          }
+        
+        
+
+         // setPnl(response.data)
+         // localStorage.setItem('pnl',response.data)
+         setCurrentTrade(response.data)
+         console.log(response.data)
+
+         setTrades((prevTrades) => {
+          const updatedTrades = [...(prevTrades || []), tempTrade];
+
+          localStorage.setItem('Trades', JSON.stringify(updatedTrades));
+          // Check if the trade at the specified index exists
+          // if (updatedTrades[roll]) {
+          //     // updatedTrades[roll].status = 'Completed';
+          //     // updatedTrades[roll].pnl = finalPnl    
+          //     // localStorage.setItem('trades', JSON.stringify(updatedTrades));
+          // } else {
+          //     console.error(`Trade at index ${roll} does not exist.`);
+          // }
+    
+          return updatedTrades;
+       });
+
+       setSystemTrades((prevTrades) => {
+        const updatedTrades = [...prevTrades];
+  
+        // Check if the trade at the specified index exists
+        // if (updatedTrades[roll]) {
+        //     updatedTrades[roll].status = 'Completed';
+        //     updatedTrades[roll].pnl = finalPnl  
+        //     updatedTrades[roll].remainingQuantity = LeftQuantity
+        //     if (remainingQuantity <= 0) {
+        //       updatedTrades[roll].status = 'completed';
+        //     }  
+        //     localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));
+        // }  
+        
+        if (updatedTrades[roll] && LeftQuantity===0){
+          updatedTrades[roll].status = 'Completed';
+
+          const totaPnl = finalPnl+updatedTrades[roll].exitedPnl
+
+          updatedTrades[roll].pnl = totaPnl
+          updatedTrades[roll].remainingQuantity = LeftQuantity
+          updatedTrades[roll].tradeAmount = 0
+          updatedTrades[roll].capitalExposed=0
+          localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));
+        }
+
+        else if(updatedTrades[roll] && LeftQuantity>0){
+          const tradeAmount = LeftQuantity * updatedTrades[roll].optionPrice  
+          updatedTrades[roll].tradeAmount = tradeAmount  
+          updatedTrades[roll].remainingQuantity=LeftQuantity
+
+          updatedTrades[roll].capitalExposed = ((tradeAmount/capital)*100).toFixed(2)
+
+          const buyprice=updatedTrades[roll].optionPrice
+          const leftPnl=(avgPrice-buyprice)*quant
+          updatedTrades[roll].exitedPnl+=leftPnl
+
+          localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));
+        }
+
+       
+
+      
+        // else if(){
+          
+        // }
+        
+        else {
+            console.error(`Trade at index ${roll} does not exist.`);
+        }
+  
+        return updatedTrades;
+     });
+
+
+
+     })
+     .catch((error) => {
+     console.log(error)
+     });
+
+    }
+   }
+
+
+   const watchPriceDecrease = async (price, targetPercentage) => {
+    const initialPrice = price;
+    let currentPrice = initialPrice;
+  
+    while (((currentPrice - initialPrice) / initialPrice) * 100 > (-targetPercentage)) {
+      console.log('Checking price decrease...', currentPrice);
+        
+      console.log(((currentPrice - initialPrice) / initialPrice) * 100)
+      // Fetch the latest price
+      // You might need to replace this with the actual method to get the current price
+      // const updatedResponse = await axios.get(`http://localhost:5000/getLatestPrice/${response.data.tradeId}`);
+      // currentPrice = updatedResponse.data.avgPrice;
+      currentPrice = getStrike()
+      // Use a delay to avoid excessive checks
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  
+    console.log('Price decrease target reached. Proceeding with the next action.');
+    // Add logic for the next action after the price decrease target is reached
+  };
+
+
+
+  const watchPriceBreakout = async (initialPrice, breakoutPercentage) => {
+    let currentPrice =  getStrike();
+    const targetPrice = initialPrice * (1 + breakoutPercentage / 100);
+    
+    console.log(`Watching for breakout above ${targetPrice} (current price: ${currentPrice})`);
+      
+    while (currentPrice < targetPrice) {
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for a bit before checking the price again
+      currentPrice = getStrike();
+      console.log(`Current price: ${currentPrice}`);
+    }
+  
+    console.log(`Breakout detected at price ${currentPrice}, placing buy order.`);
+    
+  };
+  
 
   
 
-  axios.post(`http://localhost:5000/punch`,{trade})
-  .then((response) => {
-      console.log(response)
+   
+   const calculateProfitPercentage = (averageBuyPrice,currPrice) => {
+    if (averageBuyPrice === 0) {
+      // Handle division by zero or undefined averageBuyPrice
+      return 0;
+    }
+    
+    console.log(averageBuyPrice,currPrice,'achha')
+    const profit = currPrice - averageBuyPrice;
+    const profitPercentage = (profit / averageBuyPrice) * 100;
+    
+    console.log(profit,profitPercentage,'profitt')
+  
+    return profitPercentage;
+  };
 
-      const calculatedOptionProfit = stopLoss * rewardToRisk;
+  
+  const watchProfit = async (response) => {
+    let previousStrike = getStrike(); // Get the initial strike value
+    console.log('first',previousStrike)
+
+    while (calculateProfitPercentage(response.data.avgPrice, previousStrike) < incrementalBuyPercentage) {
+      console.log('Checking profit....', previousStrike);
+      
+      // Check if the strike has changed
+      const currentStrike = getStrike();
+      if (currentStrike !== previousStrike) {
+        console.log('Strike has changed. Proceeding to the next iteration.',currentStrike);
+        previousStrike = currentStrike;
+      }
+      
+      // Add any additional logic here
+  
+      // Use a delay to avoid excessive checks
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  
+    // Add logic for the next iteration or any other actions
+    console.log('Profit threshold reached. Proceeding to the next iteration.');
+  };
+  
+
+  const handlePunch = async() => {
+
+
+    if (isIncrementalBuyEnabled ){
+      
+
+      const isOption = (symbol) => {
+        return symbol.includes('CE') || symbol.includes('PE');
+      };
+      
+      const exchange = isOption(index) ? 'NFO' : 'NSE';
+
+      for (let i=1; i<=incrementalBuy ; i++) {
+        const stepSize = Math.floor(quantity / incrementalBuy);
+        
+        const trade = {
+          pro:product,
+          order:orderType,
+          triggerPrice:triggerPrice,
+          type:type,
+          stopLoss:Number(stopLossPrice),
+          squareOff:Number(squareOffPrice),
+          quantity: stepSize,
+          symbol:index,
+         exchange:exchange,
+
+      }
+      
+      
+      console.log(trade)
+      try{
+      const response = await axios.post(`http://localhost:5000/punch`,{trade})
+      
+      console.log(response,'respo')
+      
+      const calculatedOptionProfit = rewardToRisk;
       const calculatedTradeQuantity = Math.floor(quantity);
       const calculatedTradeAmount = Math.floor(calculatedTradeQuantity * response.data.avgPrice);
       const calculatedCapitalExposed=(calculatedTradeAmount/capital)*100
@@ -560,12 +922,15 @@ const handleSuggestionSelected = (_, { suggestion }) => {
       const calculatedLoss = calculatedTradeAmount*(stopLoss/100)
       const currentTime = new Date().toLocaleString()
 
+        
+      let currentProfit = calculateProfitPercentage(response.data.avgPrice ,strike);
 
       const tempTrade = {
         symbol:index,
         tradeNum:response.data.tradeId,
         optionProfit:calculatedOptionProfit,
-        quantity:calculatedTradeQuantity,
+        remainingQuantity:stepSize,
+        quantity:stepSize,
         optionSl:stopLoss,
         optionPrice:response.data.avgPrice,
         capitalRisk:capitalRiskPerDay,
@@ -586,9 +951,270 @@ const handleSuggestionSelected = (_, { suggestion }) => {
         protectProfit:protectProfitValue,
         time:currentTime,
         exchange:exchange
+        
+      }
+
+      const tempTrade1 = {
+        symbol:index,
+        tradeNum:response.data.tradeId,
+        // optionProfit:calculatedOptionProfit,
+        quantity:stepSize,
+        // optionSl:stopLoss,
+        optionPrice:response.data.avgPrice,
+        // capitalRisk:capitalRiskPerDay,
+        // tradeAmount:calculatedTradeAmount,
+        // capitalExposed:Math.floor(calculatedCapitalExposed),
+        // toWin:Math.round(calculatedWin),
+        // toLoss:Math.round(calculatedLoss),
+        // pnl: 0,
+        status: 'completed',
+        pro:product,
+        order:orderType,
+        triggerPrice:triggerPrice,
+        type:type,
+        // quantity:Math.floor(quantity),
+        // stopLoss:stopLossPrice,
+        // squareOff:squareOffPrice,
+        // trailingSL:trailingSLValue,
+        // protectProfit:protectProfitValue,
+        time:currentTime,
+        exchange:exchange
 
       }
 
+     
+    
+      console.log(tempTrade)
+
+      setTrades((prevTrades) => {
+        const updatedTrades = [...(prevTrades || []), tempTrade1];
+    
+        localStorage.setItem('Trades', JSON.stringify(updatedTrades));
+        return updatedTrades; // This is important to ensure the state is updated
+      });
+
+      setSystemTrades((prevTrades) => {
+        const updatedTrades = [...prevTrades, tempTrade];
+        localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));        
+        return updatedTrades; // This is important to ensure the state is updated
+      });
+      
+      console.log(trades)
+
+      toast.success('order placed', {autoClose:3000})
+
+      if (i===incrementalBuy){
+        break;
+      }
+
+      await watchProfit(response);
+      
+      // while (currentProfit < incrementalBuyPercentage && incrementalLoop) {
+      //   // Adjust the delay as needed
+      //   console.log(currentProfit, 'profit');
+      //   console.log('pro');
+        
+      //   currentProfit = calculateProfitPercentage(response.data.avgPrice, strike);
+      //   await new Promise(resolve => setTimeout(resolve, 1000)); // Add a delay, e.g., 1000ms (adjust as needed)
+      // }
+  
+  
+
+      // if (istimerEnabled){
+    
+      //   console.log('lets goooooooooo')
+      //   tradeTimer = setTimeout(() => {
+      //     // Call a function to exit the trade
+      //     console.log(systemTrades,'kyaa')
+      //       handleExit(systemTrades.length);
+
+      //   }, convertedTimerValue);
+        
+      // }
+
+      // const notificationSound = document.getElementById('notificationSound');
+      // if (notificationSound) {
+      //   notificationSound.play();
+      // }
+
+      // // setPnl(response.data)
+      // // localStorage.setItem('pnl',response.data)
+      // setCurrentTrade(response.data.tradeId)
+      // console.log(response.data)
+
+      // const recent = [...strikeArray]
+      // recent[roll] = response.data.avgPrice
+      // setStrikeArray(recent)
+     
+      
+      // console.log('okkokok')
+      // console.log(recent)
+
+
+
+  }
+  catch(error) {
+  console.log(error)
+  };
+
+                 
+      }
+
+    }
+  
+
+else{
+
+
+
+    
+    if(isBuyAtLowEnabled){
+
+
+      const tempTradeWaiting = {
+        symbol: index,
+        status: 'Pending',
+        optionPrice:strike,
+        pnl:0,
+        // Add other necessary fields
+      };
+    
+      setSystemTrades((prevTrades) => {
+        const updatedTrades = [...prevTrades, tempTradeWaiting];
+        localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));
+        return updatedTrades;
+      });
+
+
+      await watchPriceDecrease(strike, buyAtLowValue);
+
+
+      setSystemTrades((prevTrades) => {
+        const updatedTrades = prevTrades.filter((trade) => trade !== tempTradeWaiting);
+        localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));
+        return updatedTrades;
+      });
+
+    }
+
+    if(isBreakoutBuyEnabled) {
+      // Add a temp trade to indicate waiting for the breakout
+      const tempTradeBreakoutWaiting = {
+        symbol: index,
+        status: 'Waiting for Breakout',
+        optionPrice: strike,
+        pnl: 0, // other necessary fields...
+      };
+      
+    
+
+      setSystemTrades((prevTrades) => {
+        const updatedTrades = [...prevTrades, tempTradeBreakoutWaiting];
+        localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));
+        return updatedTrades;
+      });
+
+      
+      // Wait for the breakout condition to be met
+      await watchPriceBreakout(strike, breakoutBuyValue);
+      
+      // Proceed with your buy order logic here
+      // Then, remove the waiting trade or update it to reflect the placed order
+      setSystemTrades((prevTrades) => {
+        const updatedTrades = prevTrades.filter((trade) => trade !== tempTradeBreakoutWaiting);
+        localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));
+        return updatedTrades;
+      });
+    }
+
+
+
+    
+
+    
+
+
+
+    const isOption = (symbol) => {
+      return symbol.includes('CE') || symbol.includes('PE');
+    };
+
+
+    
+
+    const exchange = isOption(index) ? 'NFO' : 'NSE';
+
+    const trade = {
+      pro:product,
+      order:orderType,
+      triggerPrice:triggerPrice,
+      type:type,
+      quantity:Math.floor(quantity),
+      symbol:index,
+      stopLoss:stopLossPrice,
+      squareOff:squareOffPrice,
+      trailingSL:trailingSLValue,
+      protectProfit:protectProfitValue,
+      exchange:exchange,
+      timer:convertedTimerValue
+  }
+  // rollRef.current = roll;
+  console.log(trade)
+
+
+  const last  = [...tradedArray]
+  // last[roll] = true
+  setTradedArray(last)
+
+
+  
+
+  axios.post(`http://localhost:5000/punch`,{trade})
+  .then((response) => {
+      console.log(response)
+
+      const calculatedOptionProfit =  rewardToRisk;
+      const calculatedTradeQuantity = Math.floor(quantity);
+      const calculatedTradeAmount = Math.floor(calculatedTradeQuantity * response.data.avgPrice);
+      const calculatedCapitalExposed=(calculatedTradeAmount/capital)*100
+      const calculatedWin=calculatedTradeAmount*(calculatedOptionProfit/100)
+      const calculatedLoss = calculatedTradeAmount*(stopLoss/100)
+      const currentTime = new Date().toLocaleString()
+
+
+
+      const tempTrade = {
+        symbol:index,
+        tradeNum:response.data.tradeId,
+        optionProfit:calculatedOptionProfit,
+        quantity:calculatedTradeQuantity,
+        remainingQuantity:calculatedTradeQuantity,
+        optionSl:stopLoss,
+        optionPrice:response.data.avgPrice,
+        capitalRisk:capitalRiskPerDay,
+        tradeAmount:calculatedTradeAmount,
+        capitalExposed:Math.floor(calculatedCapitalExposed),
+        toWin:Math.round(calculatedWin),
+        toLoss:Math.round(calculatedLoss),
+        pnl: 0,
+        status: 'Ongoing',
+        pro:product,
+        order:orderType,
+        triggerPrice:triggerPrice,
+        type:type,
+        // quantity:Math.floor(quantity),
+        stopLoss:stopLossPrice,
+        squareOff:squareOffPrice,
+        trailingSL:trailingSLValue,
+        protectProfit:protectProfitValue,
+        time:currentTime,
+        exchange:exchange,
+        gtt:response.data.gttId,
+        partialPnl:0,
+        exitedPnl:0
+        
+      }
+  
       const tempTrade1 = {
         symbol:index,
         tradeNum:response.data.tradeId,
@@ -622,22 +1248,62 @@ const handleSuggestionSelected = (_, { suggestion }) => {
       console.log(tempTrade)
 
       setTrades((prevTrades) => {
-        const updatedTrades = [...prevTrades, tempTrade1];
+        const updatedTrades = [...(prevTrades || []), tempTrade1];
+
         localStorage.setItem('Trades', JSON.stringify(updatedTrades));
         return updatedTrades; // This is important to ensure the state is updated
       });
 
+      // setSystemTrades((prevTrades) => {
+      //   const updatedTrades = [...prevTrades, tempTrade];
+      //   localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));        
+      //   return updatedTrades; // This is important to ensure the state is updated
+      // });
+      
+      // console.log(trades)
+
+      // toast.success('order placed', {autoClose:3000})
+
+      // if (istimerEnabled){
+    
+      //   console.log('lets goooooooooo')
+      //   tradeTimer = setTimeout(() => {
+      //     // Call a function to exit the trade
+      //     console.log(systemTrades,'kyaa')
+      //       handleExit(systemTrades.length-1);
+
+      //   }, convertedTimerValue);
+        
+      // }
+
+
       setSystemTrades((prevTrades) => {
         const updatedTrades = [...prevTrades, tempTrade];
         localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));
-        return updatedTrades; // This is important to ensure the state is updated
-      });
       
+        // Use the callback function to execute code after the state is updated
+        return updatedTrades;
+      }, () => {
+        console.log('State has been updated');
+        console.log(systemTrades)
+        toast.success('order placed', { autoClose: 3000 });
+      
+        // Update the ref with the latest state
+       
+      
+      });
 
-
-      console.log(trades)
-
-      toast.success('order placed', {autoClose:3000})
+      
+      
+      if (istimerEnabled) {
+        console.log('lets goooooooooo');
+        setTimeout(() => {
+          // Call a function to exit the trade using the ref
+          console.log(systemTrades, 'kyaaa');
+          handleExit(systemTrades - 1);
+        }, convertedTimerValue);
+      }
+      
 
       // const notificationSound = document.getElementById('notificationSound');
       // if (notificationSound) {
@@ -665,7 +1331,7 @@ const handleSuggestionSelected = (_, { suggestion }) => {
   });
   
 
-
+}
 
 
 
@@ -678,17 +1344,30 @@ const handleSuggestionSelected = (_, { suggestion }) => {
   // Listen for 'update' event and update the data state
   socket.on('holdings', (data) => {
 
-   
+    
 
     setSystemTrades((prevTrades) => {
       const updatedTrades = prevTrades.map((trade) => {
         if (trade.tradeNum === data.tradeId && trade.status==='Ongoing') {
           // Assuming data.pnl is the PNL value from the socket emit
-          return { ...trade, pnl: data.finalPnl.pnl };
+
+          const totalPnl = data.finalPnl.pnl;
+
+         
+          const remainingQuantity = trade.remainingQuantity;
+          const exitedPnl=trade.exitedPnl
+          
+          // const remainingPnl = (totalPnl / trade.quantity) * remainingQuantity;
+
+          const remainingPnl = totalPnl * (remainingQuantity / trade.quantity);
+
+          const final = remainingPnl + exitedPnl
+
+          return { ...trade, pnl: final };   
         }
         return trade;
       });
-
+    
       localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));
       return updatedTrades;
     });
@@ -734,126 +1413,7 @@ const handleSuggestionSelected = (_, { suggestion }) => {
 
 
 
-  const handleExit = (roll) => {
-
-  //   setTrades((prevTrades) => {
-  //     const updatedTrades = [...prevTrades];
-
-  //     // Check if the trade at the specified index exists
-  //     if (updatedTrades[roll]) {
-  //         updatedTrades[roll].status = 'Completed';
-  //         localStorage.setItem('trades', JSON.stringify(updatedTrades));
-  //     } else {
-  //         console.error(`Trade at index ${roll} does not exist.`);
-  //     }
-
-  //     return updatedTrades;
-  // });
   
-      console.log(trades)
-     if (trades[roll]) {
-      // Access trade details
-      const { pro, order, triggerPrice, type, quantity, symbol, stopLoss, squareOff ,optionPrice,exchange,tradeNum} = systemTrades[roll];
-      const currentTime =  new Date().toLocaleString()
-      // Create trade object for exit
-      const exitTrade = {
-        pro: pro,
-        order: order,
-        triggerPrice:triggerPrice,
-        type: type === 'BUY' ? 'SELL' : 'BUY', // Toggle BUY/SELL
-        quantity: Math.floor(quantity),
-        symbol: symbol,
-        stopLoss: stopLoss,
-        squareOff: squareOff,
-        exchange:exchange
-      }
-
-     
-
-    console.log(type) 
-    console.log(trades)
-
-     axios.post(`http://localhost:5000/exit`,{exitTrade,roll})
-     .then((response) => {
-         console.log(response)
-         toast.success('order Exit', {autoClose:3000})
-
-          const avgPrice = response.data.avgPrice
-          const finalPnl=(avgPrice-optionPrice) *quantity
-          const tempTrade = {
-            symbol:symbol,
-            tradeNum:tradeNum,
-           
-            // optionSl:stopLoss,
-            optionPrice:response.data.avgPrice,
-            // capitalRisk:capitalRiskPerDay,
-            // tradeAmount:calculatedTradeAmount,
-            // capitalExposed:Math.floor(calculatedCapitalExposed),
-            // toWin:Math.round(calculatedWin),
-            // toLoss:Math.round(calculatedLoss),
-            // pnl: 0,
-            status: 'completed',
-            pro:pro,
-            order:order,
-            // triggerPrice:triggerPrice,
-            type: type === 'BUY' ? 'SELL' : 'BUY',
-            quantity:Math.floor(quantity),
-            // stopLoss:stopLossPrice,
-            // squareOff:squareOffPrice,
-            // trailingSL:trailingSLValue,
-            // protectProfit:protectProfitValue,
-            time:currentTime,
-            exchange:exchange
-    
-          }
-
-
-         // setPnl(response.data)
-         // localStorage.setItem('pnl',response.data)
-         setCurrentTrade(response.data)
-         console.log(response.data)
-
-         setTrades((prevTrades) => {
-          const updatedTrades = [...prevTrades,tempTrade];
-          localStorage.setItem('Trades', JSON.stringify(updatedTrades));
-          // Check if the trade at the specified index exists
-          // if (updatedTrades[roll]) {
-          //     // updatedTrades[roll].status = 'Completed';
-          //     // updatedTrades[roll].pnl = finalPnl    
-          //     // localStorage.setItem('trades', JSON.stringify(updatedTrades));
-          // } else {
-          //     console.error(`Trade at index ${roll} does not exist.`);
-          // }
-    
-          return updatedTrades;
-       });
-
-       setSystemTrades((prevTrades) => {
-        const updatedTrades = [...prevTrades];
-  
-        // Check if the trade at the specified index exists
-        if (updatedTrades[roll]) {
-            updatedTrades[roll].status = 'Completed';
-            updatedTrades[roll].pnl = finalPnl    
-            localStorage.setItem('systemTrades', JSON.stringify(updatedTrades));
-        } else {
-            console.error(`Trade at index ${roll} does not exist.`);
-        }
-  
-        return updatedTrades;
-     });
-
-
-
-     })
-     .catch((error) => {
-     console.log(error)
-     });
-
-    }
-   }
-
-
 
 
   useEffect(() => {
@@ -901,92 +1461,159 @@ const handleSuggestionSelected = (_, { suggestion }) => {
 
   useEffect(() => {
     const calculateQuantity = () => {
-      const riskCapital = (capitalRiskPerDay / 100) * capital;
-      const rawQuantity = (riskCapital / ((stopLoss / 100) * strike)).toFixed(1);
-      const adjustedQuantity = Math.floor(rawQuantity / lotSize) * lotSize;
-      setQuantity(adjustedQuantity);
+      if (riskMode) {
+        // Risk mode is on, calculate quantity based on the formula
+        const riskCapital = (capitalRiskPerDay / 100) * capital;
+        const rawQuantity = (riskCapital / ((stopLoss / 100) * strike)).toFixed(1);
+        const adjustedQuantity = Math.floor(rawQuantity / lotSize) * lotSize;
+        setQuantity(adjustedQuantity);
+      } 
     };
-  
+
     calculateQuantity();
-  }, [capitalRiskPerDay, capital, stopLoss, strike, lotSize]);
+  }, [riskMode, capitalRiskPerDay, capital, stopLoss, strike, lotSize]);
+
 
 useEffect(()=>{
 
   setTriggerPrice(strike)
-  console.log(instruments)
-
+ 
 },[orderType]) 
 
 
-useEffect(()=>{
-  console.log(minCapitalRisk,maxCapitalRisk)
 
-  const tempRisk=(minCapitalRisk+maxCapitalRisk)/2 
+// useEffect(()=>{
+//   console.log(minCapitalRisk,maxCapitalRisk)
 
-  setCapitalRiskPerDay(tempRisk);
+//   const tempRisk=(minCapitalRisk+maxCapitalRisk)/2 
+
+//   setCapitalRiskPerDay(tempRisk);
 
 
-  const mid = maxCapitalRisk-minCapitalRisk 
-  const calculatedStep= mid/numTrade
-  // setStep(Number(calculatedStep.toFixed(2)))
-  localStorage.setItem('capitalRiskPerDay',minCapitalRisk); 
+//   const mid = maxCapitalRisk-minCapitalRisk 
+//   const calculatedStep= mid/numTrade
+//   // setStep(Number(calculatedStep.toFixed(2)))
+//   localStorage.setItem('capitalRiskPerDay',minCapitalRisk); 
   
-   // Initialize to 0 or any default value
-  // initialCapitalRiskArray[0] = minCapitalRisk; // Set the initial value for the first trade
-  console.log(numTrade)
-  setCapitalRiskPerDayArray((prevArray) => {
-    // Create a new array based on the previous state
-    const updatedArray = Array(numTrade).fill(minCapitalRisk);
-    // Update the local storage with the new array
-    localStorage.setItem('capitalRiskPerDayArray', JSON.stringify(updatedArray));
-    // Return the updated array to set it as the new state
-    return updatedArray;
-  });
+//    // Initialize to 0 or any default value
+//   // initialCapitalRiskArray[0] = minCapitalRisk; // Set the initial value for the first trade
+//   console.log(numTrade)
+//   setCapitalRiskPerDayArray((prevArray) => {
+//     // Create a new array based on the previous state
+//     const updatedArray = Array(numTrade).fill(minCapitalRisk);
+//     // Update the local storage with the new array
+//     localStorage.setItem('capitalRiskPerDayArray', JSON.stringify(updatedArray));
+//     // Return the updated array to set it as the new state
+//     return updatedArray;
+//   });
 
 
- },[minCapitalRisk,maxCapitalRisk,numTrade]) 
+//  },[minCapitalRisk,maxCapitalRisk,numTrade]) 
+
+
+useEffect(() => {
+
+  if (accountType==='demo'){
+    setCapital(100000)
+  }
+  // Send account type to the backend to get corresponding capital
+  axios.post(`http://localhost:5000/user-info`, { accountType })
+      .then((response) => {
+          setCapital(response.data.capital);
+          localStorage.setItem('capital', response.data.capital);
+      })
+      .catch((error) => {
+          console.log(error);
+      });
+}, [accountType, trades]); // Include accountType in the dependency array
 
 
 
-  useEffect(()=>{   
-    axios.post(`http://localhost:5000/user-info`)
-        .then((response) => {
-            setCapital(response.data.capital)
-            console.log(response.data)
-            const fetchedInstruments = response.data.instruments
-            const flattenedInstruments = [].concat(...fetchedInstruments);
-            // setInstruments(flattenedInstruments);
 
-            const instrumentNames = fetchedInstruments.map((instrument,index) => ({
-              name: instrument.name,
-              tradingsymbol: instrument.tradingsymbol,
-              id:index,
-              exchange:instrument.exchange,
-              lotsize:instrument.lot_size
+  // useEffect(()=>{   
+  //   axios.post(`http://localhost:5000/user-info`)
+  //       .then((response) => {
+  //           setCapital(response.data.capital)
+  //           // console.log(response.data)
+  //           // const fetchedInstruments = response.data.instruments
+  //           // const flattenedInstruments = [].concat(...fetchedInstruments);
+  //           // // setInstruments(flattenedInstruments);
 
-            }));
+  //           // const instrumentNames = fetchedInstruments.map((instrument,index) => ({
+  //           //   name: instrument.name,
+  //           //   tradingsymbol: instrument.tradingsymbol,
+  //           //   id:index,
+  //           //   exchange:instrument.exchange,
+  //           //   lotsize:instrument.lot_size
+
+  //           // }));
 
             
-            console.log(instrumentNames)
+  //           // console.log(instrumentNames)
 
-            setInstruments(instrumentNames)
-            console.log(flattenedInstruments)
-            console.log(instruments)
-            localStorage.setItem('capital',response.data.capital)
-            localStorage.setItem('instruments',instrumentNames)
+  //           // setInstruments(instrumentNames)
+  //           // console.log(flattenedInstruments)
+  //           // console.log(instruments)
+  //           localStorage.setItem('capital',response.data.capital)
+  //           // localStorage.setItem('instruments',instrumentNames)
   
 
-        })
-        .catch((error) => {
-        console.log(error)
-        });
+  //       })
+  //       .catch((error) => {
+  //       console.log(error)
+  //       });
 
       
+  //   },[trades])
+
+    useEffect(()=>{
+      console.log(instruments)
+      
+    },[instruments])
+
+  
+
+    useEffect(()=>{
+
+      const cachedInstruments = localStorage.getItem('instruments');
+
+      if (cachedInstruments) {
+
+        setInstruments(JSON.parse(cachedInstruments)); 
+
+      } 
+
+      else {
+
+      
+      axios.post('http://localhost:5000/kiteInstrumentList')
+      .then((response)=>{
+        const fetchedInstruments = response.data.instruments
+        const flattenedInstruments = [].concat(...fetchedInstruments);
+        // setInstruments(flattenedInstruments);
+
+        const instrumentNames = fetchedInstruments.map((instrument,index) => ({
+          name: instrument.name,
+          tradingsymbol: instrument.tradingsymbol,
+          id:index,
+          exchange:instrument.exchange,
+          lotsize:instrument.lot_size
+
+        }));
+
+        setInstruments(instrumentNames)
+        
+        console.log(flattenedInstruments)
+        console.log(instrumentNames,'lets see')
+        const temp = JSON.stringify(instrumentNames)
+        console.log(temp)
+        localStorage.setItem('instrument', temp);
+        
+
+
+      })}
     },[])
 
-
-
-    
 
     useEffect(()=>{
       axios.post(`http://localhost:5000/trade-info`,{index,exchange})
@@ -1107,7 +1734,8 @@ useEffect(()=>{
                 setMaxCapitalRisk(Number(localStorage.getItem('maxCapitalRisk')))
                 setMinCapitalRisk(Number(localStorage.getItem('minCapitalRisk')))
                 setCapitalRiskPerDayArray(localStorage.getItem('capitalRiskPerDayArray'))
-                setInstruments(localStorage.getItem('instruments'))
+              
+                setLotSize(localStorage.getItem('lotSize'))
                 // setPnlArray(localStorage.getItem('pnl'))
                 // setTrades(localStorage.getItem('trades')|| [])
                 const storedTrades = localStorage.getItem('systemTrades');
@@ -1117,6 +1745,17 @@ useEffect(()=>{
 
                 // Set the trades state with the parsed array
                 setSystemTrades(tradesArray);
+
+                const storedIndex = localStorage.getItem('index');
+
+                if (storedIndex) {
+                  // Use the stored index if available              
+                  // Update suggestions state with the stored index
+              
+                  setValue(storedIndex)
+
+                }
+
 
               }, []);
               
@@ -1133,19 +1772,170 @@ useEffect(()=>{
               },[systemTrades])
 
 
+              useEffect(()=>{
+              
+                // const rewardRatio = (rewardToRisk*stopLoss )/ 100;
+                const riskRatio = stopLoss / 100;
+              
+                const stopLossAmount = strike * riskRatio;
+                let calculatedStopLossPrice;
+                
+      
+                if (type === "BUY") {
+                  calculatedStopLossPrice = strike - stopLossAmount;
+                } else if (type === "SELL") {
+                  calculatedStopLossPrice = strike + stopLossAmount;
+                }
+      
+                const squareOffAmount = strike * rewardToRisk/100;
+                let calculatedSquareOffPrice;
+                
+        
+                if (type === "BUY") {
+                  calculatedSquareOffPrice = strike + squareOffAmount;
+                } else if (type === "SELL") {
+                  calculatedSquareOffPrice = strike - squareOffAmount;
+                }
+               
+               
+                if (!isNaN(calculatedStopLossPrice)) {
+                  setStopLossPrice(calculatedStopLossPrice.toFixed(2));
+                }
+              
+                if (!isNaN(calculatedSquareOffPrice)) {
+                  setSquareOffPrice(calculatedSquareOffPrice.toFixed(2));
+                }
+                      
+      
+              },[rewardToRisk,stopLoss,strike,type])
+
+
+              const convertToMilliseconds = (value, type) => {
+                switch (type) {
+                  case 'sec':
+                    return value * 1000; // 1 second = 1000 milliseconds
+                  case 'min':
+                    return value * 60 * 1000; // 1 minute = 60 seconds = 60,000 milliseconds
+                  case 'hour':
+                    return value * 60 * 60 * 1000; // 1 hour = 60 minutes = 3,600,000 milliseconds
+                  default:
+                    return 0;
+                }
+              };
+            
+              // Update the converted timer value whenever timerValue or timerType changes
+              useEffect(() => {
+                const convertedValue = convertToMilliseconds(timerValue, timerType);
+                setConvertedTimerValue(convertedValue);
+                console.log(convertedValue,'hoga')
+                
+              }, [timerValue, timerType]);
+             
+              
+
+              const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+              const [selectedTradeIndex, setSelectedTradeIndex] = useState(null);
+              const [exitQuantity, setExitQuantity] = useState(0);
+              const [exitPrice, setExitPrice] = useState('');
+              const [selectedOption, setSelectedOption] = useState('')
+
+              const openExitDialog = (index) => {
+                setSelectedTradeIndex(index);
+                setIsExitModalOpen(true);
+              };
+            
+              const closeExitModal = () => {
+                setSelectedTradeIndex(null);
+                setIsExitModalOpen(false);
+                setExitQuantity(0);
+              };
+            
+              const handleExitConfirm = () => {
+                // Handle exit with the selected quantity
+                handleExit(selectedTradeIndex);
+                // Close the dialog
+                closeExitModal();
+              };
+            
+
+              const handleExitType = (e) => {
+                setSelectedOption(e.target.value);
+              };
+            
+              const [expandedIndexes, setExpandedIndexes] = useState([]);
+
+              const toggleExpand = (index) => {
+                setExpandedIndexes((prevIndexes) =>
+                  prevIndexes.includes(index)
+                    ? prevIndexes.filter((i) => i !== index)
+                    : [...prevIndexes, index]
+                );
+              };
+            
+              // Group trades by their index name
+            const groupedTrades = systemTrades.reduce((acc, trade, originalIndex) => {
+              if (!acc[trade.symbol]) {
+                acc[trade.symbol] = [];
+              }
+              // Store both the trade and its original index
+              acc[trade.symbol].push({ trade, originalIndex });
+              return acc;
+            }, {});
+              
+
+
   return (
 
     <div className={`system-trading-container ${blurred ? 'blurred' : ''}`}>
       <ToastContainer></ToastContainer>
       {loggedIn ? (
             <div className='system-trading-left'>
+                    {/* <button onClick={() => setRiskMode(!riskMode)}>
+                      {riskMode ? 'Risk On' : 'Risk Off'}
+                    </button> */}
+
+                  
+                    <div className='top'>
+
+                    <Form >
+                        <Form.Check // prettier-ignore
+                          type="switch"
+                          id="custom-switch"
+                         
+                          onChange={() => setRiskMode(!riskMode)}
+                        />
+                       
+                    </Form>
+
+                    <div className='acc-change'>
+                                        <select value={accountType} onChange={(e) => setAccountType(e.currentTarget.value)} className="form-select">
+                                            <option value="demo">Demo Account</option>
+                                            <option value="personal">Live Account (Personal Funds)</option>
+                                            <option value="funded">Live Account (Funded Fund)</option>
+                                        </select>
+                                    </div>
+
+                                    </div>
+
                     <div className='system-trading-input'>
                                         <div className="centered-row">
                             <div className="Capital_Value">
                                 <div className="input-field-1">
                                 <div className="input-capital">
                                 <label htmlFor="capital">Capital:</label>
-                                <input  type='number' id="capital" value={Math.round(capital)} onChange={handleCapitalChange} /> 
+                                     {/* <ToggleButtonGroup type="radio" name="accountType" defaultValue={'demo'}>
+                                          <ToggleButton id="tbg-radio-1" variant="outline-secondary" value={'demo'} checked={accountType === 'demo'} onChange={(e) => setAccountType(e.currentTarget.value)}>
+                                            Demo Account
+                                          </ToggleButton>
+                                          <ToggleButton id="tbg-radio-2" variant="outline-secondary" value={'live'} checked={accountType === 'live'} onChange={(e) => setAccountType(e.currentTarget.value)}>
+                                            Live Account
+                                          </ToggleButton>
+                                          <ToggleButton id="tbg-radio-3" variant="outline-secondary" value={'live'} checked={accountType === 'live'} onChange={(e) => setAccountType(e.currentTarget.value)}>
+                                           Fund account
+                                          </ToggleButton>
+                                     </ToggleButtonGroup> */}
+                                    
+                                <input  type='number' id="capital" value={Math.round(capital)} readOnly /> 
                                 </div>     
                                 <div class='trade-type-input'> 
                                 <div>  
@@ -1198,25 +1988,17 @@ useEffect(()=>{
 
                                 <label htmlFor="minCapitalRisk">Capital risk per day(%):</label>
                                 </div>
-                                <div className='risk-range'>
+                              
                                 <input
                                     type="number"
                                     id="minCapitalRisk"
                                     min={0}
-                                    value={minCapitalRisk}
-                                    onChange={handleMinCapitalRiskChange}
-                                />
-
-                                    <div>-</div>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    id="maxCapitalRisk"
-                                    value={maxCapitalRisk}
-                                    onChange={handleMaxCapitalRiskChange}
+                                    value={capitalRiskPerDay}
+                                    onChange={handleCapitalRiskPerDayChange}
+                                    disabled={!riskMode}
                                 />
                                   
-                                </div>
+                              
                                 </div>
                                 
                                 
@@ -1228,17 +2010,22 @@ useEffect(()=>{
                                                                         your trades.">
                                     <FaInfoCircle />
                                   </span>
-                                    <label htmlFor="rewardToRisk">Reward to Risk:</label>
+                                    <label htmlFor="rewardToRisk">Profit Percentage:</label>
                                     </div>
                                    <div>
+                                    { riskMode===false && 
+                                
+                                   <input type="checkbox" id="enableFeature" checked={rewardToRiskEnabled} onChange={handleRewardToRiskToggle} />
+                                        }
+                                        
                                     <input
                                     min={0}
-                                
+                                    
                                     type="number"
                                     id="rewardToRisk"
                                     value={rewardToRisk}
                                     onChange={handleRewardToRiskChange}
-
+                                    disabled={!riskMode && !rewardToRiskEnabled}
                                     />
                                   
                                     </div>
@@ -1252,18 +2039,18 @@ useEffect(()=>{
                                         <label>Stop loss(%)</label>
                                     </div>
                                         <div>
-                                        <input min={0} type='number' value={stopLoss} onChange={handleStopLossChange} ></input>
+                                        { riskMode===false && 
+                                
+                                <input type="checkbox" id="enableFeature" checked={stopLossEnabled} onChange={handleStopLossToggle} />
+                                     }
+
+                                        <input min={0} type='number' value={stopLoss} onChange={handleStopLossChange}  disabled={!riskMode && !stopLossEnabled}></input>
                                      
                                    </div>
                                     </div>
 
                                 
-                                {/* <div className='no-trades-input'>
-                                    <label>
-                                    Number of Trades: </label>
-                                    <input type="number" value={numTrade} onChange={handleNumTradesChange} />
-                                
-                                </div> */}
+                              
 
                                 </div>
                                 
@@ -1301,7 +2088,7 @@ useEffect(()=>{
                                         <div className='col' >
                                 <label htmlFor="strike">Strike Price:</label>
 
-                                <input type="number" id="strike" value={strike} onChange={handleStrikeChange} />
+                                <input type="number" id="strike" value={strike} readOnly/>
                                 </div>
                         
                                 </div>
@@ -1405,7 +2192,11 @@ useEffect(()=>{
                                         </div>
                                         <div className='col' >
                                   <label>Quantity</label>
-                                  <input  value={Math.round(quantity)}></input>
+                                  {riskMode ? (
+                                      <input value={Math.round(quantity)} readOnly />
+                                    ) : (
+                                      <input type="number" value={quantity} onChange={handleQuantityChange} />
+                                    )}
                                   </div>
                                 </div>
                                 
@@ -1425,17 +2216,17 @@ useEffect(()=>{
                                   <div className="input-field-trailing-sl">
                                   
                                   <div>
-                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                  {/* <span className="info-icon" title="Select the type of product you want to trade:
                                                       - Intraday (MIS): Short-term trades within a single day.
                                                       - Longterm (CNC): Trades with no intraday restrictions.">
                                         <FaInfoCircle />
-                                      </span>
-                                 
+                                      </span> */}
+                                 <input type='checkbox'/>
                                  </div>
                                  <div className='col'>
                                   <label htmlFor="trailingSL-value">Trailing Stop Loss :</label>
                                   <div className="input-field-8">
-                               
+                                  
                                   <input type="number"  value={trailingSLValue} onChange={handleTrailingSLValueChange} ></input>
                                   <select id="trailingSL-type" value={trailingSLType} onChange={handleTrailingSLTypeChange}>
                                       <option value="%">%</option>
@@ -1448,15 +2239,17 @@ useEffect(()=>{
                                   <div className="input-field-buy-at-low">
                                 
                                 <div>
-                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                  {/* <span className="info-icon" title="Select the type of product you want to trade:
                                                       - Intraday (MIS): Short-term trades within a single day.
                                                       - Longterm (CNC): Trades with no intraday restrictions.">
                                         <FaInfoCircle />
-                                      </span>
+                                      </span> */}
+                                        <input type="checkbox" id="enableFeature" checked={isBuyAtLowEnabled} onChange={handleBuyAtLowToggle} />
                                   </div>
                                   <div className='col'>
                                   <label htmlFor="buyAtLowValue">Buy at Low :</label>
                                   <div className="input-field-11">
+                                
                                   <input type="number" id="buyAtLowValue" value={buyAtLowValue} onChange={handleBuyAtLowValueChange} />
                                   <select id="buyAtLowType" value={buyAtLowType} onChange={handleBuyAtLowTypeChange}>
                                       <option value="%">%</option>
@@ -1465,20 +2258,24 @@ useEffect(()=>{
                                   </div>
                                   </div>
                                   </div>
+
+                              
                             
                                   <div className="input-field-protect-profit">
                                  
                                  <div>
-                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                 <input type='checkbox'/>
+                                  {/* <span className="info-icon" title="Select the type of product you want to trade:
                                                       - Intraday (MIS): Short-term trades within a single day.
                                                       - Longterm (CNC): Trades with no intraday restrictions.">
                                         <FaInfoCircle />
-                                      </span>
+                                      </span> */}
                                   
                                  </div>
                                  <div className='col'>
                                   <label htmlFor="protectProfitValue">Protect Profit :</label>
                                   <div className="input-field-14">
+                                  
                                   <input type="number" id="protectProfitValue" value={protectProfitValue} onChange={handleProtectProfitValueChange} />
                                   <select id="protectProfitType" value={protectProfitType} onChange={handleProtectProfitTypeChange}>
                                       <option value="%">%</option>
@@ -1492,40 +2289,21 @@ useEffect(()=>{
                                   <div className="input-field-incremental-buy">
                                  
                                  <div>
-                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                  {/* <span className="info-icon" title="Select the type of product you want to trade:
                                                       - Intraday (MIS): Short-term trades within a single day.
                                                       - Longterm (CNC): Trades with no intraday restrictions.">
                                         <FaInfoCircle />
-                                      </span>
-                                  
+                                      </span> */}
+                                       <input type="checkbox" id="enableFeature" checked={isIncrementalBuyEnabled} onChange={handleIncrementalBuyToggle} />
+                                
                                  </div>
                                  <div className='col'>
-                                  <label htmlFor="incremental-value">Incremental Buy/Sell :</label>
-                                  <div className="input-field-14">
-                                  <input disabled='true' type="number" id="protectProfitValue" value={incrementalBuy} onChange={handleIncrementalBuy} />
-                                  <select disabled='true' id="protectProfitType" value={protectProfitType} onChange={handleProtectProfitTypeChange}>
-                                      <option value="%">%</option>
-                                      <option value="POINTS">.</option>
-                                  </select>
-                                  </div>
-                                  </div>
-                                  </div>
-
-                                  <div className="input-field-incremental-buy">
+                                  <label htmlFor="incremental-value">Incremental Buy :</label>
                                  
-                                 <div>
-                                  <span className="info-icon" title="Select the type of product you want to trade:
-                                                      - Intraday (MIS): Short-term trades within a single day.
-                                                      - Longterm (CNC): Trades with no intraday restrictions.">
-                                        <FaInfoCircle />
-                                      </span>
-                                  
-                                 </div>
-                                 <div className='col'>
-                                  <label htmlFor="incremental-value">Timer Purchase:</label>
                                   <div className="input-field-14">
-                                  <input disabled='true' type="number" id="protectProfitValue" value={incrementalBuy} onChange={handleIncrementalBuy} />
-                                  <select disabled='true' id="protectProfitType" value={protectProfitType} onChange={handleProtectProfitTypeChange}>
+                                  <input  type="number" id="protectProfitValue" value={incrementalBuy} onChange={handleIncrementalBuy} />
+                                  <input  type="number"  value={incrementalBuyPercentage} onChange={handleIncrementalPercentage} />
+                                  <select  id="protectProfitType" value={incrementalBuyType} onChange={handleincrementalBuyType}>
                                       <option value="%">%</option>
                                       <option value="POINTS">.</option>
                                   </select>
@@ -1533,32 +2311,70 @@ useEffect(()=>{
                                   </div>
                                   </div>
 
+
+
+                                  
 
 
                                   <div className="input-field-incremental-buy">
                                  
                                  <div>
-                                  <span className="info-icon" title="Select the type of product you want to trade:
+                                  {/* <span className="info-icon" title="Select the type of product you want to trade:
                                                       - Intraday (MIS): Short-term trades within a single day.
                                                       - Longterm (CNC): Trades with no intraday restrictions.">
                                         <FaInfoCircle />
-                                      </span>
+                                      </span> */}
+                                       <input type="checkbox" id="enableFeature" checked={istimerEnabled} onChange={handleToggle} />
+
+                                 </div>
+                                 <div className='col'>
+                                  <label htmlFor="incremental-value">Timer Trade:</label>
+                          
+                                   
+                                   
+                                 
+                                  <div className="input-field-14">
+                                  <input type="number" id="protectProfitValue"  onChange={handleTimerValue} />
+                                  <select id="protectProfitType" value={timerType} onChange={handleTimerType}>
+                                      <option value="sec">Sec</option>
+                                      <option value="min">Min</option>
+                                      <option value="hour">Hour</option>
+                                  </select>
+                                  </div>
+                                  </div>
+                                  </div>
+
+
+
+                                  <div className="input-field-incremental-buy">
+                                 
+                                 <div>
+                                  {/* <span className="info-icon" title="Select the type of product you want to trade:
+                                                      - Intraday (MIS): Short-term trades within a single day.
+                                                      - Longterm (CNC): Trades with no intraday restrictions.">
+                                        <FaInfoCircle />
+                                      </span> */}
+                                       <input  type='checkbox' checked={isBreakoutBuyEnabled} onChange={handleBreakout}/>
                                   
                                  </div>
                                  <div className='col'>
-                                  <label htmlFor="incremental-value">Breakout/Breakdown buy:</label>
+                                  <label htmlFor="incremental-value">Breakout buy:</label>
                                   <div className="input-field-14">
-                                  <input disabled='true' type="number" id="protectProfitValue" value={incrementalBuy} onChange={handleIncrementalBuy} />
-                                  <select disabled='true' id="protectProfitType" value={protectProfitType} onChange={handleProtectProfitTypeChange}>
+                                 
+                                  <input type="number" id="protectProfitValue"  onChange={handleBreakoutbuy} />
+                                  <select id="protectProfitType" value={breakoutType} onChange={handleBreakoutTypeChange}>
                                       <option value="%">%</option>
                                       <option value="POINTS">.</option>
                                   </select>
                                   </div>
                                   </div>
                                   </div>
+
+
+                                      
                             
                           
-                              <button className='punch' onClick={handlePunch}>Punch</button>
+                              {/* <button className='punch' onClick={handlePunch}>Punch</button> */}
                                  
                                 </>
                               ) : (
@@ -1568,7 +2384,7 @@ useEffect(()=>{
                                     <p>Subscribe to activate advance feature</p>
                                     <button onClick={subscribeHandle}>Subscribe Now</button>
                                   </div>
-                                  <button className='punch' onClick={handlePunch}>Punch</button>
+                                  {/* <button className='punch' onClick={handlePunch}>Punch</button> */}
                                 </>
                               )}
                             </div>
@@ -1650,66 +2466,233 @@ useEffect(()=>{
 
                     </div>
 
-                    <div className='system-trading-position'>      
-                             <table className='position-table'>
-                                <thead>
-                                  <tr>
-                                   <th>Status</th>
-                                    <th># Trade</th>
-                                    <th>Sym</th>
-                                    <th>Opt Price</th>
-                                    <th>Opt SL</th>
-                                    <th>Opt Profit</th>
-                                    <th>Trade Amount</th>
-                                    <th>Trade Qty</th>
-                                    <th>Cap Exposed(%)</th>
-                                    <th>Cap Risk(%)</th>
-                                    <th>To Win</th>
-                                    <th>To Lose</th>
-                                    <th>PNL</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {systemTrades && systemTrades.map((trade, index) => (
-                                    <tr key={index}>
-                                       <td style={{ color: trade.status === 'Completed' ? 'green' : 'orange' }}>{trade.status}</td>
-                                      <td>{index+1}</td>
-                                      <td>{trade.symbol}</td>
-                                      <td>{trade.optionPrice}</td>
-                                      <td>{trade.optionSl}</td>
-                                      <td>{trade.optionProfit}</td>
-                                      <td>{trade.tradeAmount}</td>
-                                      <td>{trade.quantity}</td>
-                                      <td>{trade.capitalExposed}</td>
-                                      <td>{trade.capitalRisk}</td>
-                                      <td>{trade.toWin}</td>
-                                      <td>{trade.toLoss}</td>
-                                      <td style={{ color: trade.pnl >= 0 ? 'green' : 'red' }}>{trade.pnl ? trade.pnl.toFixed(2) : '0'}</td>
-                                      {trade.status !== 'Completed' && (
-                                          <button onClick={() => handleExit(index)}>Exit</button>
-                                        )}
-                                                                            
-                                      {/* Add other trade details here */}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
+                            <div className='system-trading-middle'>
 
-
+                            <div className='punch-container'>
+                                 <button className='punch' onClick={handlePunch}>Punch</button>
                                
-                    </div>
+                            </div>
 
+                            
                     <div className='total-pnl-section'>
 
                                  
-                            <h2>Total PNL</h2>
-                          
-                            <h5 style={{ color: totalPnl >= 0 ? 'green' : 'red' }}>{totalPnl}</h5>
-                            <h5 style={{ color: totalPnl >= 0 ? 'green' : 'red' }}>({pnlPercentage})%</h5>
-                
-                          
-                        </div>
+                        <h2>Total PNL</h2>
 
+                        <h5 style={{ color: totalPnl >= 0 ? 'green' : 'red' }}>{totalPnl}</h5>
+                        <h5 style={{ color: totalPnl >= 0 ? 'green' : 'red' }}>({pnlPercentage})%</h5>
+
+
+                    </div>
+
+                    </div>
+
+
+                    <div className='system-trading-position'>
+      <table className='position-table'>
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th># Trade</th>
+            <th>Sym</th>
+            <th>Opt Price</th>
+            <th>Opt SL</th>
+            <th>Opt Profit</th>
+            <th>Trade Amount</th>
+            <th>Trade Qty</th>
+            <th>Cap Exposed(%)</th>
+            <th>Cap Risk(%)</th>
+            <th>To Win</th>
+            <th>To Lose</th>
+            <th>PNL</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(groupedTrades).map(([symbol, tradesGroup], groupIndex) => {
+            const totalQuantity = tradesGroup.reduce((total, {trade}) => total + trade.quantity, 0);
+            const remainingQuantity = tradesGroup.reduce((total, {trade}) => total + trade.remainingQuantity, 0);
+            
+          
+            // const avgOptionPrice = tradesGroup.reduce((sum, {trade}) => sum + trade.optionPrice, 0) / tradesGroup.length;
+            // const avgOptionSl = tradesGroup.reduce((sum, {trade}) => sum + Number(trade.optionSl), 0) / tradesGroup.length;
+            // const avgOptionProfit = tradesGroup.reduce((sum, {trade}) => sum + Number(trade.optionProfit), 0) / tradesGroup.length;
+            
+            // const avgCapitalExposed = (tradesGroup.reduce((sum, {trade}) => sum + trade.capitalExposed, 0) / tradesGroup.length).toFixed(2);
+          
+              const ongoingTrades = tradesGroup.filter(({ trade }) => trade.status === 'Ongoing');
+              const avgOptionPrice = ongoingTrades.length > 0
+                ? ongoingTrades.reduce((sum, { trade }) => sum + trade.optionPrice, 0) / ongoingTrades.length
+                : 0; // Return 0 (or any other default value) if there are no ongoing trades
+              
+            
+              const avgCapitalExposed = ongoingTrades.length > 0
+                ? ongoingTrades.reduce((sum, { trade }) => sum + trade.capitalExposed, 0) / ongoingTrades.length
+                : 0; // Return 0 (or any other default value) if there are no ongoing trades
+
+                const avgOptionSl = ongoingTrades.length > 0
+                ? ongoingTrades.reduce((sum, { trade }) => sum + Number(trade.optionSl), 0) / ongoingTrades.length
+                : 0; // Return 0 (or any other default value) if there are no ongoing trades
+          
+          
+                const avgOptionProfit = ongoingTrades.length > 0
+                ? ongoingTrades.reduce((sum, { trade }) => sum + Number(trade.optionProfit), 0) / ongoingTrades.length
+                : 0; // Return 0 (or any other default value) if there are no ongoing trades
+
+                const avgCapitalRisk = ongoingTrades.length > 0
+                ? ongoingTrades.reduce((sum, { trade }) => sum + Number(trade.capitalRisk), 0) / ongoingTrades.length
+                : 0; // Return 0 (or any other default value) if there are no ongoing trades
+
+
+                
+            // const avgCapitalExposed = (
+            //   tradesGroup
+            //     .filter(({ trade }) => trade.status === 'Ongoing') 
+            //     .reduce((sum, { trade }) => sum + trade.capitalExposed, 0) /
+            //   tradesGroup.filter(({ trade }) => trade.status === 'Ongoing').length
+            // ).toFixed(2);
+           
+
+          //   const avgOptionPrice = (
+          //     tradesGroup
+          //     .filter(({ trade }) => trade.status === 'Ongoing') 
+          //     .reduce((sum, { trade }) => sum + trade.optionPrice, 0) /
+          //   tradesGroup.filter(({ trade }) => trade.status === 'Ongoing').length
+          // );
+
+
+          //   const avgOptionSl = (
+          //     tradesGroup
+          //     .filter(({ trade }) => trade.status === 'Ongoing') 
+          //     .reduce((sum, { trade }) => sum + trade.optionSl, 0) /
+          //   tradesGroup.filter(({ trade }) => trade.status === 'Ongoing').length
+          // );
+
+
+          //     const avgOptionProfit =(
+          //       tradesGroup
+          //     .filter(({ trade }) => trade.status === 'Ongoing') 
+          //     .reduce((sum, { trade }) => sum + trade.optionProfit, 0) /
+          //   tradesGroup.filter(({ trade }) => trade.status === 'Ongoing').length
+          // );
+
+
+            // const avgCapitalRisk = tradesGroup.reduce((sum, {trade}) => sum + Number(trade.capitalRisk), 0) / tradesGroup.length;
+
+            // Calculate sum
+            const sumTradeAmount = ongoingTrades.reduce((sum, {trade}) => sum + trade.tradeAmount, 0);
+            const sumToWin = ongoingTrades.reduce((sum, {trade}) => sum + trade.toWin, 0);
+            const sumToLose = ongoingTrades.reduce((sum, {trade}) => sum + trade.toLoss, 0); 
+            const sumPnl   = tradesGroup.reduce((sum, {trade}) => sum + trade.pnl, 0).toFixed(2);
+
+            return (
+              <React.Fragment key={groupIndex}>
+                <tr onClick={() => toggleExpand(groupIndex)}
+                    style={{
+                      background:  '#C0C0C0', // Set alternating background colors
+                      fontWeight: 'bold', // Make the summary row bold for better visibility
+                    }}
+                >
+                 
+                 <td style={{ color: tradesGroup.every(({trade}) => trade.status === 'Completed') ? 'green' : 'orange' }}>
+                    {tradesGroup.every(({trade}) => trade.status === 'Completed') ? 'Completed' : 'Ongoing'}
+                  </td>
+                  <td>{}</td>
+                  <td>{symbol}</td>
+                  <td>{avgOptionPrice.toFixed(2)}</td>
+                  <td>{avgOptionSl.toFixed(2)}</td>
+                  <td>{avgOptionProfit}</td>
+                  <td>{sumTradeAmount}</td>
+                  <td>{`${remainingQuantity}/${totalQuantity}`}</td>
+                  <td>{avgCapitalExposed}</td>
+                  <td>{avgCapitalRisk.toFixed(2)}</td>
+                  <td>{sumToWin}</td>
+                  <td>{sumToLose}</td>
+                  <td style={{ color: sumPnl >= 0 ? 'green' : 'red' }}
+                  >{sumPnl}</td>
+                
+                </tr>
+                {expandedIndexes.includes(groupIndex) && (
+                  // Display individual trades in the expanded row
+                  tradesGroup.map(({trade, originalIndex}, index) => (
+                    <tr key={index}>
+                      <td style={{ color: trade.status === 'Completed' ? 'green' : 'orange' }}>{trade.status}</td>
+                      <td>{index + 1}</td>
+                      <td>{trade.symbol}</td>
+                      <td>{trade.optionPrice}</td>
+                      <td>{trade.optionSl}</td>
+                      <td>{trade.optionProfit}</td>
+                      <td>{trade.tradeAmount}</td>
+                      <td>{`${trade.remainingQuantity}/${trade.quantity}`}</td>
+                      <td>{trade.capitalExposed}</td>
+                      <td>{trade.capitalRisk}</td>
+                      <td>{trade.toWin}</td>
+                      <td>{trade.toLoss}</td>
+                      <td style={{ color: trade.pnl >= 0 ? 'green' : 'red' }}>
+                        {trade.pnl ? trade.pnl.toFixed(2) : '0'}
+                      </td>
+                      <td>
+                        {trade.status !== 'Completed' && (
+                          <button onClick={() => openExitDialog(originalIndex)}>Exit</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </React.Fragment>
+            );
+          })}
+        </tbody>
+      </table>
+
+
+      <Modal show={isExitModalOpen} onHide={closeExitModal}>
+                                <Modal.Header closeButton>
+                                  <Modal.Title>Exit Confirmation</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                  <p>Specify quantity to exit:</p>
+                                  <Form.Control
+                                    type="number"
+                                    value={exitQuantity}
+                                    onChange={(e) => setExitQuantity(e.target.value)}
+                                  />
+
+                                  <Form.Check
+                                  inline
+                                  label='Market'                   
+                                  type='radio'
+                                  name='tradetype'
+                                  onChange={handleExitType}
+                                  />
+
+                                  <Form.Check
+                                  inline
+                                  label='Limit'
+                                  type='radio'
+                                  name='tradetype'
+                                  onChange={handleExitType}
+                                  />
+                                    
+                                  <Form.Group>
+                                    <Form.Label>Specify price:</Form.Label>
+                                    <Form.Control
+                                      type="number"
+                                      value={exitPrice}
+                                      onChange={(e) => setExitPrice(e.target.value)}
+                                    />
+                                  </Form.Group>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                  <Button variant="primary" onClick={handleExitConfirm}>
+                                    Exit
+                                  </Button>
+                                  <Button variant="secondary" onClick={closeExitModal}>
+                                    Cancel
+                                  </Button>
+                                </Modal.Footer>
+                              </Modal>
+    </div>
 
 
 

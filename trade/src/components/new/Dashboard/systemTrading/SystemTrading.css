@@ -9,6 +9,7 @@
 .system-trading-left{
     width: 100%;
     position: relative;
+    padding-left: 15px;
 
 }
 .system-trading-left .system-trading-input .centered-row{
@@ -75,7 +76,7 @@
 
 
 .system-trading-container input[type="number"] ,.system-trading-container select {
-    width: 90px;
+    width: 70px;
     border-radius: 5px;
     text-align: center;
     height: 30px;
@@ -87,14 +88,22 @@
     text-align: center;
 }
 
+.system-trading-left .top{
+    display: flex;
+    justify-content: space-between;
+}
 
 
+.system-trading-left .top select{
+    width: 20rem;
+    height: 3rem;
+}
 
 .system-trading-left .system-trading-input .Capital_Value .capital-risk-input{
     display: flex;
     justify-content: space-between;
     width: 100%;
-    padding: 0 6px 0 31px;
+    padding: 0 31px 0 31px;
     
 }
 
@@ -108,10 +117,10 @@
 
 
 }
-.system-trading-left .system-trading-input .Capital_Value .capital-risk-input input{
+/* .system-trading-left .system-trading-input .Capital_Value .capital-risk-input input{
     width: 60px;
     height: 30px;
-}
+} */
 
 .system-trading-left .system-trading-input .Capital_Value .risk-input{
     display: flex;
@@ -255,14 +264,18 @@
     width: 50px;
 }
 
-.system-trading-left .system-trading-input .Type_Value .punch{
+.system-trading-left .punch{
     width: 90px;
     background-color: tomato;
     border-radius: 5px;
     color: white;
     height: 40px;
 }
-
+.system-trading-left .punch-container{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-around;
+}
 
 .system-trading-left .system-trading-input .Type_Value .blurred-field{
     display: flex;
@@ -289,12 +302,15 @@
 }
 
 
-
+.system-trading-middle{
+    display: flex;
+    padding: 10px 10px;
+}
 
 
 .system-trading-position{
     background-color:#EFF2F4;
-    height: 50%;
+    height: 100%;
     margin-bottom: 10px;
     margin-top: 30px;
 }
@@ -317,7 +333,7 @@
 
   }
   
-  .system-trading-position tbody tr:nth-child(even) {
+  .system-trading-position tbody  {
     background-color: #f9f9f9;
   }
 

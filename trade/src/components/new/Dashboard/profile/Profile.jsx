@@ -40,11 +40,140 @@ const Profile = () => {
 
         <div className='profile-buttom'>
             <div className='range-inputs'>
-                <input>
-                
-                </input>
+                <div className='equity w-25'>
+                  <h2>Equity</h2>
 
-                 <input></input>   
+                  <div className='d-flex justify-content-between w-100'>
+                      <h4>Available Margin</h4>
+                      <h3>7800</h3>
+                  </div> 
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h4>Used Margin</h4>
+                      <h3>0.00</h3>
+                  </div> 
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h4>Available Cash</h4>
+                      <h3>0.00</h3>
+                  </div>
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Opening balance</h5>
+                      <h4>7800</h4>
+                  </div>
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Payin</h5>
+                      <h4>0.00</h4>
+                  </div>
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Payout</h5>
+                      <h4>0.00</h4>
+                  </div>
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Span</h5>
+                      <h4>0.00</h4>
+                  </div> 
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Delivery margin</h5>
+                      <h4>0.00</h4>
+                  </div>   
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Exposure</h5>
+                      <h4>0.00</h4>
+                  </div>              
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Options Premium</h5>
+                      <h4>0.00</h4>
+                  </div> 
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Collateral(Liquid Funds)</h5>
+                      <h4>0.00</h4>
+                  </div> 
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Collateral(Equity)</h5>
+                      <h4>0.00</h4>
+                  </div> 
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Total Collateral</h5>
+                      <h4>0.00</h4>
+                  </div> 
+
+                  
+
+                </div>
+
+                <div className='Commodity w-25'>
+                  <h2>Commodity</h2>
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h4>Available Margin</h4>
+                      <h3>0.00</h3>
+                  </div> 
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h4>Used Margin</h4>
+                      <h3>0.00</h3>
+                  </div> 
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h4>Available Cash</h4>
+                      <h3>0.00</h3>
+                  </div>
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Opening balance</h5>
+                      <h4>0.00</h4>
+                  </div>
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Payin</h5>
+                      <h4>0.00</h4>
+                  </div>
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Payout</h5>
+                      <h4>0.00</h4>
+                  </div>
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Span</h5>
+                      <h4>0.00</h4>
+                  </div> 
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Delivery margin</h5>
+                      <h4>0.00</h4>
+                  </div>   
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Exposure</h5>
+                      <h4>0.00</h4>
+                  </div>              
+
+                  <div className='d-flex justify-content-between w-100'>
+                      <h5>Options Premium</h5>
+                      <h4>0.00</h4>
+                  </div> 
+
+                
+
+                  
+
+                </div>
+
+
+
+
 
             </div>
 

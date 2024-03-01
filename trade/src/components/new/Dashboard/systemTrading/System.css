@@ -1,0 +1,276 @@
+.system{
+    padding: 1rem;
+    height: 100%;
+}
+
+
+.system .top{
+    display: flex;
+}
+
+.system  .acc-change{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    background-color: aliceblue;
+}
+
+.system .top .watch-table table th{
+    background-color: cornflowerblue;
+    color: white;
+
+}
+.system .top .news table th{
+    background-color: cornflowerblue;
+    color: white;
+}
+
+.system .top .watch-table table .sell{
+    color: red;
+}
+
+.system .top .watch-table table .buy{
+    color: green;
+}
+
+.system .acc-change select{
+    width: 20rem;
+}
+
+.system .top .watch-list{
+    width: 50%;
+    padding: 1rem;
+    height: 400px;
+   
+}
+
+
+.system .top .watch-list .news{
+    height: 100%;
+    overflow-y: scroll;
+}
+
+.system .top .watch-list .calender{
+    height: 100%;
+}
+.system .top .watch-list .watch-tabs{
+    margin-top: 2rem;
+    background-color:skyblue;
+}
+
+.system .top .watch-list .risk-switch{
+    transform: scale(1.2)
+}
+.system .top .watch-list .risk-switch label{
+    text-align: end;
+    font-size: medium;
+}
+
+.system .top .over-view{
+    width: 50%;
+}
+
+.system .top .over-view .active-graph-content {
+    height: 500px; /* Set to the desired fixed height */
+    overflow: hidden; /* Hide any overflow; you can also use 'auto' for scrollbars */
+    display: flex;
+    justify-content: center; /* Center the graph image horizontally */
+    align-items: center; /* Center the graph image vertically */
+}
+
+
+.system .top .over-view img{
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.system .position-sec{
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.system .position-sec .position-tabs{
+    background-color:skyblue;
+}
+
+.system .position-sec table{
+    width: 100%;
+}
+
+.system .position-sec table tr th{
+    border: 1px black;
+    background-color:cornflowerblue;
+    color: white;
+}
+
+.system .fetures-sec{
+    padding: 1rem;
+}
+
+.system .modal-body{
+    padding: 2rem;
+}
+.watch-table {
+    display: flex;
+    overflow-x: auto; /* Allows horizontal scrolling */
+}
+.watch-table .unscrollable-columns{
+    width: 70%;
+}
+
+
+.watch-table .unscrollable-columns table{
+    width: 100%;
+}
+
+.watch-table .scrollable-columns table{
+    width: 100%;
+}
+
+
+.scrollable-columns {
+    overflow-x: auto; /* Ensures this part is scrollable */
+    white-space: nowrap; /* Keeps the table from breaking into multiple lines */
+    width: 30%;
+    height: 110%;
+}
+
+/* Apply fixed width to your th and td to ensure alignment */
+.watch-table th, .watch-table td {
+    width: 120px; /* Example width, adjust as necessary */
+}
+
+/* Additional styling for scrollable table to match the main table */
+.scrollable-columns table {
+    border-collapse: collapse;
+}
+
+.scrollable-columns th, .scrollable-columns td {
+    border: 1px solid #ddd; /* Example border, adjust as necessary */
+    text-align: left;
+    padding: 8px;
+}
+
+/* Styling for headers and cells to ensure visibility and alignment */
+.system table {
+    border-collapse: collapse;
+}
+
+.system th, td {
+    text-align: left;
+    padding: 8px;
+    border: 1px solid #ddd; /* Example styling, adjust as needed */
+}
+
+/* Add to your CSS file */
+.table-container {
+    position: relative; /* Ensure relative positioning for the container */
+}
+
+.options-container {
+    display:none; /* Temporarily make it always visible for testing */
+    position: absolute; /* Use fixed or absolute, depending on your layout */
+    border: 2px solid rgb(136, 130, 130); /* Make it visible */
+     /* Ensure it's on top */
+    background-color: white; /* Ensure text is readable */
+}
+
+.table-row:hover .options-container {
+    display:flex; /* Show when the row is hovered */
+   /* Position it at the top of the hovered row */
+    position: absolute;
+    right: 0px;
+    /* Position it to the right of the hovered row */
+    
+}
+
+.system .selected {
+    background-color: #007bff; /* Blue background for selected button */
+    color: white; /* White text color */
+    /* Add other styling as needed */
+  }
+
+  .system .bullish {
+    color: green;
+}
+
+.system .bearish {
+    color: red;
+}
+
+.system .High{
+    color: red;
+}
+
+.system .Moderate{
+    color: orange;
+}
+
+.system .tab {
+    background-color: #f0f0f0; /* Light grey background for inactive tabs */
+    border: 1px solid #ccc; /* Light grey border */
+    padding: 10px; /* Some padding around tab text */
+    cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
+    margin-right: 5px; /* Add some space between tabs */
+}
+
+/* Active tab styling */
+.system .tab.active {
+    background-color: #007bff; /* Bootstrap primary color for example */
+    color: white; /* White text for better contrast */
+    border-color: #007bff; /* Matching border color */
+}
+
+.system .watch-tabs {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    gap: 5px;
+    padding: 20px;
+  }
+
+  .system .watch-tabs button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  .system .watch-tabs button.selected {
+    background-color: #0056b3;
+  }
+
+  .system  .watch-tabs button:hover {
+    background-color: #0056b3;
+  }
+
+
+  .system .position-tabs button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  .system .position-tabs button.selected {
+    background-color: #0056b3;
+  }
+
+  .system .position-tabs button:hover {
+    background-color: #0056b3;
+  }
+
+  .system .position-tabs  {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    gap: 5px;
+    padding: 20px;
+  }

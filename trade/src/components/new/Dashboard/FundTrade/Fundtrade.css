@@ -1,0 +1,51 @@
+/* .fundtrade .top{
+    background-color: azure;
+    height: 300px;
+    padding: 10px;
+}
+
+
+.fundtrade .top{
+    display: flex;
+    justify-content: space-around;
+}
+
+.fundtrade .top table td{
+    width: 200px;
+}
+
+.fundtrade .bottom{
+    padding-top: 50px;
+}
+
+.fundtrade .bottom ul{
+    display: flex;
+    justify-content: space-around;
+}
+
+.fundtrade .bottom li{
+    background-color: aqua;
+   
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid var(--gray-200, #C6CFD7);
+    background: var(--gray-0, #FFF);
+    box-shadow: 0px 8px 12px 0px rgba(0, 0, 0, 0.08);
+}
+
+.fundtrade .bottom ul button{
+    background-color: black;
+    color: aliceblue;
+    border-radius: 10px;
+    font-size: medium;
+    margin-left: 10px;
+}
+
+
+.fundtrade .bottom ul h2{
+    margin-top: 100px;
+}
+
+.fundtrade .bottom ul h4{
+    margin-bottom: 50px;
+} */

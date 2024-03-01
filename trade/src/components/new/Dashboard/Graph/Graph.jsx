@@ -11,7 +11,9 @@ const Graph = ({ selectedInstrument }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.post('http://localhost:5000/getGraph', { selectedInstrument });
+        
+        const instrument = selectedInstrument.instrument_key
+        const response = await axios.post('http://localhost:5000/getGraph', {instrument} );
         
         const candleData = response.data.candle;
         setFinancialData(candleData);
@@ -56,21 +58,28 @@ const Graph = ({ selectedInstrument }) => {
         },
       },
     },
-    fill: {
-      type: 'gradient',
-      gradient: {
-        shadeIntensity: 1,
-        opacityFrom: 0.7,
-        opacityTo: 0.9,
-        stops: [0, 100],
-      },
-    },
+    // fill: {
+    //   type: 'gradient',
+    //   gradient: {
+    //     shadeIntensity: 1,
+    //     opacityFrom: 0.7,
+    //     opacityTo: 0.9,
+    //     stops: [0, 100],
+    //   },
+    // },
+    
+    // stroke: {
+    //   curve: 'smooth', // Set the curve property to 'smooth' for smooth lines
+    // },
+
     dataLabels: {
       enabled: false,
     },
+
     grid: {
       show: false,
     },
+   
   };
 
   const series = [
@@ -89,7 +98,7 @@ const Graph = ({ selectedInstrument }) => {
 
   return (
     <div className='overview-graph'>
-    <h5>{selectedInstrument}</h5>
+    <h5>{selectedInstrument.name}</h5>
     <Form style={{display:'flex'}}>
       <Form.Check
         type='switch'

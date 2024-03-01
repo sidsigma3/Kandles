@@ -1,0 +1,136 @@
+.fund-dash{
+    padding: 10px;
+}
+
+
+.fund-dash .acc-detail{
+    height: 10vh;
+}
+
+.fund-dash .acc-detail .acc-type{
+    background-color: aliceblue;
+
+}
+
+.fund-dash .acc-detail  .acc-change select {
+    width: 20rem;
+    margin-bottom: 5rem;
+
+}
+
+.fund-dash .top{
+    display: flex;
+    background-color: azure;
+    height: 30vh;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+
+.fund-dash .top .top-left{
+    display: flex;
+    justify-content: space-between;
+    width: 65%;
+    padding: 10px;
+}
+
+
+.fund-dash .top .top-right{
+   background-color:beige;
+    width: 34%;
+}
+
+.fund-dash .top .top-right table{
+    width: 100%;
+}
+
+.fund-dash .top .top-left .acc-info{
+    background-color:lavender;
+    width: 50%;
+    padding: 10px;
+}
+
+.fund-dash .top .top-left .acc-info div{
+    display: flex;
+    justify-content: space-between;
+}
+
+.fund-dash .top .top-left .target-info{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  justify-content: space-between;
+}
+
+.fund-dash .top .top-left .target-info div{
+    /* background-color: beige; */
+    height: 50px;
+    width: 300px;
+}
+.fund-dash .top .top-left .target-info .progress{
+    height: 40px;
+}
+
+.fund-dash .position{
+    background-color:floralwhite;
+    height: 35vh;
+    margin-top: 10px;
+    margin: 10px;
+}
+
+.fund-dash .position table{
+    width: 100%;
+}
+.fund-dash .bottom{
+    background-color: aliceblue;
+    height: 35vh;
+    display: flex;
+    justify-content: space-between;
+}
+
+.fund-dash .bottom .bottom-left {
+    width: 65%;
+}
+.fund-dash .bottom  .bottom-right{
+    width: 32%;
+}
+
+.fund-dash .bottom .bottom-left .row-1,.fund-dash .bottom .bottom-left .row-2{
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+
+
+.fund-dash .bottom .bottom-left .avg-win , .fund-dash .bottom .bottom-left .avg-loss ,.fund-dash .bottom .bottom-left .win-ratio,.fund-dash .bottom .bottom-left .profit-factor{
+    background-color:lavender;
+    height: 50px;
+    width: 450px;
+} 
+
+
+.fund-dash .bottom .bottom-left .avg-win , .fund-dash .bottom .bottom-right{
+    background-color: lavender;
+}
+
+.fund-dash .bottom .bottom-right table{
+    width: 100%;
+}
+
+.fund-dash .trading-psychology-section{
+    width: 100%; /* or any specific width */
+    /* Ensure there's a min-width if necessary */
+    min-width: 300px; 
+}
+
+.fund-dash .recharts-default-legend{
+    font-size: 25px;
+}
+
+
+.fund-dash .psych-table{
+    width: 80%;
+    text-align: center;
+    margin-top: 20px;
+}
