@@ -48,7 +48,7 @@ function MaxPain( { instrumentList }) {
      
       const chart = chartRef.current;
       console.log(chartRef.current.scales)
-      console.log('hoga ki nahin bhai')
+     
       const xAxes = chart.scales.x;
       const middleIndex = Math.floor(xAxes.max / 2);
 

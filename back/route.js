@@ -30,7 +30,7 @@ const Razorpay = require('razorpay');
 
 const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
-
+const { spawn } = require('child_process');
 
 const htmlTemplate = fs.readFileSync(
   "./../trade/src/components/WelocomeEmail.html",
@@ -2338,6 +2338,23 @@ function getMargins(segment) {
       socket.emit("update", finalPnl);
     }
   });
+
+
+
+  router.post('/backtest', (req, res) => {
+    const pythonProcess = spawn('python', ['./config/strategy.py', JSON.stringify(req.body)]);
+    
+    let dataString = '';
+    pythonProcess.stdout.on('data', (data) => {
+        dataString += data.toString();
+        // console.log(dataString)
+    });
+
+    pythonProcess.on('close', (code) => {
+        console.log(`Process exited with code ${code}`);
+        res.json(dataString); // Send the Python script's response back to React
+    });
+});
 
   return router;
 };

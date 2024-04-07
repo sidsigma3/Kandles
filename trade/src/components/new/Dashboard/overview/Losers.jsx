@@ -347,9 +347,9 @@ const Losers = () => {
   return (
     <div className='movers'>
        <table>
-        <thead>
-          <tr>
-            <th></th>
+        <thead >
+          <tr >
+            <th className='pb-5'></th>
             <th>Symbol</th>
             <th>Last Traded Price</th>
             <th>Change (%)</th>

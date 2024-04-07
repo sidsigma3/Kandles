@@ -14,7 +14,7 @@ import ToggleButton from 'react-bootstrap/ToggleButton'
 import useRazorpay from "react-razorpay";
 import Form from 'react-bootstrap/Form';
 // import Modal from 'react-modal';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, FormLabel, FormControl, FormGroup, FormCheck, FormSelect } from 'react-bootstrap';
 import { ToggleButtonGroup } from 'react-bootstrap';
 
 
@@ -82,8 +82,8 @@ const SystemTrading = ({ trades, setTrades ,setRenderedContent}) => {
   const [incrementalBuyType,handleincrementalBuyType] =useState()
   const [incrementalBuyPercentage,setIncrementalBuyPercentage] = useState()
   const [blurred, setBlurred] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [isConnectComplete, setConnectComplete] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(true);
+  const [isConnectComplete, setConnectComplete] = useState(true);
   const [requestToken,setrequestToken] = useState(null)
   const hasExecuted = useRef(false);
 
@@ -1916,6 +1916,171 @@ useEffect(() => {
                                     </div>
 
                                     </div>
+
+
+
+                      <div className='w-100 m-1  mt-3'>
+                        <Form className='d-flex justify-content-between'>
+
+                          <Form.Group className='w-25'>
+                            <FormLabel>Strategy Name</FormLabel>
+                            <FormControl placeholder='Eg:Stradle'></FormControl>
+                          </Form.Group>
+                       
+                        <FormGroup className='d-flex w-50 justify-content-between bg-light'>
+
+                        <FormGroup className='w-50 m-1 '>
+                        <FormGroup>
+                          <FormLabel>Entry Time</FormLabel>
+                          <FormControl type='time'></FormControl>
+                        </FormGroup>
+
+                        <FormGroup className='d-flex justify-content-center'>
+                          <FormCheck type='switch'></FormCheck>
+                          <FormLabel className='m-0'>Immediate</FormLabel>
+                        </FormGroup>
+                        </FormGroup>
+
+                        <FormGroup className='w-50 m-1'>
+                          <FormLabel>Exit Time</FormLabel>
+                          <FormControl className='w-300' type='time'></FormControl>
+                        </FormGroup>
+
+
+
+                        </FormGroup>
+
+                        </Form>
+                      </div>
+
+
+                      <div>
+                      <h3>Add Leg</h3>
+
+                      <div className='bg-light p-3'>
+                        <Form className='d-flex justify-content-between'>
+                          <FormGroup>
+                            <FormLabel>Instrument</FormLabel>
+                           <FormSelect className='w-100 h-50'>
+                           <option>Nifty</option>
+                            <option>Banknifty</option>
+                            <option>Finnifty</option>
+                            <option>Midcapnifty</option>
+                           </FormSelect>
+                          </FormGroup>
+
+
+                          <FormGroup>
+                            <FormLabel>Segment</FormLabel>
+                            
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                  <input type="radio" class="btn-check" name="btnradio" id="btnradio1"  checked></input>
+                                  <label class="btn btn-outline-primary" for="btnradio1">OPT</label>
+
+                                  <input type="radio" class="btn-check" name="btnradio" id="btnradio2" ></input>
+                                  <label class="btn btn-outline-primary" for="btnradio2">FUT</label>
+
+                
+                                </div>
+
+                          </FormGroup>
+
+
+                          <FormGroup>
+                            <FormLabel>Position</FormLabel>
+                            
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                  <input type="radio" class="btn-check" name="btnradio1" id="btnradio11"  checked></input>
+                                  <label class="btn btn-outline-primary" for="btnradio11">BUY</label>
+
+                                  <input type="radio" class="btn-check" name="btnradio1" id="btnradio22" ></input>
+                                  <label class="btn btn-outline-primary" for="btnradio22">SELL</label>
+
+                
+                                </div>
+
+                          </FormGroup>
+
+                          <FormGroup>
+                            <FormLabel>Strike Criteria</FormLabel>
+                           <FormSelect className='w-100 h-50'>
+                           <option>ATM</option>
+                            <option>CLosest Premium</option>
+                      
+                           </FormSelect>
+                          </FormGroup>
+
+
+                          <FormGroup>
+                            <FormLabel>Total Lot</FormLabel>
+                            <FormControl type='number'></FormControl>
+                          </FormGroup>
+
+                        </Form>
+                        </div>
+
+
+                        </div>
+
+
+
+
+
+                        <div className='d-flex justify-content-between'>
+
+                          <div className='mt-3 w-50'>
+                            <h4>Overall MTM</h4>
+                            <div className='d-flex w-100 justify-content-between mr-5'>
+                            <div className='w-25 m-2'>
+                            <FormGroup className='d-flex justify-content-between'>
+                              <FormLabel>Stop Loss</FormLabel>
+                              <FormSelect className='w-50 h-50'>
+                                <option>None</option>
+                                <option>MTM</option>
+                                <option>Premium %</option>
+                              </FormSelect>
+                            </FormGroup>
+
+                            <FormGroup className='d-flex'>
+                              <FormCheck></FormCheck>
+                              <FormLabel>SL Re-entry</FormLabel>
+                            </FormGroup>
+                            
+                            </div>
+
+                            <div>
+                            <FormGroup className='d-flex w-100 justify-content-between' >
+                              <FormLabel>Overall Target</FormLabel>
+                              <FormSelect className='w-50 h-50'>
+                                <option>None</option>
+                                <option>MTM</option>
+                                <option>Premium %</option>
+                              </FormSelect>
+                            </FormGroup>
+
+                            <FormGroup className='d-flex'>
+                              <FormCheck></FormCheck>
+                              <FormLabel>Target Re-entry</FormLabel>
+                            </FormGroup>
+                            
+                            </div>
+                            </div>
+                            </div>
+
+                            <div className='w-25'>
+                            <h4>Profit Management</h4>
+                              <FormGroup className='d-flex'>
+                                <FormCheck></FormCheck>
+                                <FormSelect className='w-50 h-50'>
+                                  <option>Lock Profit</option>
+                                  <option>Lock and trail</option>
+                                  <option>Trail Profit</option>
+                                </FormSelect>
+                              </FormGroup>
+                              </div>
+                          </div>
+
+
 
                     <div className='system-trading-input'>
                                         <div className="centered-row">

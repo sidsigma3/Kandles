@@ -16,6 +16,11 @@ import Competition from './Competition/Competition';
 import CompeteRank from './Competition/CompeteRank';
 import Leaderboard from './Leaderboard/Leaderboard';
 import System from './systemTrading/System';
+import Discussion from './Discussion/Discussion';
+import Journal from './Journal/Journal';
+import Trading from './Trading/Trading';
+import Broker from './Broker/Broker';
+import Setup from './Broker/Setup';
 
 import { TbWorld } from "react-icons/tb";
 import { BsTrophy } from "react-icons/bs";
@@ -37,6 +42,9 @@ const Dashboard = () => {
   const hasExecuted = useRef(false);
   const [trades, setTrades] = useState([]);
   const [renderedContent, setRenderedContent] = useState(null);
+  const [strategyList,setStrategyList] =useState([])
+  const [editingStrategyIndex, setEditingStrategyIndex] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const queryParams = queryString.parse(window.location.search);
@@ -116,14 +124,17 @@ const Dashboard = () => {
 
     switch (active) {
       case 'home':
-        return <HomePage></HomePage>;
+        return <HomePage strategyList={strategyList} setStrategyList={setStrategyList} setActive={setActive} setEditingStrategyIndex={setEditingStrategyIndex} setIsEditing={setIsEditing}></HomePage>;
       case 'system-trading':
-        // return <SystemTrading trades={trades} setTrades={setTrades} setRenderedContent={setRenderedContent}></SystemTrading>;
-        return <System></System>
+        return <SystemTrading trades={trades} setTrades={setTrades} setRenderedContent={setRenderedContent}></SystemTrading>;
+        
         case 'order':
         return <Order trades={trades} setTrades={setTrades}></Order>;
       case 'scanner':
         return <Scanner></Scanner>;
+        case 'trading':
+          return <Trading setStrategyList={setStrategyList} strategyList={strategyList} editingStrategyIndex={editingStrategyIndex} setEditingStrategyIndex={setEditingStrategyIndex} isEditing={isEditing} setIsEditing={setIsEditing}></Trading>
+        // return <System></System>;
       case 'account':
         return <Profile></Profile>
       case 'subscription':
@@ -136,6 +147,14 @@ const Dashboard = () => {
           return  <CompeteRank></CompeteRank>
       case 'leaderboard':
         return <Leaderboard></Leaderboard>
+      case 'discussion':
+        return   <Discussion></Discussion>
+      case 'journal':
+        return   <Journal></Journal>
+      case 'broker':
+        return   <Broker setActive={setActive}></Broker>
+      case 'setup':
+        return   <Setup></Setup>
 
       default:
         return <HomePage></HomePage>;
@@ -172,7 +191,26 @@ const Dashboard = () => {
             <li className={`system-trading ${active === 'system-trading' ? 'active' : ''}`} onClick={() => pageHandler('system-trading')}>
             <div className="icon-container">
               <MdOutlineCalculate className='dash-icons' /> 
+              <span className="nav-text"><h3>System Trading</h3></span>
+              {/* <h3>Trading</h3> */}
+              </div>
+            </li>
+
+
+
+
+            <li className={`system-trading ${active === 'trading' ? 'active' : ''}`} onClick={() => pageHandler('trading')}>
+            <div className="icon-container">
+              <MdOutlineCalculate className='dash-icons' /> 
               <span className="nav-text"><h3>Trading</h3></span>
+              {/* <h3>Trading</h3> */}
+              </div>
+            </li>
+
+            <li className={`system-trading ${(active === 'broker' || active === 'setup') ? 'active' : ''}`} onClick={() => pageHandler('broker')}>
+            <div className="icon-container">
+              <MdOutlineCalculate className='dash-icons' /> 
+              <span className="nav-text"><h3>Broker</h3></span>
               {/* <h3>Trading</h3> */}
               </div>
             </li>
@@ -193,6 +231,16 @@ const Dashboard = () => {
               {/* <h3>Performance</h3> */}
               </div>
             </li>
+
+
+            <li className={`account ${active === 'journal' ? 'active' : ''}`} onClick={() => pageHandler('journal')}>
+            <div className="icon-container">
+            <TbReportAnalytics  className='dash-icons'/>
+            <span className="nav-text"><h3>Journal</h3></span>
+              {/* <h3>Performance</h3> */}
+              </div>
+            </li>
+
 
             <li className={`account ${active === 'competition' ? 'active' : ''}`} onClick={() => pageHandler('competition')}>
             <div className="icon-container">
@@ -221,6 +269,14 @@ const Dashboard = () => {
             </li>
 
           
+
+            <li className={`account ${active === 'discussion' ? 'active' : ''}`} onClick={() => pageHandler('discussion')}>
+            <div className="icon-container">
+              <CgProfile className='dash-icons'/>
+              <span className="nav-text"><h3>Discussion</h3></span>
+              {/* <h3>Profile</h3> */}
+              </div>
+            </li>
 
          
 

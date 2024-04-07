@@ -409,9 +409,9 @@ useEffect(()=>{
     // </div>
      <div className='movers'>
       <table>
-        <thead>
+        <thead >
           <tr>
-            <th></th>
+            <th className='pb-5'></th>
             <th>Symbol</th>
             <th>Last Traded Price</th>
             <th>Change (%)</th>
