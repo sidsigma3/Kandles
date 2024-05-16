@@ -188,21 +188,21 @@ const Dashboard = () => {
               </div>
             </li>
 
-            <li className={`system-trading ${active === 'system-trading' ? 'active' : ''}`} onClick={() => pageHandler('system-trading')}>
+            {/* <li className={`system-trading ${active === 'system-trading' ? 'active' : ''}`} onClick={() => pageHandler('system-trading')}>
             <div className="icon-container">
               <MdOutlineCalculate className='dash-icons' /> 
               <span className="nav-text"><h3>System Trading</h3></span>
-              {/* <h3>Trading</h3> */}
+             
               </div>
-            </li>
+            </li> */}
 
 
-
+          
 
             <li className={`system-trading ${active === 'trading' ? 'active' : ''}`} onClick={() => pageHandler('trading')}>
             <div className="icon-container">
               <MdOutlineCalculate className='dash-icons' /> 
-              <span className="nav-text"><h3>Trading</h3></span>
+              <span className="nav-text"><h3>Strategy builder</h3></span>
               {/* <h3>Trading</h3> */}
               </div>
             </li>
@@ -228,37 +228,37 @@ const Dashboard = () => {
             <div className="icon-container">
             <TbReportAnalytics  className='dash-icons'/>
             <span className="nav-text"><h3>Performance</h3></span>
-              {/* <h3>Performance</h3> */}
+            
               </div>
             </li>
 
-
+{/* 
             <li className={`account ${active === 'journal' ? 'active' : ''}`} onClick={() => pageHandler('journal')}>
             <div className="icon-container">
             <TbReportAnalytics  className='dash-icons'/>
             <span className="nav-text"><h3>Journal</h3></span>
-              {/* <h3>Performance</h3> */}
+              
               </div>
-            </li>
+            </li> */}
 
 
-            <li className={`account ${active === 'competition' ? 'active' : ''}`} onClick={() => pageHandler('competition')}>
+            {/* <li className={`account ${active === 'competition' ? 'active' : ''}`} onClick={() => pageHandler('competition')}>
             <div className="icon-container">
             <BsTrophy  className='dash-icons'/>
             <span className="nav-text"><h3>Competition</h3></span>
-              {/* <h3>Competition</h3> */}
+             
               </div>
-            </li>
+            </li> */}
 
 
    
-            <li className={`account ${active === 'leaderboard' ? 'active' : ''}`} onClick={() => pageHandler('leaderboard')}>
+            {/* <li className={`account ${active === 'leaderboard' ? 'active' : ''}`} onClick={() => pageHandler('leaderboard')}>
             <div className="icon-container">
             <TbWorld className='dash-icons'/>
             <span className="nav-text"><h3>Leaderboard</h3></span>
-              {/* <h3>Leaderboard</h3> */}
+            
               </div>
-            </li>
+            </li> */}
 
             <li className={`account ${active === 'subscription' ? 'active' : ''}`} onClick={() => pageHandler('subscription')}>
             <div className="icon-container">
@@ -269,14 +269,14 @@ const Dashboard = () => {
             </li>
 
           
-
+{/* 
             <li className={`account ${active === 'discussion' ? 'active' : ''}`} onClick={() => pageHandler('discussion')}>
             <div className="icon-container">
               <CgProfile className='dash-icons'/>
               <span className="nav-text"><h3>Discussion</h3></span>
-              {/* <h3>Profile</h3> */}
+             
               </div>
-            </li>
+            </li> */}
 
          
 

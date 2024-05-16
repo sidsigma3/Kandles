@@ -998,16 +998,16 @@ function getMargins(segment) {
     // }
 
     
-    const authorizationCode = req.body.requestToken;
-    console.log(authorizationCode)
+    // const authorizationCode = req.body.requestToken;
+    // console.log(authorizationCode)
   
-    const params = {
-      code: authorizationCode,
-      client_id: API_KEY,
-      client_secret: API_SECRET,
-      redirect_uri: REDIRECT_URI,
-      grant_type: 'authorization_code',
-    };
+    // const params = {
+    //   code: authorizationCode,
+    //   client_id: API_KEY,
+    //   client_secret: API_SECRET,
+    //   redirect_uri: REDIRECT_URI,
+    //   grant_type: 'authorization_code',
+    // };
     
 
   //   var params = {

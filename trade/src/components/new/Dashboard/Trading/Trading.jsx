@@ -6,13 +6,21 @@ import RealTimeClock from '../overview/RealTimeClock';
 import { MdDeleteOutline } from "react-icons/md";
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
+import Select from 'react-select';
+import makeAnimated from 'react-select/animated';
+import StrategyBuilder from '../overview/StrategyBuilder';
+import Strategy from '../overview/Strategy';
+import stockList from '../overview/StockList';
+import { ProgressBar } from 'react-loader-spinner'
+
 
 const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditingStrategyIndex ,isEditing,setIsEditing}) => {
     const [accountType, setAccountType] = useState('live')
     const [legList,setLegList] = useState([])
     const [currentLeg,setCurrentleg]= useState()
     const [showInputs, setShowInputs] = useState(false);
-   
+    const [expandedRow, setExpandedRow] = useState(null);
+    const [view, setView] = useState('time');
     
     const [strategy,setStrategy] =useState()
     const [entryTime,setEntryTime] =  useState()
@@ -33,13 +41,16 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
     const [advancedFeat,setAdvanceFeat] = useState()
     const[strikeCriteriaInput,setStrikeCriteriaInput] = useState()
 
+    const [showMore,setShowMore] = useState(false)
+    const [showMore1,setShowMore1] = useState(false)
+    const [trailing,setTrailing] = useState()
 
     const [overallSl,setOverallSl]=useState()
     const [overallSlType,setOverallSlType] =useState()
     const [overallTarget,setOverallTarget] = useState()
     const [overallTargetType,setOverallTargetType] =useState()
 
-
+    const [entryType,setEntryType] = useState('buy')
     const [pyTarget,setPyTarget]= useState()
     const [pyStoploss,setPyStoploss]= useState()
     const [backtest,setBacktest] = useState()
@@ -49,6 +60,48 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
     const [imageSrc,setImageSrc] = useState()
     const [backCapital,setBackCapital] =useState()
     const [backQuantity,setBackQuantity] =useState()
+
+    const [indicatorDetails, setIndicatorDetails] = useState({
+      indicatorOne: { value: '', offset: '', period: '', isNew: true ,indiInputs:{}},
+      comparator: '',
+      indicatorTwo: { value: '', offset: '', period: '', isNew: true ,indiInputs:{}},
+    });
+
+    const [graphType,setGraphType] = useState()
+    const [monthlyData,setMonthlyData] = useState()
+    const [trailingType,setTrailingType] = useState()
+    const [loading, setLoading] = useState(false);
+
+    const [strategyDetails, setStrategyDetails] = useState({
+      conditions: [
+          {
+              indicatorOne: { value: "", params: {} },
+              comparator: "",
+              indicatorTwo: { value: "", params: {} }
+          }
+      ],
+      logicalOperators: [] 
+    });
+
+    const [summary, setSummary] = useState({
+      totalSignals: 0,
+      profitFactor: 0,
+      totalWins: 0,
+      totalLosses: 0,
+      maxDrawdown: 0
+    });
+  
+    
+
+
+  const toggleRow = (index) => {
+      setExpandedRow(expandedRow === index ? null : index);
+  };
+
+    // const formatDate = (date) => {
+    //     const newDate = new Date(date);
+    //     return newDate.toLocaleDateString();
+    // };
 
     const [strikeCriteria,setStrikeCriteria] = useState('ATM')
     const [segment, setSegment] = useState('OPT');
@@ -66,7 +119,8 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
         Fri: false,
       });
 
-
+      const animatedComponents = makeAnimated()
+      
       const handleSave = () => {
         const newStrategy = {
           strategyName: strategy,
@@ -284,17 +338,29 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
       const handleStrategy = async (e) => {
         e.preventDefault();
 
-        axios.post(`http://localhost:5000/backtest`,{pyStoploss,pyTarget,backSymbol,startDate,endDate,backCapital,backQuantity})
+        setLoading(true)    
+        axios.post(`http://localhost:5000/backtest`,{pyStoploss,pyTarget,backSymbol,startDate,endDate,backCapital,backQuantity,strategyDetails,entryType,graphType,trailing})
               .then((response)=>{
-                console.log(response)
+               
                 const responseData = JSON.parse(response.data); // Manually parse the JSON string
                 setBacktest(responseData)
+                const parsedData = responseData.map(item => {
+                  return {
+                      ...item,
+                      monthly_pnl: typeof item.monthly_pnl === 'string' ? JSON.parse(item.monthly_pnl) : item.monthly_pnl
+                  };
+                 });
+              
+                setMonthlyData(parsedData)
+                console.log(parsedData)
+                setLoading(false)
+                console.log(responseData)
               })
               .catch((err)=>{
                 console.log(err)
               })
 
-        
+              
 
         // try {
         //   const response = await fetch('/backtest', {
@@ -366,17 +432,118 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
           // Update state or perform other actions with formattedDate
         };
 
-
-        const [indicator, setIndicator] = useState('');
-        const [condition, setCondition] = useState('');
-        const [threshold, setThreshold] = useState('');
+        function formatDate(dateString) {
+          const date = new Date(dateString);
+          const options = { day: '2-digit', month: 'short', year: 'numeric' };
+          return date.toLocaleDateString('en-GB', options);
+      }
       
-        // Function to handle the "Create Strategy" click
-        const handleCreateStrategy = () => {
-          // Here you would call a function to handle the strategy logic
-          console.log({ indicator, condition, threshold });
-          // This could involve calling an API, performing calculations, etc.
+      
+    
+
+        const [modalIsOpen, setModalIsOpen] = useState(false);
+        const [period, setPeriod] = useState('');
+        const [offset, setOffset] = useState('');
+        const [finalSelections, setFinalSelections] = useState([]);
+        const [selectedOptions, setSelectedOptions] = useState([]);
+        const [selectedIndicator, setSelectedIndicator] = useState({});
+        
+        const handleIndicatorChange = (options) => {
+          setSelectedOptions(options); // Update state with currently selected options
+          const latestOption = options[options.length - 1]; // Assuming the latest selected option is at the end
+          const category = groupedOptions.find(group => group.options.some(option => option.value === latestOption.value));
+          if (category && category.label === 'Indicators') {
+            setSelectedIndicator(latestOption);
+            setModalIsOpen(true);
+          } else {
+            // For non-indicators, add directly to final selections
+            setFinalSelections([...finalSelections, latestOption]);
+          }
         };
+      
+        const handleModalSubmit = () => {
+          const newSelection = {
+            label: `Period: ${period}, Offset: ${offset}`,
+            period,
+            offset,
+          };
+          setFinalSelections([...finalSelections, newSelection]);
+          setModalIsOpen(false); // Close the modal
+          setPeriod(''); // Reset period input
+          setOffset(''); // Reset offset input
+        };
+
+        const groupedOptions = [
+          {
+            label: 'Indicators',
+            options: [
+              { value: 'rsi', label: 'RSI' },
+              { value: 'macd', label: 'MACD' },
+              // add more indicators here
+            ],
+          },
+          {
+            label: 'Math Functions',
+            options: [
+              { value: 'add', label: 'Add' },
+              { value: 'subtract', label: 'Subtract' },
+              // add more math functions here
+            ],
+          },
+          {
+            label: 'Operators',
+            options: [
+              { value: 'greaterThan', label: 'Greater Than' },
+              { value: 'lessThan', label: 'Less Than' },
+              // add more operators here
+            ],
+          },
+        ];
+
+        const formatGroupLabel = (group) => (
+          <div style={{ fontWeight: 'bold' }}>
+            {group.label}
+          </div>
+        );
+
+
+        useEffect(() => {
+          if (Array.isArray(backtest) && backtest.length > 0) {
+            const calculatedSummary = backtest.reduce((acc, curr) => {
+              acc.totalSignals += curr.result["Total Signals"];
+              acc.totalPnL += curr.result["Total PnL"];
+              acc.totalWins += curr.result["Number of Wins"];
+              acc.totalLosses += curr.result["Number of Losses"];
+              acc.maxDrawdown += curr.result["Max Drawdown"];
+              acc.winStreakSum += curr.result["Winning Streak"];  // Sum of all win streaks
+              acc.loseStreakSum += curr.result["Losing Streak"]; // Sum of all lose streaks
+              acc.profitFactor += curr.result["Profit Factor"]; 
+              return acc;
+            }, {
+              totalSignals: 0,
+              totalPnL: 0,
+              totalWins: 0,
+              totalLosses: 0,
+              maxDrawdown: 0,
+              winStreakSum: 0,
+              loseStreakSum: 0,
+              profitFactor:0
+            });
+        
+            setSummary({
+              totalSignals: calculatedSummary.totalSignals,
+              totalPnL: calculatedSummary.totalPnL.toFixed(2),
+              totalWins: calculatedSummary.totalWins,
+              totalLosses: calculatedSummary.totalLosses,
+              maxDrawdown: calculatedSummary.maxDrawdown.toFixed(2),
+              avgWinStreak: (calculatedSummary.winStreakSum / backtest.length).toFixed(1),  // Average win streak
+              avgLoseStreak: (calculatedSummary.loseStreakSum / backtest.length).toFixed(1), // Average lose streak
+              profitFactor:(calculatedSummary.profitFactor/backtest.length).toFixed(1)
+            });
+          }
+        }, [backtest]);
+      
+        
 
   return (
     <div className='trade p-2 mx-2'>
@@ -386,6 +553,11 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
 
             <div>
                 <RealTimeClock></RealTimeClock>
+            </div>
+
+            <div>
+            <button onClick={() => setView('time')}>Options-Based</button>
+            <button onClick={() => setView('indicator')}>Equity-Based</button>
             </div>
 
             <div>
@@ -400,6 +572,9 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
 
         </div>
 
+        {view === 'time' ? (
+        
+      <div>
 
         <div>
     <Form className='d-flex justify-content-between'>
@@ -1334,28 +1509,46 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
         </div>
 
 
-        <div className='d-flex justify-content-center mt-3 bg-light'>
+        <div className='d-flex justify-content-center mt-3 bg-light mb-3'>
             <button className='btn btn-secondary' onClick={handleSave}>save</button>
         </div>
 
+        </div>
+
+) : (
+
+      <div>
+        <div  className='mt-3 bg-light p-2'>
+          <h4>Positions</h4>
+
+          <FormGroup>
+              {/* <FormSelect onChange={(e)=>setBackSymbol(e.target.value)}>
+
+                {stockList.map(stock => {
+                      return <option value={stock}>{stock}</option>;
+                    })}
+              </FormSelect> */}
+
+              <div className="btn-group mb-3 mt-2" role="group">
+                <input type="radio" className="btn-check" name="entryType" id="btnEntryType1" checked={entryType === 'buy'} onChange={() => setEntryType('buy')} />
+                <label className="btn btn-outline-primary" htmlFor="btnEntryType1">BUY</label>
+
+                <input type="radio" className="btn-check" name="entryType" id="btnEntryType2" checked={entryType === 'sell'} onChange={() => setEntryType('sell')} />
+                <label className="btn btn-outline-primary" htmlFor="btnEntryType2">SELL</label>
+              </div>    
 
 
-        <div className='w-50 mt-3'>
-            <FormGroup>
-              <FormSelect onChange={(e)=>setBackSymbol(e.target.value)}>
-                <option value='SBIN'>SBIN</option>
-                <option value='CIPLA'>CIPLA</option>
-                <option value='HDFCBANK'>HDFCBANK</option>
-              </FormSelect>
-            </FormGroup>
+              
+              <Select
+                isMulti
+                onChange={(selectedOptions) => setBackSymbol(selectedOptions.map(option => option.value))}
+                options={stockList.map(stock => ({ value: stock, label: stock }))}
+                className="basic-multi-select"
+                classNamePrefix="select"
+                placeholder="Select Symbols"
+            />
 
 
-            <FormGroup>
-              <FormLabel>Date</FormLabel>
-              <FormGroup className='d-flex'>
-              <FormControl type='date' onChange={(e)=>setStartDates(e.target.value)}></FormControl>
-              <FormControl type='date' onChange={(e)=>setEndDates(e.target.value)}></FormControl>
-              </FormGroup>
             </FormGroup>
 
             <FormGroup>
@@ -1363,11 +1556,89 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
               <FormControl type='number' onChange={(e)=>setBackQuantity(Number(e.target.value))}></FormControl>
             </FormGroup>
 
-            <FormGroup>
-              <FormLabel>Initial Capital</FormLabel>
-              <FormControl type='number' onChange={(e)=>setBackCapital(Number(e.target.value))}></FormControl>
-            </FormGroup>
 
+            <div className='d-flex mt-3 align-item-center justify-content-between'>
+              <FormLabel>Graph</FormLabel>
+
+              <FormSelect onChange={(e)=>setGraphType(e.target.value)} className='w-25'>
+                <option value='candle'>Candle Stick</option>
+                <option value='heikin-ashi'>Heikin-Ashi</option>
+              </FormSelect>
+
+              <FormSelect className='w-25'>
+                <option>1 Min</option>
+                <option>3 Min</option>
+                <option>5 Min</option>
+                <option>10 Min</option>
+                <option>15 Min</option>
+                <option>30 Min</option>
+                <option>1 Hour</option>
+                <option>1 Day</option>
+              </FormSelect>
+
+              <FormSelect className='w-25'>
+                <option>MIS</option>
+                <option>CNC/NRML</option>
+              </FormSelect>
+
+
+            
+            </div>
+
+            {showMore1 && (
+                     <div className='d-flex justify-content-between'>
+   
+                      <FormGroup>
+                        <FormLabel>Max Allocation</FormLabel>
+                        <FormControl></FormControl>
+                      </FormGroup>
+
+                      <FormGroup>
+                        <FormLabel>Max Quantity</FormLabel>
+                        <FormControl></FormControl>
+                      </FormGroup>
+
+                      <FormGroup>
+                        <FormLabel>Position size type</FormLabel>
+                        <FormSelect>
+                          <option>Capita based</option>
+                          <option>Risk based</option>
+                        </FormSelect>
+                      </FormGroup>
+                      
+   
+   
+                     </div>
+                     
+                 ) 
+   
+                 }
+
+            <a  className='mt-3 mb-3' href='#' onClick={()=> showMore1 ? setShowMore1(false) : setShowMore1(true)}>{showMore1 ? 'Hide Option' : 'Show Option'}</a>
+                 
+                 
+
+        
+        </div>
+
+
+
+
+         <div className='mt-3 bg-light p-2'>
+
+          <h4>Entry Condition</h4>
+            <Strategy 
+            indicatorDetails={indicatorDetails} 
+            setIndicatorDetails={setIndicatorDetails}
+            strategy  = {strategyDetails}
+            setStrategy = {setStrategyDetails}
+          />
+          </div>
+
+
+
+          <div  className='mt-3 bg-light p-2'>
+            <h4>Exit Condition</h4>
 
             <FormGroup>
               <FormLabel>Stoploss</FormLabel>
@@ -1380,74 +1651,403 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
               
             </FormGroup>
 
-            <div>
-      <select value={indicator} onChange={e => setIndicator(e.target.value)}>
-        <option value="">Select Indicator</option>
-        <option value="rsi">RSI</option>
-        <option value="macd">MACD</option>
-      </select>
+            {showMore && (
+                  <div>
 
-      <select value={condition} onChange={e => setCondition(e.target.value)}>
-        <option value="">Select Condition</option>
-        <option value="above">Above</option>
-        <option value="below">Below</option>
-      </select>
+                  <FormGroup>
+                    <FormLabel>Trailing SL %</FormLabel>
+                    <FormControl onChange={(e)=>setTrailing(Number(e.target.value))}></FormControl>
+                    <FormLabel>TPSL Type</FormLabel>
+                    <FormSelect onChange={(e)=>setTrailingType(e.target.value)}>
+                      <option value='%'>Percentage(%)</option>
+                      <option value='abs'>Absolute(abs)</option>
+                      <option value='pts'>Points(pts)</option>
+    
+                    </FormSelect>
+    
+                  </FormGroup>
 
-      <input
-        type="number"
-        value={threshold}
-        onChange={e => setThreshold(e.target.value)}
-        placeholder="Threshold Value"
+                  <div>
+                 
+                <Strategy 
+                indicatorDetails={indicatorDetails} 
+                setIndicatorDetails={setIndicatorDetails}
+                strategy  = {strategyDetails}
+                setStrategy = {setStrategyDetails}
+              />
+         
+
+                    </div>
+
+
+                  </div>
+                  
+              ) 
+
+              }
+
+            
+              <a  className='my-3' href='#' onClick={()=> showMore ? setShowMore(false) : setShowMore(true)}>{showMore ? 'Hide Option' : 'Show Option'}</a>
+                 
+              
+              
+            
+
+            </div>
+
+
+            <div  className='mt-3 bg-light p-2'>
+              <h4>Backtest Parameter</h4>
+
+              <FormGroup>
+              <FormLabel>Date</FormLabel>
+              <FormGroup className='d-flex'>
+              <FormControl type='date' onChange={(e)=>setStartDates(e.target.value)}></FormControl>
+              <FormControl type='date' onChange={(e)=>setEndDates(e.target.value)}></FormControl>
+              </FormGroup>
+            </FormGroup>
+
+           
+            <FormGroup>
+              <FormLabel>Initial Capital</FormLabel>
+              <FormControl type='number' onChange={(e)=>setBackCapital(Number(e.target.value))}></FormControl>
+            </FormGroup>
+
+
+              </div>
+
+        {/* <StrategyBuilder></StrategyBuilder>
+
+
+        <div>
+      <Select
+        closeMenuOnSelect={false}
+        components={animatedComponents}
+        options={groupedOptions}
+        onChange={handleIndicatorChange}
+        isMulti
       />
+      <Modal show={modalIsOpen} onHide={() => setModalIsOpen(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Indicator Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <input 
+            type="text" 
+            value={period} 
+            onChange={(e) => setPeriod(e.target.value)} 
+            placeholder="Period" 
+          />
+          <input 
+            type="text" 
+            value={offset} 
+            onChange={(e) => setOffset(e.target.value)} 
+            placeholder="Offset" 
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setModalIsOpen(false)}>Close</Button>
+          <Button variant="primary" onClick={handleModalSubmit}>Submit</Button>
+        </Modal.Footer>
+      </Modal>
+     
+    </div> */}
 
-      <button onClick={handleCreateStrategy}>Create Strategy</button>
-    </div>
 
-              <button onClick={handleStrategy} className='mt-4'>Start BackTest</button>
+        {/* <div>
+      <Select
+        closeMenuOnSelect={false}
+        components={animatedComponents}
+        options={groupedOptions}
+        isMulti
+        formatGroupLabel={formatGroupLabel} // Optional for custom group headings
+      />
+    </div> */}
+
+
+        <div className='mt-1 mb-3'>
+
+            <button onClick={handleStrategy} className='mt-4'>Start BackTest</button>
 
         </div>
         
-      
-       
+                
+         
+   
         
-        {backtest && (
+        {/* {backtest && (
         <>
             <h3>Strategy Metrics</h3>
           <ul>
-            <li>Total Signals: {backtest.result["Total Signals"]}</li>
-            <li>Number of Wins: {backtest.result["Number of Wins"]}</li>
-            <li>Number of Losses: {backtest.result["Number of Losses"]}</li>
-            <li>Winning Streak: {backtest.result["Winning Streak"]}</li>
-            <li>Losing Streak': {backtest.result["Losing Streak"]}</li>
-            <li>Max Gains: {backtest.result["Max Gains"]}</li>
-            <li>Max Loss: {backtest.result["Max Loss"]}</li>
-            <li>Avg Gain per Winning Trade: {backtest.result["Avg Gain per Winning Trade"]}</li> 
-            <li>Avg Loss per Losing Trade: {backtest.result["Avg Loss per Losing Trade"]}</li>
-            <li>Max Drawdown: {backtest.result["Max Drawdown"]}</li>
-            <li>Win Rate (%): {backtest.result["Win Rate (%)"]}</li>
-            <li>Loss Rate (%): {backtest.result["Loss Rate (%)"]}</li>
-            <li>Profit Factor: {backtest.result["Profit Factor"]}</li>
-            <li>Total PnL: {backtest.result["Total PnL"]}</li>
-            <li>Final Funds: {backtest.result["Remaining Funds"]}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Total Signals: {backtest.result_2["Total Signals"]}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Number of Wins: {backtest.result_2["Number of Wins"]}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Number of Losses: {backtest.result_2["Number of Losses"]}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Winning Streak: {backtest.result_2["Winning Streak"]}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Losing Streak: {backtest.result_2["Losing Streak"]}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Max Gains: {backtest.result_2["Max Gains"].toFixed(2)}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Max Loss: {backtest.result_2["Max Loss"].toFixed(2)}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Avg Gain per Winning Trade: {backtest.result_2["Avg Gain per Winning Trade"].toFixed(2)}</li> 
+            <li className='border rounded mb-2 w-50 p-2'>Avg Loss per Losing Trade: {backtest.result_2["Avg Loss per Losing Trade"].toFixed(2)}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Max Drawdown: {backtest.result_2["Max Drawdown"]}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Max Drawdown Days: {backtest.result_2['Max Drawdown Days']}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Win Rate (%): {backtest.result_2["Win Rate (%)"].toFixed(2)}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Loss Rate (%): {backtest.result_2["Loss Rate (%)"].toFixed(2)}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Profit Factor: {backtest.result_2["Profit Factor"].toFixed(2)}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Total PnL: {backtest.result_2["Total PnL"].toFixed(2)}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Total Brokerage: {backtest.result_2['Total Brokerage']}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Net Pnl After Brokerage: {backtest.result_2['Net PnL After Brokerage'].toFixed(2)}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Final Funds: {backtest.result_2["Remaining Funds"]}</li>
+            <li className='border rounded mb-2 w-50 p-2'>Expectency: {backtest.result_2['Expectancy'].toFixed(2)}</li>
           </ul>
 
-
-          <h3>Trade Details</h3>
-          <ul>
-            {backtest.result.trades.map((trade, index) => (
-              <li key={index}>
-                {trade.action} at {trade.price}{trade.pnl ? `, PnL: ${trade.pnl}` : ''}
-              </li>
-            ))}
-          </ul>
+          
+          <div>
+      <h3>Trade Details</h3>
+      <table className='w-100'>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>PnL</th>
+            <th>Action</th>
+            <th>Qunatity</th>
+            <th>Trigger</th>
+           
+            
+          </tr>
+        </thead>
+        <tbody>
+          {backtest.result_2.trades.map((trade, index) => (
+            <tr key={index}>
+              <td>{formatDate(trade.date)}</td>
+              <td>{trade.symbol}</td>
+              <td>{trade.price.toFixed(2)}</td>
+              <td>{trade.pnl ? `₹${trade.pnl.toFixed(2)}` : '-'}</td>
+              <td>{trade.action}</td>
+              <td>{trade.quantity}</td>
+              <td>{trade.trigger}</td>             
+             
+             
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
 
         
-
-          {/* Assuming you have a Base64 encoded image or a URL for the graph */}
           <img src={imageSrc} alt="Strategy Performance Graph" />
         </>
-      )}
+      )}   */}
 
+      {loading ? (
+                <div className='d-flex justify-content-center'><ProgressBar
+                visible={true}
+                height="80"
+                width="80"
+                color="#4fa94d"
+                ariaLabel="progress-bar-loading"
+                wrapperStyle={{}}
+                wrapperClass=""
+                /></div>  // Display this when data is being fetched
+            ) : backtest ? (
+    
+        <>
+
+        <table className="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Instrument</th>
+                        <th>Profit Factor</th>
+                        <th>P&amp;L</th>
+                        <th>W | L</th>
+                        <th>Trades</th>
+                        <th>WS</th>
+                        <th>LS</th>
+                        <th>Max DD</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        <tr>
+                          <td>Summary</td>
+                          <td>{summary.profitFactor}</td>
+                          <td>₹{summary.totalPnL}</td>
+                          <td>{summary.totalWins} | {summary.totalLosses}</td>
+                          <td>{summary.totalSignals}</td>
+                          <td>{summary.avgWinStreak}</td>
+                          <td>{summary.avgLoseStreak}</td>
+                          <td>{summary.maxDrawdown}</td>
+                        </tr>
+                    {backtest.map((result, index) => (
+                        <React.Fragment key={index}>
+                            <tr onClick={() => toggleRow(index)} style={{ cursor: 'pointer' }}>
+                                <td>{result.symbol}</td>
+                                <td>{result.result['Profit Factor'].toFixed(2)}</td>
+                                <td style={{ color: result.result["Total PnL"] >= 0 ? 'green' : 'red' }}>
+                                  ₹{result.result["Total PnL"].toFixed(2)}
+                                </td>
+                                <td>{result.result["Number of Wins"]} | {result.result["Number of Losses"]}</td>
+                                <td>{result.result["Total Signals"]}</td>
+                                <td>{result.result["Winning Streak"]}</td>
+                                <td>{result.result["Losing Streak"]}</td>
+                                <td>{result.result["Max Drawdown"].toFixed(2)}</td>
+                            </tr>
+                            {expandedRow === index && result.result && result.result.trades && (
+                                <tr>
+                                    <td colSpan="8">
+                                         <div>
+
+                                          <div>
+                                            <img src={`data:image/png;base64,${result.funds_graph}`} alt={`${result.symbol} Strategy Graph 1`} />
+
+                                          
+
+                                          <div>
+                                              <ul className='d-flex flex-wrap' style={{ listStyleType: 'none', padding: 0 }}>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Total Signals:</b> {result.result["Total Signals"]}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Number of Wins:</b> {result.result["Number of Wins"]}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Number of Losses:</b> {result.result["Number of Losses"]}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Avg Gain per Winning Trade:</b> ₹{result.result["Avg Gain per Winning Trade"].toFixed(2)}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Avg Loss per Losing Trade:</b> ₹{result.result["Avg Loss per Losing Trade"].toFixed(2)}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Win Rate (%):</b> {result.result["Win Rate (%)"].toFixed(2)}%
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Loss Rate (%):</b> {result.result["Loss Rate (%)"].toFixed(2)}%
+                                                </li>
+                                                {/* <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Profit Factor:</b> {result.result["Profit Factor"].toFixed(2)}
+                                                </li> */}
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Total PnL:</b> ₹{result.result["Total PnL"].toFixed(2)}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Total Brokerage:</b> ₹{result.result["Total Brokerage"].toFixed(2)}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Net PnL After Brokerage:</b> ₹{result.result["Net PnL After Brokerage"].toFixed(2)}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Final Funds:</b> ₹{result.result["Remaining Funds"]}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Expectancy:</b> {result.result["Expectancy"].toFixed(2)}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Max Gains:</b> ₹{result.result["Max Gains"].toFixed(2)}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Max Loss:</b> ₹{result.result["Max Loss"].toFixed(2)}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Max Drawdown:</b> {result.result["Max Drawdown"].toFixed(2)}
+                                                </li>
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Max Drawdown Days:</b> {result.result["Max Drawdown Days"]}
+                                                </li>
+                                              </ul>
+                                            </div>
+
+
+                                            <div>
+
+                                                {/* {backtest.map((result, index) => (
+                                                    <div key={index}>
+                                                        <h2>{result.symbol}</h2>
+                                                        <p>Monthly PnL: {result.monthly_pnl}</p>
+                                                   
+                                                    </div>
+                                                ))} */}
+
+                 {monthlyData.map((data, index) => (
+                <div key={index}>
+                    <h2>{data.symbol}</h2>
+                    <table className='w-100'>
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                {data.monthly_pnl.columns.map((month, idx) => (
+                                    <th key={idx}>{month}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.monthly_pnl.index.map((year, yearIndex) => (
+                                <tr key={yearIndex}>
+                                    <td>{year}</td>
+                                    {data.monthly_pnl.data[yearIndex].map((pnlValue, valueIndex) => (
+                                        <td style={{ color: pnlValue > 0 ? 'green' : pnlValue < 0 ? 'red' : 'black' }} key={valueIndex}>{pnlValue.toLocaleString()}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ))}
+                                                
+                                            </div>
+
+                                          </div> 
+                                           
+                                            <img src={`data:image/png;base64,${result.trade_graph}`} alt={`${result.symbol} Strategy Graph 2`} />
+                                        </div>
+                                        <table className='w-100'>
+                                            <thead>
+                                                <tr>
+                                                    <th>Time</th>
+                                                    <th>Symbol</th>
+                                                    <th>Price</th>
+                                                    <th>PnL</th>
+                                                    <th>Action</th>
+                                                    <th>Quantity</th>
+                                                    <th>Trigger</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {result.result.trades.map((trade, idx) => (
+                                                    <tr key={idx}>
+                                                        <td>{formatDate(trade.date)}</td>
+                                                        <td>{trade.symbol}</td>
+                                                        <td>{trade.price.toFixed(2)}</td>
+                                                        <td style={{ color: trade.pnl >= 0 ? 'green' : 'red' }}>
+                                                         {trade.pnl ? trade.pnl.toFixed(2) : ''} ₹
+                                                        </td>
+                                                        <td style={{ color: trade.action === 'Buy' ? '#6495ED' : '#E74C3C ' }}>
+                                                        {trade.action}
+                                                      </td>
+                                                        <td>{trade.quantity}</td>
+                                                        <td>{trade.trigger}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </tbody>
+            </table>
+
+        </>
+      )  
+      : (
+        <div>No data available</div>
+    )}                       
+
+
+    </div>
+     )}
     </div>
   )
 }
