@@ -207,13 +207,13 @@ const Dashboard = () => {
               </div>
             </li>
 
-            <li className={`system-trading ${(active === 'broker' || active === 'setup') ? 'active' : ''}`} onClick={() => pageHandler('broker')}>
+            {/* <li className={`system-trading ${(active === 'broker' || active === 'setup') ? 'active' : ''}`} onClick={() => pageHandler('broker')}>
             <div className="icon-container">
               <MdOutlineCalculate className='dash-icons' /> 
               <span className="nav-text"><h3>Broker</h3></span>
-              {/* <h3>Trading</h3> */}
+            
               </div>
-            </li>
+            </li> */}
            
            
             {/* <li className={`order ${active === 'order' ? 'active' : ''}`} onClick={() => pageHandler('order')}>
@@ -227,7 +227,7 @@ const Dashboard = () => {
             <li className={`account ${active === 'fundtrade' ? 'active' : ''}`} onClick={() => pageHandler('fundtrade')}>
             <div className="icon-container">
             <TbReportAnalytics  className='dash-icons'/>
-            <span className="nav-text"><h3>Performance</h3></span>
+            <span className="nav-text"><h3>Report and Anslsyis</h3></span>
             
               </div>
             </li>

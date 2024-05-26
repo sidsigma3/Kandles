@@ -341,11 +341,24 @@ const handleInputChange = (e, inputName) => {
             comparator: "",
             indicatorTwo: { value: "", params: {} }
         };
-        setStrategy(prev => ({
-            ...prev,
-            conditions: [...prev.conditions, newCondition],
-            logicalOperators: [...prev.logicalOperators, "AND"] // Default logical operator
-        }));
+    
+        setStrategy(prev => {
+            const newStrategy = {
+                ...prev,
+                conditions: [...prev.conditions, newCondition]
+            };
+    
+            // Check if conditions length is greater than 1 to add default logical operator
+            if (prev.conditions.length > 0) {
+                newStrategy.logicalOperators = [...prev.logicalOperators, 'AND'];
+            }
+
+            else{
+                
+            }
+    
+            return newStrategy;
+        });
     }
     
     function changeLogicalOperator(index, operator) {
@@ -358,16 +371,11 @@ const handleInputChange = (e, inputName) => {
     }
     
     function deleteCondition(index) {
-        setStrategy(prev => {
-            if (prev.conditions.length > 1) {
-                return {
-                    ...prev,
-                    conditions: prev.conditions.filter((_, i) => i !== index),
-                    logicalOperators: prev.logicalOperators.filter((_, i) => i !== index - 1) // Adjust logical operators array as well
-                };
-            }
-            return prev; // Do not delete the last condition
-        });
+        setStrategy(prev => ({
+            ...prev,
+            conditions: prev.conditions.filter((_, i) => i !== index),
+            logicalOperators: prev.logicalOperators.filter((_, i) => i !== index - 1) // Adjust logical operators array as well
+        }));
     }
     
     const handleComparatorChange = (e, index) => {
@@ -470,10 +478,12 @@ const handleInputChange = (e, inputName) => {
             <React.Fragment key={index}>
                 {index > 0 && (
                     <div className="logical-operator d-flex justify-content-center my-2">
-                        <Form.Control as="select"
-                            value={strategy.logicalOperators[index - 1]}
+                        <Form.Control
+                            as="select"
+                            value={strategy.logicalOperators[index - 1] || 'AND'}
                             onChange={(e) => changeLogicalOperator(index - 1, e.target.value)}
-                            className="form-control mb-3 w-25  text-center">
+                            className="form-control mb-3 w-25 text-center"
+                        >
                             <option value="AND">AND</option>
                             <option value="OR">OR</option>
                         </Form.Control>
@@ -531,12 +541,12 @@ const handleInputChange = (e, inputName) => {
                     </div>
                     </div>    
                         
-                    {index > 0 && (
+                  
                         <div>
                     <Button variant="danger" size="sm" className='ms-2' onClick={() => deleteCondition(index)}> <MdDeleteOutline size={30}/></Button>
                     
                         </div>
-                    )}
+                   
                 </div>
 
                

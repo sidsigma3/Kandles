@@ -12,6 +12,7 @@ import StrategyBuilder from '../overview/StrategyBuilder';
 import Strategy from '../overview/Strategy';
 import stockList from '../overview/StockList';
 import { ProgressBar } from 'react-loader-spinner'
+import optionList from '../overview/optionList';
 
 
 const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditingStrategyIndex ,isEditing,setIsEditing}) => {
@@ -43,7 +44,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
 
     const [showMore,setShowMore] = useState(false)
     const [showMore1,setShowMore1] = useState(false)
-    const [trailing,setTrailing] = useState()
+    const [trailing,setTrailing] = useState(0)
 
     const [overallSl,setOverallSl]=useState()
     const [overallSlType,setOverallSlType] =useState()
@@ -67,21 +68,30 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
       indicatorTwo: { value: '', offset: '', period: '', isNew: true ,indiInputs:{}},
     });
 
+    const [indicatorDetailsExit, setIndicatorDetailsExit] = useState({
+      indicatorOne: { value: '', offset: '', period: '', isNew: true ,indiInputs:{}},
+      comparator: '',
+      indicatorTwo: { value: '', offset: '', period: '', isNew: true ,indiInputs:{}},
+    });
+
     const [graphType,setGraphType] = useState()
     const [monthlyData,setMonthlyData] = useState()
     const [trailingType,setTrailingType] = useState()
     const [loading, setLoading] = useState(false);
-
+    const [positionSizeType,setPositionSizeType] = useState('')
+    const [maxQuantity,setMaxQuantity] = useState()
+    const [sizeAmount,setSizeAmount] = useState()
     const [strategyDetails, setStrategyDetails] = useState({
-      conditions: [
-          {
-              indicatorOne: { value: "", params: {} },
-              comparator: "",
-              indicatorTwo: { value: "", params: {} }
-          }
-      ],
-      logicalOperators: [] 
+      conditions: [],
+      logicalOperators: []
     });
+
+    const [strategyDetailsExit, setStrategyDetailsExit] = useState({
+      conditions: [],
+      logicalOperators: []
+    });
+
+
 
     const [summary, setSummary] = useState({
       totalSignals: 0,
@@ -91,11 +101,28 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
       maxDrawdown: 0
     });
   
-    
+  const [filteredTrades,setFilterdTrades] = useState()
 
+
+  const [targetPct,setTargetPct] = useState()
+  const [slPct,setSlPct] = useState()
+  const [trailPct,setTrailPct] = useState()
+
+  const [moveSl,setMoveSl] = useState()
+  const [moveInstrument,setMoveInstrument] = useState()
+
+  const [moveSlPct,setMoveSlPct] = useState()
+  const [moveInstrumentPct,setMoveInstrumentPct] = useState()
+
+  const [ instrumentType,setInstrumentType] = useState('equity')
+
+  const [timePeriod,setTimePeriod] = useState('day')
+
+  const [selectedSymbol,setSelectedSymbol] = useState()
 
   const toggleRow = (index) => {
       setExpandedRow(expandedRow === index ? null : index);
+      setSelectedSymbol(backtest[index].symbol)
   };
 
     // const formatDate = (date) => {
@@ -339,7 +366,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
         e.preventDefault();
 
         setLoading(true)    
-        axios.post(`http://localhost:5000/backtest`,{pyStoploss,pyTarget,backSymbol,startDate,endDate,backCapital,backQuantity,strategyDetails,entryType,graphType,trailing})
+        axios.post(`http://localhost:5000/backtest`,{slPct,targetPct,backSymbol,startDate,endDate,backCapital,backQuantity,strategyDetails,entryType,graphType,trailPct,sizeAmount,maxQuantity,strategyDetailsExit,positionSizeType,moveSlPct,moveInstrumentPct,timePeriod})
               .then((response)=>{
                
                 const responseData = JSON.parse(response.data); // Manually parse the JSON string
@@ -434,7 +461,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
 
         function formatDate(dateString) {
           const date = new Date(dateString);
-          const options = { day: '2-digit', month: 'short', year: 'numeric' };
+          const options = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
           return date.toLocaleDateString('en-GB', options);
       }
       
@@ -508,7 +535,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
 
 
         useEffect(() => {
-          if (Array.isArray(backtest) && backtest.length > 0) {
+          if (Array.isArray(backtest) && backtest.length > 0) {   
             const calculatedSummary = backtest.reduce((acc, curr) => {
               acc.totalSignals += curr.result["Total Signals"];
               acc.totalPnL += curr.result["Total PnL"];
@@ -541,9 +568,77 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
               profitFactor:(calculatedSummary.profitFactor/backtest.length).toFixed(1)
             });
           }
-        }, [backtest]);
-      
         
+        // if (backtest){ 
+      
+        // }
+        }, [backtest]);
+
+
+        useEffect(()=>{
+          setTargetPct(pyTarget/100) 
+          
+        },[pyTarget])
+
+        useEffect(()=>{
+          setSlPct(pyStoploss/100) 
+          
+        },[pyStoploss])
+
+
+        useEffect(()=>{
+          setTrailPct(trailing/100) 
+          
+        },[trailing])
+
+
+        useEffect(()=>{
+          setMoveSlPct(moveSl/100)
+        },[moveSl])
+
+
+        useEffect(()=>{
+          setMoveInstrumentPct(moveInstrument/100)
+        },[moveInstrument])
+      
+        const [selectedSentiment, setSelectedSentiment] = useState('All'); // State variable for selected sentiment
+
+        // Function to handle sentiment change
+        const handleSentimentChange = (event) => {
+          setSelectedSentiment(event.target.value);
+        };
+
+      //   useEffect(() => {
+      //     if (backtest && Array.isArray(backtest)) {
+      //         const filteredTrade = backtest
+      //             .map(result => result.result.trades)
+      //             .flat()
+      //             .filter(trade => selectedSentiment === 'All' || trade.day_type === selectedSentiment);
+      //         setFilterdTrades(filteredTrade);
+      //     }
+
+    
+
+      // }, [backtest, selectedSentiment]);
+
+      useEffect(() => {
+        if (backtest && Array.isArray(backtest)) {
+          const filteredTrade = backtest
+            .filter(result => result.symbol === selectedSymbol) 
+            .map(result => result.result.trades)
+            .flat()
+            .filter(trade => selectedSentiment === 'All' || trade.day_type === selectedSentiment);
+          setFilterdTrades(filteredTrade);
+        }
+      }, [backtest, selectedSymbol, selectedSentiment]);
+  
+
+    //  useEffect(()=>{
+    //   const trailPercentage = (moveSl/moveInstrument) * 100
+    //   setTrailing(trailPercentage)
+
+    //  },[moveSl,moveInstrument])
+
 
   return (
     <div className='trade p-2 mx-2'>
@@ -1538,22 +1633,39 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
               </div>    
 
 
+              <div className='d-flex justify-content-between'>
+
+                <FormGroup className='w-25'>
+                  <FormLabel>Type of Instruments</FormLabel>
+                  <FormSelect onChange={(e)=>setInstrumentType(e.target.value)}>
+                    <option value='equity'>Equity</option>
+                    <option value='indices'>Indices</option>
+                  </FormSelect>
+
+                </FormGroup>
+
               
+
+                
+              <FormGroup className='w-75'>
+              <FormLabel>Instruments</FormLabel>
               <Select
                 isMulti
                 onChange={(selectedOptions) => setBackSymbol(selectedOptions.map(option => option.value))}
-                options={stockList.map(stock => ({ value: stock, label: stock }))}
+                options={ instrumentType === 'equity'? stockList.map(stock => ({ value: stock, label: stock })): optionList.map(stock => ({ value: stock, label: stock }))}
                 className="basic-multi-select"
                 classNamePrefix="select"
                 placeholder="Select Symbols"
             />
+              </FormGroup>
 
+            </div>
 
             </FormGroup>
 
             <FormGroup>
               <FormLabel>Quantity</FormLabel>
-              <FormControl type='number' onChange={(e)=>setBackQuantity(Number(e.target.value))}></FormControl>
+              <FormControl type='number' onChange={(e)=>setBackQuantity(Number(e.target.value))} readOnly={positionSizeType?true:false}></FormControl>
             </FormGroup>
 
 
@@ -1565,15 +1677,15 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                 <option value='heikin-ashi'>Heikin-Ashi</option>
               </FormSelect>
 
-              <FormSelect className='w-25'>
-                <option>1 Min</option>
-                <option>3 Min</option>
-                <option>5 Min</option>
-                <option>10 Min</option>
-                <option>15 Min</option>
-                <option>30 Min</option>
-                <option>1 Hour</option>
-                <option>1 Day</option>
+              <FormSelect onChange={(e)=>setTimePeriod(e.target.value)} className='w-25'>
+                <option value='minute'>1 Min</option>
+                {/* <option value=''>3 Min</option> */}
+                <option value='5minute'>5 Min</option>
+                <option value='10min'>10 Min</option>
+                <option value='15min'>15 Min</option>
+                <option value='30min'>30 Min</option>
+                <option value='hourly'>1 Hour</option>
+                <option value='daily'>1 Day</option>
               </FormSelect>
 
               <FormSelect className='w-25'>
@@ -1589,20 +1701,21 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                      <div className='d-flex justify-content-between'>
    
                       <FormGroup>
-                        <FormLabel>Max Allocation</FormLabel>
-                        <FormControl></FormControl>
+                        <FormLabel>{positionSizeType === 'capital'? 'Max Allocation' : 'Max Sl per trade' }</FormLabel>
+                        <FormControl onChange={(e)=>setSizeAmount(Number(e.target.value))}></FormControl>
                       </FormGroup>
 
                       <FormGroup>
                         <FormLabel>Max Quantity</FormLabel>
-                        <FormControl></FormControl>
+                        <FormControl onChange={(e)=>setMaxQuantity(Number(e.target.value))}></FormControl>
                       </FormGroup>
 
                       <FormGroup>
                         <FormLabel>Position size type</FormLabel>
-                        <FormSelect>
-                          <option>Capita based</option>
-                          <option>Risk based</option>
+                        <FormSelect onChange={(e)=>setPositionSizeType(e.target.value)}>
+                          <option value={''}>-</option>
+                          <option value='capital'>Capital based</option>
+                          <option value='risk'>Risk based</option>
                         </FormSelect>
                       </FormGroup>
                       
@@ -1652,28 +1765,47 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
             </FormGroup>
 
             {showMore && (
+              
+
                   <div>
 
-                  <FormGroup>
-                    <FormLabel>Trailing SL %</FormLabel>
-                    <FormControl onChange={(e)=>setTrailing(Number(e.target.value))}></FormControl>
+                  <FormGroup className='d-flex justify-content-between'>
+                    <div>
+                    <FormLabel>If instrument move by</FormLabel>
+                    <FormControl onChange={(e)=>setMoveInstrument(Number(e.target.value))}></FormControl>
+                    </div>
+
+                  
+
+                    <div>
+                    <FormLabel>Move SL By</FormLabel>
+                    <FormControl onChange={(e)=> setMoveSl(Number(e.target.value))}></FormControl>
+                    </div>
+
+                    <div>
                     <FormLabel>TPSL Type</FormLabel>
                     <FormSelect onChange={(e)=>setTrailingType(e.target.value)}>
                       <option value='%'>Percentage(%)</option>
                       <option value='abs'>Absolute(abs)</option>
-                      <option value='pts'>Points(pts)</option>
-    
+                      <option value='pts'>Points(pts)</option>    
                     </FormSelect>
-    
+                    </div>
+
+                    {/* <div>
+                      <FormControl onChange={(e)=>setTrailing(e.target.value)}></FormControl>
+                    </div> */}
+
+                   
+
                   </FormGroup>
 
                   <div>
                  
                 <Strategy 
-                indicatorDetails={indicatorDetails} 
-                setIndicatorDetails={setIndicatorDetails}
-                strategy  = {strategyDetails}
-                setStrategy = {setStrategyDetails}
+                indicatorDetails={indicatorDetailsExit} 
+                setIndicatorDetails={setIndicatorDetailsExit}
+                strategy  = {strategyDetailsExit}
+                setStrategy = {setStrategyDetailsExit}
               />
          
 
@@ -1876,7 +2008,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                           <td>{summary.totalSignals}</td>
                           <td>{summary.avgWinStreak}</td>
                           <td>{summary.avgLoseStreak}</td>
-                          <td>{summary.maxDrawdown}</td>
+                          <td>-{summary.maxDrawdown}</td>
                         </tr>
                     {backtest.map((result, index) => (
                         <React.Fragment key={index}>
@@ -1890,7 +2022,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                                 <td>{result.result["Total Signals"]}</td>
                                 <td>{result.result["Winning Streak"]}</td>
                                 <td>{result.result["Losing Streak"]}</td>
-                                <td>{result.result["Max Drawdown"].toFixed(2)}</td>
+                                <td>-{result.result["Max Drawdown"].toFixed(2)}</td>
                             </tr>
                             {expandedRow === index && result.result && result.result.trades && (
                                 <tr>
@@ -1914,10 +2046,10 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                                                   <b>Number of Losses:</b> {result.result["Number of Losses"]}
                                                 </li>
                                                 <li className='border rounded mb-2 w-25 p-2'>
-                                                  <b>Avg Gain per Winning Trade:</b> ₹{result.result["Avg Gain per Winning Trade"].toFixed(2)}
+                                                  <b>Avg Gain per Winning Trade:</b> ₹ {result.result["Avg Gain per Winning Trade"].toFixed(2)}
                                                 </li>
                                                 <li className='border rounded mb-2 w-25 p-2'>
-                                                  <b>Avg Loss per Losing Trade:</b> ₹{result.result["Avg Loss per Losing Trade"].toFixed(2)}
+                                                  <b>Avg Loss per Losing Trade:</b> ₹ -{result.result["Avg Loss per Losing Trade"].toFixed(2)}
                                                 </li>
                                                 <li className='border rounded mb-2 w-25 p-2'>
                                                   <b>Win Rate (%):</b> {result.result["Win Rate (%)"].toFixed(2)}%
@@ -1938,7 +2070,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                                                   <b>Net PnL After Brokerage:</b> ₹{result.result["Net PnL After Brokerage"].toFixed(2)}
                                                 </li>
                                                 <li className='border rounded mb-2 w-25 p-2'>
-                                                  <b>Final Funds:</b> ₹{result.result["Remaining Funds"]}
+                                                  <b>Total Invested Fund:</b> ₹{(result.result["investedFund"]/result.result["Total Signals"]).toFixed(2)}
                                                 </li>
                                                 <li className='border rounded mb-2 w-25 p-2'>
                                                   <b>Expectancy:</b> {result.result["Expectancy"].toFixed(2)}
@@ -1955,45 +2087,82 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                                                 <li className='border rounded mb-2 w-25 p-2'>
                                                   <b>Max Drawdown Days:</b> {result.result["Max Drawdown Days"]}
                                                 </li>
+
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Target Reached:</b> {result.result["targetCount"]}
+                                                </li>
+
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>Stoploss Hit:</b> {result.result["slCount"]}
+                                                </li>
+
+                                                 <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>TSL Hit:</b> {result.result["tslCount"]}
+                                                </li>
+
+                                                {strategyDetailsExit.conditions.length > 0 && (
+                                                   <li className='border rounded mb-2 w-25 p-2'>
+                                                   <b>Sell Signal:</b> {result.result["sellSignalCount"]}
+                                                 </li>
+                                                )}                              
+
+                                                <li className='border rounded mb-2 w-25 p-2'>
+                                                  <b>ROI:</b> {((result.result['Total PnL']/(result.result["investedFund"]/result.result["Total Signals"]))*100).toFixed(2)}
+                                                </li>
+
                                               </ul>
                                             </div>
 
 
                                             <div>
 
-                                                {/* {backtest.map((result, index) => (
-                                                    <div key={index}>
-                                                        <h2>{result.symbol}</h2>
-                                                        <p>Monthly PnL: {result.monthly_pnl}</p>
-                                                   
-                                                    </div>
-                                                ))} */}
+                               
 
-                 {monthlyData.map((data, index) => (
-                <div key={index}>
-                    <h2>{data.symbol}</h2>
-                    <table className='w-100'>
-                        <thead>
-                            <tr>
-                                <th>Year</th>
-                                {data.monthly_pnl.columns.map((month, idx) => (
-                                    <th key={idx}>{month}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {data.monthly_pnl.index.map((year, yearIndex) => (
-                                <tr key={yearIndex}>
-                                    <td>{year}</td>
-                                    {data.monthly_pnl.data[yearIndex].map((pnlValue, valueIndex) => (
-                                        <td style={{ color: pnlValue > 0 ? 'green' : pnlValue < 0 ? 'red' : 'black' }} key={valueIndex}>{pnlValue.toLocaleString()}</td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            ))}
+                                            `{monthlyData.map((data, outerIndex) => {
+                                                if (outerIndex === index) {
+                                                    return (
+                                                        <div key={outerIndex}>
+                                                            <h2>{data.symbol}</h2>
+                                                            <table className='w-100'>
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Year</th>
+                                                                        {data.monthly_pnl.columns.map((month, idx) => (
+                                                                            <th key={idx}>{month}</th>
+                                                                        ))}
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {data.monthly_pnl.index.map((year, yearIndex) => (
+                                                                        <tr
+                                                                            key={yearIndex}
+                                                                            style={{
+                                                                                backgroundColor: yearIndex === data.monthly_pnl.index.length - 1 ? 'lightgrey' : 'transparent',
+                                                                                fontWeight: yearIndex === data.monthly_pnl.index.length - 1 ? 'bold' : 'normal',
+                                                                            }}
+                                                                        >
+                                                                            <td>{year}</td>
+                                                                            {data.monthly_pnl.data[yearIndex].map((pnlValue, valueIndex) => (
+                                                                                <td
+                                                                                    style={{
+                                                                                        color: pnlValue > 0 ? 'green' : pnlValue < 0 ? 'red' : 'black'
+                                                                                    }}
+                                                                                    key={valueIndex}
+                                                                                >
+                                                                                    {pnlValue}
+                                                                                </td>
+                                                                            ))}
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    );
+                                                }
+                                                return null; // Render nothing for other indices
+                                            })}`
+
+
                                                 
                                             </div>
 
@@ -2001,12 +2170,23 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                                            
                                             <img src={`data:image/png;base64,${result.trade_graph}`} alt={`${result.symbol} Strategy Graph 2`} />
                                         </div>
+                                        <select value={selectedSentiment} onChange={handleSentimentChange}>
+                                                <option value="All">All</option>
+                                                <option value="bullish">Bullish</option>
+                                                <option value="bearish">Bearish</option>
+                                                <option value="sideways">Sideways</option>
+                                        </select>
+
                                         <table className='w-100'>
                                             <thead>
                                                 <tr>
-                                                    <th>Time</th>
+                                                    <th>Date</th>
+                                                    <th>Sentiment</th>
                                                     <th>Symbol</th>
                                                     <th>Price</th>
+                                                    <th>Stoploss</th>
+                                                    <th>Trailing Sl</th>
+                                                    <th>Target</th>
                                                     <th>PnL</th>
                                                     <th>Action</th>
                                                     <th>Quantity</th>
@@ -2014,11 +2194,15 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {result.result.trades.map((trade, idx) => (
+                                                {filteredTrades.map((trade, idx) => (
                                                     <tr key={idx}>
                                                         <td>{formatDate(trade.date)}</td>
+                                                        <td>{trade.day_type}</td>
                                                         <td>{trade.symbol}</td>
                                                         <td>{trade.price.toFixed(2)}</td>
+                                                        <td>{trade.stopLossprice!= undefined ? trade.stopLossprice.toFixed(2):0}</td>
+                                                        <td>{trade.trailingSl!= undefined ? trade.trailingSl.toFixed(2):0}</td>
+                                                        <td>{trade.targetPrice.toFixed(2)}</td>
                                                         <td style={{ color: trade.pnl >= 0 ? 'green' : 'red' }}>
                                                          {trade.pnl ? trade.pnl.toFixed(2) : ''} ₹
                                                         </td>

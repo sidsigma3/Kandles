@@ -2356,5 +2356,34 @@ function getMargins(segment) {
     });
 });
 
+// router.post('/backtest', (req, res) => {
+//   const input = JSON.stringify(req.body);
+//   const pythonProcess = spawn('python', ['./config/strategy.py', input]);
+
+//   let dataString = '';
+  
+//   pythonProcess.stdout.on('data', (data) => {
+//       dataString += data.toString();
+//   });
+
+//   pythonProcess.stderr.on('data', (data) => {
+//       console.error(`stderr: ${data}`);
+//   });
+
+//   pythonProcess.on('close', (code) => {
+//       console.log(`Process exited with code ${code}`);
+//       try {
+//           const responseJson = JSON.parse(dataString);
+//           res.json(responseJson);
+//       } catch (error) {
+//           console.error('Error parsing JSON:', error);
+//           res.status(500).json({ error: 'Failed to parse response from Python script.' });
+//       }
+//   });
+// });
+
+
+
+
   return router;
 };
