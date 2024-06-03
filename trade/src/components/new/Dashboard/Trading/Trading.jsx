@@ -86,7 +86,17 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
       logicalOperators: []
     });
 
+    const [strategyDetails2, setStrategyDetails2] = useState({
+      conditions: [],
+      logicalOperators: []
+    });
+
     const [strategyDetailsExit, setStrategyDetailsExit] = useState({
+      conditions: [],
+      logicalOperators: []
+    });
+
+    const [strategyDetailsExit2, setStrategyDetailsExit2] = useState({
       conditions: [],
       logicalOperators: []
     });
@@ -103,6 +113,8 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
   
   const [filteredTrades,setFilterdTrades] = useState()
 
+  const [maxLong,setMaxLong] = useState()
+  const [maxShort,setMaxShort] = useState()
 
   const [targetPct,setTargetPct] = useState()
   const [slPct,setSlPct] = useState()
@@ -120,9 +132,15 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
 
   const [selectedSymbol,setSelectedSymbol] = useState()
 
+  const [selectedTrigger, setSelectedTrigger] = useState('All')
+
   const toggleRow = (index) => {
       setExpandedRow(expandedRow === index ? null : index);
       setSelectedSymbol(backtest[index].symbol)
+  };
+
+  const handleTriggerChange = (event) => {
+    setSelectedTrigger(event.target.value);
   };
 
     // const formatDate = (date) => {
@@ -366,7 +384,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
         e.preventDefault();
 
         setLoading(true)    
-        axios.post(`http://localhost:5000/backtest`,{slPct,targetPct,backSymbol,startDate,endDate,backCapital,backQuantity,strategyDetails,entryType,graphType,trailPct,sizeAmount,maxQuantity,strategyDetailsExit,positionSizeType,moveSlPct,moveInstrumentPct,timePeriod})
+        axios.post(`http://localhost:5000/backtest`,{slPct,targetPct,backSymbol,startDate,endDate,backCapital,backQuantity,strategyDetails,entryType,graphType,trailPct,sizeAmount,maxQuantity,strategyDetailsExit,positionSizeType,moveSlPct,moveInstrumentPct,timePeriod,marketType,strategyDetails2,strategyDetailsExit2})
               .then((response)=>{
                
                 const responseData = JSON.parse(response.data); // Manually parse the JSON string
@@ -382,6 +400,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                 console.log(parsedData)
                 setLoading(false)
                 console.log(responseData)
+                setExpandedRow(null)
               })
               .catch((err)=>{
                 console.log(err)
@@ -465,7 +484,8 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
           return date.toLocaleDateString('en-GB', options);
       }
       
-      
+
+        const [marketType,setMarketType] = useState()
     
 
         const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -611,33 +631,112 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
       //   useEffect(() => {
       //     if (backtest && Array.isArray(backtest)) {
       //         const filteredTrade = backtest
-      //             .map(result => result.result.trades)
+      //             .map(result => result.result.tradesShort)
       //             .flat()
       //             .filter(trade => selectedSentiment === 'All' || trade.day_type === selectedSentiment);
       //         setFilterdTrades(filteredTrade);
       //     }
 
-    
+      
 
       // }, [backtest, selectedSentiment]);
 
+      
+
+      // useEffect(() => {
+      //   if (backtest && Array.isArray(backtest)) {
+      //     const filteredTrade = backtest
+      //       .filter(result => result.symbol === selectedSymbol)
+      //       .map(result => [...result.result.trades, ...result.result.tradesShort]) 
+      //       .flat()
+      //       .filter(trade =>
+      //         (selectedSentiment === 'All' || trade.day_type === selectedSentiment) &&
+      //         (selectedTrigger === 'All' || trade.trigger === selectedTrigger)
+      //       )
+      //       .sort((a, b) => new Date(a.date) - new Date(b.date)); 
+    
+      //       setFilterdTrades(filteredTrade);
+      //   }
+      // }, [backtest, selectedSymbol, selectedSentiment, selectedTrigger]);
+      
       useEffect(() => {
         if (backtest && Array.isArray(backtest)) {
-          const filteredTrade = backtest
-            .filter(result => result.symbol === selectedSymbol) 
+          const pairTrades = (trades) => {
+            const pairedTrades = [];
+            let currentPair = [];
+    
+            trades.forEach(trade => {
+              if (currentPair.length === 0) {
+                currentPair.push(trade);
+              } else {
+                const [firstTrade] = currentPair;
+                if (
+                  (firstTrade.action === 'Buy' && trade.action === 'Sell') ||
+                  (firstTrade.action === 'Sell' && trade.action === 'Buy')
+                ) {
+                  currentPair.push(trade);
+                  pairedTrades.push([...currentPair]);
+                  currentPair = [];
+                } else {
+                  pairedTrades.push([...currentPair]);
+                  currentPair = [trade];
+                }
+              }
+            });
+    
+            if (currentPair.length > 0) {
+              pairedTrades.push(currentPair);
+            }
+    
+            return pairedTrades;
+          };
+    
+          // Extract, filter, and pair long trades
+          const longTrades = backtest
+            .filter(result => result.symbol === selectedSymbol)
             .map(result => result.result.trades)
             .flat()
-            .filter(trade => selectedSentiment === 'All' || trade.day_type === selectedSentiment);
-          setFilterdTrades(filteredTrade);
+            .filter(trade =>
+              (selectedSentiment === 'All' || trade.day_type === selectedSentiment) &&
+              (selectedTrigger === 'All' || trade.trigger === selectedTrigger)
+            );
+          const pairedLongTrades = pairTrades(longTrades);
+    
+          // Extract, filter, and pair short trades
+          const shortTrades = backtest
+            .filter(result => result.symbol === selectedSymbol)
+            .map(result => result.result.tradesShort)
+            .flat()
+            .filter(trade =>
+              (selectedSentiment === 'All' || trade.day_type === selectedSentiment) &&
+              (selectedTrigger === 'All' || trade.trigger === selectedTrigger)
+            );
+          const pairedShortTrades = pairTrades(shortTrades);
+    
+          // Combine paired trades and sort by date
+          const combinedTrades = [...pairedLongTrades.flat(), ...pairedShortTrades.flat()];
+          combinedTrades.sort((a, b) => (a.tradeNumber) -(b.tradeNumber));
+          
+          let cumulativePnL = 0;
+          const combinedTradesWithCumulativePnL = combinedTrades.map(trade => {
+            if (trade.pnl !== undefined && trade.pnl !== null) {
+              cumulativePnL += trade.pnl;
+            }
+            return { ...trade, cumulativePnL };
+          });
+        
+         setFilterdTrades(combinedTradesWithCumulativePnL);  
+       
+          // setFilterdTrades(combinedTrades);
         }
-      }, [backtest, selectedSymbol, selectedSentiment]);
+      }, [backtest, selectedSymbol, selectedSentiment, selectedTrigger]);
+    
   
+     useEffect(()=>{
+      const trailPercentage = (moveSl/moveInstrument) * 100
+      setTrailing(trailPercentage)
 
-    //  useEffect(()=>{
-    //   const trailPercentage = (moveSl/moveInstrument) * 100
-    //   setTrailing(trailPercentage)
-
-    //  },[moveSl,moveInstrument])
+     },[moveSl,moveInstrument])
 
 
   return (
@@ -1678,9 +1777,9 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
               </FormSelect>
 
               <FormSelect onChange={(e)=>setTimePeriod(e.target.value)} className='w-25'>
-                <option value='minute'>1 Min</option>
+                <option value='min'>1 Min</option>
                 {/* <option value=''>3 Min</option> */}
-                <option value='5minute'>5 Min</option>
+                <option value='5min'>5 Min</option>
                 <option value='10min'>10 Min</option>
                 <option value='15min'>15 Min</option>
                 <option value='30min'>30 Min</option>
@@ -1688,9 +1787,9 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                 <option value='daily'>1 Day</option>
               </FormSelect>
 
-              <FormSelect className='w-25'>
-                <option>MIS</option>
-                <option>CNC/NRML</option>
+              <FormSelect onChange={(e)=>setMarketType(e.target.value)} className='w-25'>
+                <option value='mis'>MIS</option>
+                <option value='cnc'>CNC/NRML</option>
               </FormSelect>
 
 
@@ -1701,7 +1800,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                      <div className='d-flex justify-content-between'>
    
                       <FormGroup>
-                        <FormLabel>{positionSizeType === 'capital'? 'Max Allocation' : 'Max Sl per trade' }</FormLabel>
+                        <FormLabel>{positionSizeType === 'capital'? 'Max Allocation (amount)' : 'Max Sl per trade (%)' }</FormLabel>
                         <FormControl onChange={(e)=>setSizeAmount(Number(e.target.value))}></FormControl>
                       </FormGroup>
 
@@ -1745,7 +1844,23 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
             setIndicatorDetails={setIndicatorDetails}
             strategy  = {strategyDetails}
             setStrategy = {setStrategyDetails}
+            strategy2={strategyDetails2}
+            setStrategy2={setStrategyDetails2}
+            type = {'Entry'}
           />
+            
+            <div className='d-flex justify-content-between mt-3'>
+            <FormGroup>
+              <FormLabel>Max No. of Long Entry in a Day</FormLabel>
+              <FormControl type='number' onChange={(e)=>setMaxLong(e.target.value)}></FormControl>
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>Max No. of Short Entry in a Day</FormLabel>
+              <FormControl type='number' onChange={(e)=>setMaxShort(e.target.value)}></FormControl>
+            </FormGroup>
+            </div>
+
           </div>
 
 
@@ -1806,6 +1921,9 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                 setIndicatorDetails={setIndicatorDetailsExit}
                 strategy  = {strategyDetailsExit}
                 setStrategy = {setStrategyDetailsExit}
+                strategy2={strategyDetailsExit2}
+                setStrategy2={setStrategyDetailsExit2}
+                t   ype = {'Exit'}
               />
          
 
@@ -2104,6 +2222,12 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                                                    <li className='border rounded mb-2 w-25 p-2'>
                                                    <b>Sell Signal:</b> {result.result["sellSignalCount"]}
                                                  </li>
+                                                )} 
+
+                                                {marketType === 'mis' && (
+                                                   <li className='border rounded mb-2 w-25 p-2'>
+                                                   <b>Market Close:</b> {result.result["marketCloseCount"]}
+                                                 </li>
                                                 )}                              
 
                                                 <li className='border rounded mb-2 w-25 p-2'>
@@ -2177,7 +2301,63 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                                                 <option value="sideways">Sideways</option>
                                         </select>
 
+                                        <select value={selectedTrigger} onChange={handleTriggerChange}>
+                                          <option value="All">All</option>
+                                          <option value="Entry Signal">Entry</option>
+                                          <option value="stoploss">Stop Loss</option>
+                                          <option value="target">Target</option>
+                                          <option value="tsl">TSL</option>
+                                          <option value="Market Close">Market Close</option>
+                                        </select>
+
                                         <table className='w-100'>
+                                            <thead>
+                                                <tr>
+                                                    <th>Trade #</th>
+                                                    <th>Date</th>
+                                                    <th>Sentiment</th>
+                                                    <th>Signal Type</th>
+                                                    <th>Symbol</th>
+                                                    <th>Price</th>
+                                                    <th>Stoploss</th>
+                                                    <th>Trailing Sl</th>
+                                                    <th>Target</th>
+                                                    <th>PnL</th>
+                                                    <th>Cumulative Pnl</th>
+                                                    <th>Action</th>
+                                                    <th>Quantity</th>
+                                                    <th>Trigger</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {filteredTrades.map((trade, idx) => (
+                                              <tr key={idx}>
+                                                <td>{trade.tradeNumber}</td>
+                                                <td>{formatDate(trade.date)}</td>
+                                                <td>{trade.day_type}</td>
+                                                <td>{trade.signalType}</td>
+                                                <td>{trade.symbol}</td>
+                                                <td>{trade.price.toFixed(2)}</td>
+                                                <td>{trade.stopLossprice !== undefined ? trade.stopLossprice.toFixed(2) : '0'}</td>
+                                                <td>{trade.trailingSl !== undefined ? trade.trailingSl.toFixed(2) : '0'}</td>
+                                                <td>{trade.targetPrice.toFixed(2)}</td>
+                                                <td style={{ color: trade.pnl >= 0 ? 'green' : 'red' }}>
+                                                  {trade.pnl ? '₹ '+ trade.pnl.toFixed(2) : ''} 
+                                                </td>
+                                                <td style={{color:trade.cumulativePnL >= 0 ? 'green' : 'red'}}>
+                                                  {trade.pnl !== undefined && trade.pnl !== null ? '₹ '+trade.cumulativePnL.toFixed(2): ''}
+                                                </td>
+                                                <td style={{ color: trade.action === 'Buy' ? '#6495ED' : '#E74C3C' }}>
+                                                  {trade.action}
+                                                </td>
+                                                <td>{trade.quantity}</td>
+                                                <td>{trade.trigger}</td>
+                                              </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+
+                                        {/* <table className='w-100'>
                                             <thead>
                                                 <tr>
                                                     <th>Date</th>
@@ -2194,7 +2374,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {filteredTrades.map((trade, idx) => (
+                                                {backtest.result.result.tradesShort.map((trade, idx) => (
                                                     <tr key={idx}>
                                                         <td>{formatDate(trade.date)}</td>
                                                         <td>{trade.day_type}</td>
@@ -2214,7 +2394,7 @@ const Trading = ({strategyList,setStrategyList ,editingStrategyIndex, setEditing
                                                     </tr>
                                                 ))}
                                             </tbody>
-                                        </table>
+                                        </table> */}
                                     </td>
                                 </tr>
                             )}

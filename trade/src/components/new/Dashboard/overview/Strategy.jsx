@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { MdDeleteOutline } from "react-icons/md";
 
-const Strategy = ({ indicatorDetails, setIndicatorDetails , strategy , setStrategy }) => {
+const Strategy = ({ indicatorDetails, setIndicatorDetails , strategy , setStrategy , strategy2 , setStrategy2 ,type}) => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [currentEditing, setCurrentEditing] = useState({ index: null, key: null });
     const [offset, setOffset] = useState('');
@@ -158,27 +158,45 @@ const Strategy = ({ indicatorDetails, setIndicatorDetails , strategy , setStrate
     };
 
     
-    const openOffsetModalForEditing = (index,indicatorKey) => {
-        setCurrentEditing({ index, key: indicatorKey });
-        const currentDetails = strategy.conditions[index][indicatorKey];
+    // const openOffsetModalForEditing = (index,indicatorKey) => {
+    //     setCurrentEditing({ index, key: indicatorKey });
+    //     const currentDetails = strategy.conditions[index][indicatorKey];
     
       
+    //     setModalIsOpen(true);
+    //     // setLocalIndicatorDetails(currentDetails.indiInputs || {});
+    //     console.log(currentDetails)
+    // };
+
+    const openOffsetModalForEditing = (strategyType, index, indicatorKey) => {
+        setCurrentEditing({ strategyType, index, key: indicatorKey });
+        const currentDetails = (strategyType === 'long' ? strategy : strategy2).conditions[index][indicatorKey];
         setModalIsOpen(true);
         // setLocalIndicatorDetails(currentDetails.indiInputs || {});
-        console.log(currentDetails)
+        console.log(currentDetails);
     };
+
 
     
 
-    const openOffsetModalForEdit = (index,indicatorKey) => {
-        setCurrentEditing({ index, key: indicatorKey });
-        const currentDetails = strategy.conditions[index][indicatorKey];
+    // const openOffsetModalForEdit = (index,indicatorKey) => {
+    //     setCurrentEditing({ index, key: indicatorKey });
+    //     const currentDetails = strategy.conditions[index][indicatorKey];
         
       
+    //     setModalIsOpen(true);
+    //     setLocalIndicatorDetails(currentDetails.indiInputs || {});
+    //     console.log(currentDetails)
+    // };
+
+    const openOffsetModalForEdit = (strategyType,index,indicatorKey) => {
+        setCurrentEditing({ strategyType, index, key: indicatorKey });
+        const currentDetails = (strategyType === 'long' ? strategy : strategy2).conditions[index][indicatorKey];
         setModalIsOpen(true);
         setLocalIndicatorDetails(currentDetails.indiInputs || {});
         console.log(currentDetails)
     };
+
 
     // const handleIndicatorChange = (e, indicatorKey) => {
     //     const displayName = e.target.value;
@@ -195,35 +213,77 @@ const Strategy = ({ indicatorDetails, setIndicatorDetails , strategy , setStrate
     // };
 
 
-    const handleIndicatorChange = (e, index, indicatorKey) => {
-        const displayName = e.target.value;
-        const technicalName = indicatorMapping[displayName] || '';
-        const indicatorConfig = indicatorConfigurations[displayName] || { inputs: [], defaultValues: {} };
+//     const handleIndicatorChange = (e, index, indicatorKey) => {
+//         const displayName = e.target.value;
+//         const technicalName = indicatorMapping[displayName] || '';
+//         const indicatorConfig = indicatorConfigurations[displayName] || { inputs: [], defaultValues: {} };
     
-        // Create an object to hold the initial values for each input, using defaults
-        const initialInputs = indicatorConfig.inputs.reduce((acc, inputName) => {
-            acc[inputName] = indicatorConfig.defaultValues[inputName] || '';  // Use the default value or fallback to an empty string
-            return acc;
-        }, {});
+//         // Create an object to hold the initial values for each input, using defaults
+//         const initialInputs = indicatorConfig.inputs.reduce((acc, inputName) => {
+//             acc[inputName] = indicatorConfig.defaultValues[inputName] || '';  // Use the default value or fallback to an empty string
+//             return acc;
+//         }, {});
 
 
-        setStrategy(prev => {
-            const updatedConditions = [...prev.conditions];
-            updatedConditions[index] = {
-                ...updatedConditions[index],
-                [indicatorKey]: {
-                    value: technicalName,
-                    displayValue: displayName,
-                    indiInputs: initialInputs
-                }
-            };
-            return { ...prev, conditions: updatedConditions };
-        });
+//         setStrategy(prev => {
+//             const updatedConditions = [...prev.conditions];
+//             updatedConditions[index] = {
+//                 ...updatedConditions[index],
+//                 [indicatorKey]: {
+//                     value: technicalName,
+//                     displayValue: displayName,
+//                     indiInputs: initialInputs
+//                 }
+//             };
+//             return { ...prev, conditions: updatedConditions };
+//         });
 
 
-    console.log(initialInputs)
+//     console.log(initialInputs)
 
-    // Update the indicator details state
+//     // Update the indicator details state
+//     setIndicatorDetails(prev => ({
+//         ...prev,
+//         [indicatorKey]: {
+//             ...prev[indicatorKey],
+//             value: technicalName,
+//             displayValue: displayName,
+//             isNew: false,
+//             indiInputs: initialInputs
+//         },
+//     }));
+
+//     setLocalIndicatorDetails(initialInputs);
+//     if (technicalName && !indicatorDetails[indicatorKey].offset) {
+//         openOffsetModalForEditing(index,indicatorKey);
+//     }
+// };
+
+const handleIndicatorChange = (e, strategyType, index, indicatorKey) => {
+    const displayName = e.target.value;
+    const technicalName = indicatorMapping[displayName] || '';
+    const indicatorConfig = indicatorConfigurations[displayName] || { inputs: [], defaultValues: {} };
+
+    const initialInputs = indicatorConfig.inputs.reduce((acc, inputName) => {
+        acc[inputName] = indicatorConfig.defaultValues[inputName] || '';
+        return acc;
+    }, {});
+
+    const updateStrategy = strategyType === 'long' ? setStrategy : setStrategy2;
+
+    updateStrategy(prev => {
+        const updatedConditions = [...prev.conditions];
+        updatedConditions[index] = {
+            ...updatedConditions[index],
+            [indicatorKey]: {
+                value: technicalName,
+                displayValue: displayName,
+                indiInputs: initialInputs
+            }
+        };
+        return { ...prev, conditions: updatedConditions };
+    });
+
     setIndicatorDetails(prev => ({
         ...prev,
         [indicatorKey]: {
@@ -237,9 +297,11 @@ const Strategy = ({ indicatorDetails, setIndicatorDetails , strategy , setStrate
 
     setLocalIndicatorDetails(initialInputs);
     if (technicalName && !indicatorDetails[indicatorKey].offset) {
-        openOffsetModalForEditing(index,indicatorKey);
+        openOffsetModalForEditing(strategyType, index, indicatorKey);
     }
 };
+
+
 
 const handleInputChange = (e, inputName) => {
     let value = e.target.value;
@@ -256,27 +318,50 @@ const handleInputChange = (e, inputName) => {
     }));
 };
 
-    const handleModalSubmit = () => {
-        // setIndicatorDetails(prev => ({
-        //     ...prev,
-        //     [currentEditing]: {
-        //         ...prev[currentEditing],
-        //         offset,
-        //         period
-        //     },
-        // }));
+    // const handleModalSubmit = () => {
         
+        
+    //     setIndicatorDetails(prev => ({
+    //         ...prev,
+    //         [currentEditing]: {
+    //             ...prev[currentEditing],
+    //             indiInputs:localIndicatorDetails              
+    //         },
+    //     }));
+
+    //     setStrategy(prev => {
+    //         const newConditions = [...prev.conditions];
+    //         const { index, key } = currentEditing;
+    //         if (index != null && key) {
+    //             newConditions[index][key] = {
+    //                 ...newConditions[index][key],
+    //                 indiInputs: localIndicatorDetails
+    //             };
+    //         }
+    //         return { ...prev, conditions: newConditions };
+    //     });
+
+
+    //     setLocalIndicatorDetails({})
+    //     setCurrentEditing({ index: null, key: null });
+    //     setModalIsOpen(false);
+       
+    // };
+
+    const handleModalSubmit = () => {
+        const { strategyType, index, key } = currentEditing;
+        const updateStrategy = strategyType === 'long' ? setStrategy : setStrategy2;
+
         setIndicatorDetails(prev => ({
             ...prev,
             [currentEditing]: {
                 ...prev[currentEditing],
-                indiInputs:localIndicatorDetails              
+                indiInputs: localIndicatorDetails
             },
         }));
 
-        setStrategy(prev => {
+        updateStrategy(prev => {
             const newConditions = [...prev.conditions];
-            const { index, key } = currentEditing;
             if (index != null && key) {
                 newConditions[index][key] = {
                     ...newConditions[index][key],
@@ -286,20 +371,40 @@ const handleInputChange = (e, inputName) => {
             return { ...prev, conditions: newConditions };
         });
 
-
-        setLocalIndicatorDetails({})
-        setCurrentEditing({ index: null, key: null });
+        setLocalIndicatorDetails({});
+        setCurrentEditing({ strategyType: null, index: null, key: null });
         setModalIsOpen(false);
-       
     };
 
-    const handleDeleteIndicator = (index,indicatorKey) => {
+    // const handleDeleteIndicator = (index,indicatorKey) => {
+    //     setIndicatorDetails(prev => ({
+    //         ...prev,
+    //         [indicatorKey]: { value: '', displayValue: '', offset: '', period: '', isNew: true ,indiInputs : {}},
+    //     }));
+
+    //     setStrategy(prev => ({
+    //         ...prev,
+    //         conditions: prev.conditions.map((condition, i) => {
+    //             if (i === index) {
+    //                 return {
+    //                     ...condition,
+    //                     [indicatorKey]: { value: '', displayValue: '', offset: '', period: '', isNew: true, indiInputs: {} }
+    //                 };
+    //             }
+    //             return condition;
+    //         })
+    //     }));
+    // };
+
+    const handleDeleteIndicator = (strategyType, index, indicatorKey) => {
+        const updateStrategy = strategyType === 'long' ? setStrategy : setStrategy2;
+
         setIndicatorDetails(prev => ({
             ...prev,
-            [indicatorKey]: { value: '', displayValue: '', offset: '', period: '', isNew: true ,indiInputs : {}},
+            [indicatorKey]: { value: '', displayValue: '', offset: '', period: '', isNew: true, indiInputs: {} },
         }));
 
-        setStrategy(prev => ({
+        updateStrategy(prev => ({
             ...prev,
             conditions: prev.conditions.map((condition, i) => {
                 if (i === index) {
@@ -312,6 +417,7 @@ const handleInputChange = (e, inputName) => {
             })
         }));
     };
+
 
 
     function formatIndicatorDisplay(indicator) {
@@ -333,59 +439,120 @@ const handleInputChange = (e, inputName) => {
     }
     
 
-   
+
     
-    function addCondition() {
+    // function addCondition() {
+    //     const newCondition = {
+    //         indicatorOne: { value: "", params: {} },
+    //         comparator: "",
+    //         indicatorTwo: { value: "", params: {} }
+    //     };
+    
+    //     setStrategy(prev => {
+    //         const newStrategy = {
+    //             ...prev,
+    //             conditions: [...prev.conditions, newCondition]
+    //         };
+    
+    //         // Check if conditions length is greater than 1 to add default logical operator
+    //         if (prev.conditions.length > 0) {
+    //             newStrategy.logicalOperators = [...prev.logicalOperators, 'AND'];
+    //         }
+
+    //         else{
+                
+    //         }
+    
+    //         return newStrategy;
+    //     });
+    // }
+
+    function addCondition(strategyType) {
         const newCondition = {
             indicatorOne: { value: "", params: {} },
             comparator: "",
             indicatorTwo: { value: "", params: {} }
         };
-    
-        setStrategy(prev => {
+
+        const updateStrategy = strategyType === 'long' ? setStrategy :setStrategy2
+        updateStrategy(prev => {
             const newStrategy = {
                 ...prev,
                 conditions: [...prev.conditions, newCondition]
             };
-    
-            // Check if conditions length is greater than 1 to add default logical operator
+
             if (prev.conditions.length > 0) {
                 newStrategy.logicalOperators = [...prev.logicalOperators, 'AND'];
+            } else {
+                newStrategy.logicalOperators = [];
             }
 
-            else{
-                
-            }
-    
             return newStrategy;
         });
+
+       
     }
     
-    function changeLogicalOperator(index, operator) {
-        const newOperators = [...strategy.logicalOperators];
+    // function changeLogicalOperator(index, operator) {
+    //     const newOperators = [...strategy.logicalOperators];
+    //     newOperators[index] = operator;
+    //     setStrategy(prev => ({
+    //         ...prev,
+    //         logicalOperators: newOperators
+    //     }));
+    // }
+
+    function changeLogicalOperator(strategyType, index, operator) {
+        const updateStrategy = strategyType === 'long' ? setStrategy : setStrategy2;
+        const newOperators = [...(strategyType === 'long' ? strategy.logicalOperators : strategy2.logicalOperators)];
         newOperators[index] = operator;
-        setStrategy(prev => ({
+
+        updateStrategy(prev => ({
             ...prev,
             logicalOperators: newOperators
         }));
     }
+
     
-    function deleteCondition(index) {
-        setStrategy(prev => ({
+    // function deleteCondition(index) {
+    //     setStrategy(prev => ({
+    //         ...prev,
+    //         conditions: prev.conditions.filter((_, i) => i !== index),
+    //         logicalOperators: prev.logicalOperators.filter((_, i) => i !== index - 1) // Adjust logical operators array as well
+    //     }));
+    // }
+
+    function deleteCondition(strategyType,index) {
+        const updateStrategy = strategyType === 'long' ? setStrategy : setStrategy2
+        
+
+        updateStrategy(prev => ({
             ...prev,
             conditions: prev.conditions.filter((_, i) => i !== index),
-            logicalOperators: prev.logicalOperators.filter((_, i) => i !== index - 1) // Adjust logical operators array as well
+            logicalOperators: prev.logicalOperators.filter((_, i) => i !== index - 1)
         }));
+
+
     }
     
-    const handleComparatorChange = (e, index) => {
+
+
+    // const handleComparatorChange = (e, index) => {
+    //     const newComparator = e.target.value;
+    //     setStrategy(prev => ({
+    //         ...prev,
+    //         conditions: prev.conditions.map((cond, idx) => idx === index ? { ...cond, comparator: newComparator } : cond)
+    //     }));
+    // };
+    const handleComparatorChange = (e, strategyType, index) => {
         const newComparator = e.target.value;
-        setStrategy(prev => ({
+        const updateStrategy = strategyType === 'long' ? setStrategy : setStrategy2;
+
+        updateStrategy(prev => ({
             ...prev,
             conditions: prev.conditions.map((cond, idx) => idx === index ? { ...cond, comparator: newComparator } : cond)
         }));
     };
-    
 
     return (
         <div className='mt-3'>
@@ -464,39 +631,39 @@ const handleInputChange = (e, inputName) => {
             </Modal>
 
 
-            <Form>
+            <Form className='d-flex'>
+            <div className='w-100'>
+
+            {strategy.conditions.map((condition, index) => (
+                <React.Fragment key={index}>
+                    {index > 0 && (
+                        <div className="logical-operator d-flex justify-content-center my-2">
+                            <Form.Control
+                                as="select"
+                                value={strategy.logicalOperators[index - 1] || 'AND'}
+                                // onChange={(e) => changeLogicalOperator(index - 1, e.target.value)}
+                                onChange={(e) => changeLogicalOperator('long', index - 1, e.target.value)}
+                                className="form-control mb-3 w-25 text-center"
+                            >
+                                <option value="AND">AND</option>
+                                <option value="OR">OR</option>
+                            </Form.Control>
+                        </div>
+                    )}
 
 
-
-
-
-
-
-
-
-        {strategy.conditions.map((condition, index) => (
-            <React.Fragment key={index}>
-                {index > 0 && (
-                    <div className="logical-operator d-flex justify-content-center my-2">
-                        <Form.Control
-                            as="select"
-                            value={strategy.logicalOperators[index - 1] || 'AND'}
-                            onChange={(e) => changeLogicalOperator(index - 1, e.target.value)}
-                            className="form-control mb-3 w-25 text-center"
-                        >
-                            <option value="AND">AND</option>
-                            <option value="OR">OR</option>
-                        </Form.Control>
-                    </div>
-                )}
-            
+              
+                
+                <div className='w-100'>
+                    <h5 className='text-center'>Long {type} Condition</h5>
                 <div className='d-flex justify-content-between bg-light p-3'>
                    <div className='d-flex justify-content-between w-100'>
                     <div>
                     <input
                         list="indicators-list"
                         value={formatIndicatorDisplay(condition.indicatorOne)}
-                        onChange={(e) => handleIndicatorChange(e, index, 'indicatorOne')}
+                        // onChange={(e) => handleIndicatorChange(e, index, 'indicatorOne')}
+                        onChange={(e) => handleIndicatorChange(e, 'long', index, 'indicatorOne')}
                         placeholder="Select First Indicator"
                         className="form-control"
                         size='sm'
@@ -506,17 +673,18 @@ const handleInputChange = (e, inputName) => {
                                 <option key={index} value={indicator}>{indicator}</option>
                             ))}
                         </datalist>
-                        <Button onClick={() => openOffsetModalForEdit(index,'indicatorOne')} size='sm'>Edit</Button>
-                        <Button variant="danger" size="sm" onClick={() => handleDeleteIndicator(index, 'indicatorOne')}>Delete</Button>
-
+                        <Button onClick={() => openOffsetModalForEdit('long',index,'indicatorOne')} size='sm'>Edit</Button>
+                        {/* <Button variant="danger" size="sm" onClick={() => handleDeleteIndicator(index, 'indicatorOne')}>Delete</Button> */}
+                            {/* <Button onClick={() => openOffsetModalForEditing('long', index, 'indicatorOne')} size='sm'>Edit</Button> */}
+                            <Button variant="danger" size="sm" onClick={() => handleDeleteIndicator('long', index, 'indicatorOne')}>Delete</Button>
                         </div>
                     
                     <div>
                     <Form.Control
                         as="select"
                         value={condition.comparator}
-                        onChange={(e) => handleComparatorChange(e, index)}
-                       
+                        // onChange={(e) => handleComparatorChange(e, index)}
+                        onChange={(e) => handleComparatorChange(e, 'long', index)}
                         className="form-control">
                         <option value="">Select Comparator</option>
                         <option value="crosses-below">Crosses Below</option>
@@ -531,30 +699,132 @@ const handleInputChange = (e, inputName) => {
                     <input
                         list="indicators-list"
                         value={formatIndicatorDisplay(condition.indicatorTwo)}
-                        onChange={(e) => handleIndicatorChange(e, index, 'indicatorTwo')}
+                        // onChange={(e) => handleIndicatorChange(e, index, 'indicatorTwo')}
+                        onChange={(e) => handleIndicatorChange(e, 'long', index, 'indicatorTwo')}
                         placeholder="Select Second Indicator"
                         className="form-control"
                         size='sm'
                     />
-                    <Button onClick={() => openOffsetModalForEdit(index,'indicatorTwo')} size='sm'>Edit</Button>
-                    <Button variant="danger" size="sm" onClick={() => handleDeleteIndicator(index, 'indicatorTwo')}>Delete</Button>
+                    <Button onClick={() => openOffsetModalForEdit('long',index,'indicatorTwo')} size='sm'>Edit</Button>
+                    {/* <Button variant="danger" size="sm" onClick={() => handleDeleteIndicator(index, 'indicatorTwo')}>Delete</Button> */}
+                    {/* <Button onClick={() => openOffsetModalForEditing('long', index, 'indicatorTwo')} size='sm'>Edit</Button> */}
+                    <Button variant="danger" size="sm" onClick={() => handleDeleteIndicator('long', index, 'indicatorTwo')}>Delete</Button>
                     </div>
                     </div>    
                         
                   
                         <div>
-                    <Button variant="danger" size="sm" className='ms-2' onClick={() => deleteCondition(index)}> <MdDeleteOutline size={30}/></Button>
+                    <Button variant="danger" size="sm" className='ms-2' onClick={() => deleteCondition('long',index)}> <MdDeleteOutline size={30}/></Button>
                     
                         </div>
                    
                 </div>
+                </div>
+
+                    
+            </React.Fragment>
+        ))}
+       
+            <Button variant="secondary" className='mt-4' onClick={()=>addCondition('long')}>Add Long Condition</Button>
+                
+            </div>
+
+            <div  className='w-100'>
+            {strategy2.conditions.map((condition, index) => (
+                <React.Fragment key={index}>
+                    {index > 0 && (
+                        <div className="logical-operator d-flex justify-content-center my-2">
+                            <Form.Control
+                                as="select"
+                                value={strategy.logicalOperators[index - 1] || 'AND'}
+                                // onChange={(e) => changeLogicalOperator(index - 1, e.target.value)}
+                                onChange={(e) => changeLogicalOperator('long', index - 1, e.target.value)}
+                                className="form-control mb-3 w-25 text-center"
+                            >
+                                <option value="AND">AND</option>
+                                <option value="OR">OR</option>
+                            </Form.Control>
+                        </div>
+                    )}
+
+
+
+                                
+                <div className='w-100'>
+                <h5 className='text-center'>Short {type} Condition</h5>
+                <div className='d-flex justify-content-between bg-light p-3 border-3 border-start'>
+                   <div className='d-flex justify-content-between w-100'>
+                    <div>
+                    <input
+                        list="indicators-list"
+                        value={formatIndicatorDisplay(condition.indicatorOne)}
+                        // value={strategy2.logicalOperators[index - 1] || 'AND'}
+                        // onChange={(e) => handleIndicatorChange(e, index, 'indicatorOne')}
+                        onChange={(e) => handleIndicatorChange(e,'short', index ,'indicatorOne')}
+                        placeholder="Select First Indicator"
+                        className="form-control"
+                        size='sm'
+                    />
+                     <datalist id="indicators-list">
+                            {Object.keys(indicatorMapping).map((indicator, index) => (
+                                <option key={index} value={indicator}>{indicator}</option>
+                            ))}
+                        </datalist>
+                        <Button onClick={() => openOffsetModalForEdit('short',index,'indicatorOne')} size='sm'>Edit</Button>
+                        {/* <Button variant="danger" size="sm" onClick={() => handleDeleteIndicator(index, 'indicatorOne')}>Delete</Button>
+                    <Button onClick={() => openOffsetModalForEditing('short', index, 'indicatorOne')} size='sm'>Edit</Button> */}
+                    <Button variant="danger" size="sm" onClick={() => handleDeleteIndicator('short', index, 'indicatorOne')}>Delete</Button>
+                        </div>
+                    
+                    <div>
+                    <Form.Control
+                        as="select"
+                        value={condition.comparator}
+                        // onChange={(e) => handleComparatorChange(e, index)}
+                        onChange={(e) => handleComparatorChange(e, 'short', index)}
+                        className="form-control">
+                        <option value="">Select Comparator</option>
+                        <option value="crosses-below">Crosses Below</option>
+                        <option value="equal-to">Equal To</option>
+                        <option value="lower-than">Lower Than</option>
+                        <option value="higher-than">Higher Than</option>
+                        <option value="crosses-above">Crosses Above</option>
+                    </Form.Control>
+                    </div>
+
+                    <div>
+                    <input
+                        list="indicators-list"
+                        value={formatIndicatorDisplay(condition.indicatorTwo)}
+                        // onChange={(e) => handleIndicatorChange(e, index, 'indicatorTwo')}
+                        onChange={(e) => handleIndicatorChange(e, 'short', index, 'indicatorTwo')}
+                        placeholder="Select Second Indicator"
+                        className="form-control"
+                        size='sm'
+                    />
+                    <Button onClick={() => openOffsetModalForEdit('short',index,'indicatorTwo')} size='sm'>Edit</Button>
+                    {/* <Button variant="danger" size="sm" onClick={() => handleDeleteIndicator(index, 'indicatorTwo')}>Delete</Button>
+                   <Button onClick={() => openOffsetModalForEditing('short', index, 'indicatorTwo')} size='sm'>Edit</Button> */}
+                    <Button variant="danger" size="sm" onClick={() => handleDeleteIndicator('short', index, 'indicatorTwo')}>Delete</Button>
+                    </div>
+                    </div>    
+                        
+                  
+                        <div>
+                    <Button variant="danger" size="sm" className='ms-2' onClick={() => deleteCondition('short',index)}> <MdDeleteOutline size={30}/></Button>
+                    
+                        </div>
+                   
+                </div>
+                </div>
+
 
                
             </React.Fragment>
         ))}
        
-        <Button variant="secondary" className='mt-4' onClick={addCondition}>Add Condition</Button>
-      
+        <Button variant="secondary" className='mt-4' onClick={()=>addCondition('short')}>Add Short Condition</Button>
+        </div>
     </Form>
 
            
