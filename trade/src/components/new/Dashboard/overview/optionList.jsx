@@ -1,11 +1,132 @@
-const optionList = [
+const nifty50List =[
+    "GRASIM", "HEROMOTOCO", "CIPLA", "POWERGRID", "NESTLEIND", "NTPC", "HDFCLIFE",
+    "TATASTEEL", "AXISBANK", "APOLLOHOSP", "DIVISLAB", "TATAMOTORS", "ASIANPAINT",
+    "SHRIRAMFIN", "DRREDDY", "BPCL", "EICHERMOT", "ADANIPORTS", "LT", "SBILIFE",
+    "BRITANNIA", "SUNPHARMA", "JSWSTEEL", "RELIANCE", "SBIN",
+    "ICICIBANK", "ADANIENT", "BHARTIARTL", "COALINDIA", "ONGC", "INDUSINDBK",
+    "BAJAJFINSV", "HINDUNILVR", "TATACONSUM", "HINDALCO", "MARUTI", "ITC",
+    "KOTAKBANK", "TITAN", "HDFCBANK", "TCS", "HCLTECH", "M&M", "BAJFINANCE",
+    "LTIM", "WIPRO", "INFY", "TECHM"
+  ];
+
+
+const bankniftyList = [
+    "BANKBARODA",
+    "KOTAKBANK",
+    "HDFCBANK",
+    "PNB",
+    "SBIN",
+    "BANDHANBNK",
+    "INDUSINDBK",
+    "AXISBANK",
+    "AUBANK",
+    "ICICIBANK",
+    "IDFCFIRSTB",
+    "FEDERALBNK"
+]
+
+const finniftyList = [ 
+    "HDFCAMC",
+    "SHRIRAMFIN",
+    "HDFCLIFE",
+    "BAJFINANCE",
+    "SBIN",
+    "LICHSGFIN",
+    "BAJAJFINSV",
+    "AXISBANK",
+    "IDFC",
+    "HDFCBANK",
+    "ICICIPRULI",
+    "RECLTD",
+    "ICICIBANK",
+    "SBILIFE",
+    "PFC",
+    "SBICARD",
+    "MUTHOOTFIN",
+    "KOTAKBANK",
+    "ICICIGI",
+    "CHOLAFIN"
+]
+
+const niftyitList = [
+    "NIFTY IT",
+    "TECHM",
+    "PERSISTENT",
+    "LTIM",
+    "HCLTECH",
+    "MPHASIS",
+    "WIPRO",
+    "LTTS",
+    "COFORGE",
+    "TCS",
+    "INFY"
+]
+
+
+const niftymidcapList =[
+    "NIFTY MIDCAP 50",
+    "MAXHEALTH",
+    "HDFCAMC",
+    "CONCOR",
+    "SUZLON",
+    "FEDERALBNK",
+    "OFSS",
+    "LTF",
+    "NMDC",
+    "CUMMINSIND",
+    "GODREJPROP",
+    "ACC",
+    "YESBANK",
+    "DIXON",
+    "PETRONET",
+    "IDEA",
+    "BHARATFORG",
+    "ASTRAL",
+    "JUBLFOOD",
+    "MFSL",
+    "TATACOMM",
+    "GUJGASLTD",
+    "PERSISTENT",
+    "PIIND",
+    "DALBHARAT",
+    "IDFCFIRSTB",
+    "INDHOTEL",
+    "LTTS",
+    "HINDPETRO",
+    "MPHASIS",
+    "TIINDIA",
+    "ALKEM",
+    "POLYCAB",
+    "COFORGE",
+    "BHEL",
+    "SAIL",
+    "ASHOKLEY",
+    "MRF",
+    "ABCAPITAL",
+    "ESCORTS",
+    "M&MFIN",
+    "BALKRISIND",
+    "LUPIN",
+    "OBEROIRLTY",
+    "AUROPHARMA",
+    "GMRINFRA",
+    "PAGEIND",
+    "UPL",
+    "AUBANK",
+    "BANDHANBNK",
+    "INDUSTOWER"
+  ];
+
+
+
+const optionLis = [
     'Nifty 50',
     'NIFTY100 EQL Wgt',
     'NIFTY50 EQL Wgt',
     'NiftyM150Momntm50',
     'Nifty Auto',
     'Nifty Commodities',
-   'Nifty Mid Liq 15',
+    'Nifty Mid Liq 15',
     'Nifty GS 10Yr Cln',
     'NIFTY TOTAL MKT',
     'Nifty Serv Sector',
@@ -77,6 +198,16 @@ const optionList = [
     'Nifty MidSml Hlth',
     'Nifty Multi Infra',
 ]
+
+const optionList = {
+    'Nifty 50': nifty50List,
+    'Nifty Bank':bankniftyList,
+    'Nifty Fin Service':finniftyList,
+    'Nifty IT' : niftyitList,
+    'Nifty Midcap50': niftymidcapList,
+
+}
+
 
 
 

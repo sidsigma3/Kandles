@@ -101,7 +101,7 @@ function Journal() {
       <div className='w-75 m-2 p-2'>
       <h2 className="mb-4">Journal Entries</h2>
     <div className='bg-white'>
-        <table className='table table-hover '>
+        <table className='table table-hover'>
             <thead className='thead-dark'>
             <tr>
                 <th scope='col'>#</th>

@@ -182,6 +182,13 @@ const stockList = [
     "WIPRO",
     "ZEEL",
     "ZYDUSLIFE",
+    "NIFTY 50",
+    "NIFTY BANK",
+    "NIFTY FIN SERVICE"
 ]
+
+
+
+
 
 export default stockList

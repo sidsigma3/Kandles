@@ -21,6 +21,8 @@ import Journal from './Journal/Journal';
 import Trading from './Trading/Trading';
 import Broker from './Broker/Broker';
 import Setup from './Broker/Setup';
+import StrategyHome from './Strategy/StrategyHome';
+
 
 import { TbWorld } from "react-icons/tb";
 import { BsTrophy } from "react-icons/bs";
@@ -128,12 +130,13 @@ const Dashboard = () => {
       case 'system-trading':
         return <SystemTrading trades={trades} setTrades={setTrades} setRenderedContent={setRenderedContent}></SystemTrading>;
         
-        case 'order':
+      case 'order':
         return <Order trades={trades} setTrades={setTrades}></Order>;
       case 'scanner':
         return <Scanner></Scanner>;
-        case 'trading':
-          return <Trading setStrategyList={setStrategyList} strategyList={strategyList} editingStrategyIndex={editingStrategyIndex} setEditingStrategyIndex={setEditingStrategyIndex} isEditing={isEditing} setIsEditing={setIsEditing}></Trading>
+      case 'trading':
+          return <StrategyHome setStrategyList={setStrategyList} strategyList={strategyList} editingStrategyIndex={editingStrategyIndex} setEditingStrategyIndex={setEditingStrategyIndex} isEditing={isEditing} setIsEditing={setIsEditing}></StrategyHome>
+          // return <Trading setStrategyList={setStrategyList} strategyList={strategyList} editingStrategyIndex={editingStrategyIndex} setEditingStrategyIndex={setEditingStrategyIndex} isEditing={isEditing} setIsEditing={setIsEditing}></Trading>
         // return <System></System>;
       case 'account':
         return <Profile></Profile>

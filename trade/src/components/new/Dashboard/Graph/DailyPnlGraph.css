@@ -1,0 +1,55 @@
+.react-calendar-heatmap .color-empty {
+    fill: #eeeeee;
+  }
+  .react-calendar-heatmap .color-positive {
+    fill: #089c19;
+  }
+  .react-calendar-heatmap .color-negative {
+    fill: #d41002;
+  }
+  .react-calendar-heatmap .color-neutral {
+    fill: #d9d9d9;
+  }
+  
+  .react-calendar-heatmap text {
+    font-size: 10px;
+    fill: #555;
+    text-transform: capitalize;
+  }
+  
+  .react-calendar-heatmap .week {
+    stroke: #fff;
+    stroke-width: 2px;
+  }
+  
+  .react-calendar-heatmap .month {
+    stroke: #555;
+    stroke-width: 2px;
+  }
+  
+  .heatmap-container .react-calendar-heatmap {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .heatmap-container .react-calendar-heatmap .react-calendar-heatmap-month {
+    margin-right: 10px; /* Adjust the margin to create space between months */
+  }
+  
+  .heatmap-container .react-calendar-heatmap .react-calendar-heatmap-week {
+    display: flex;
+  }
+  
+  .heatmap-container .react-calendar-heatmap .react-calendar-heatmap-day {
+    margin: 1px; /* Adjust the margin to control spacing between days */
+  }
+  
+  .daily-pnl-graph button{
+    border: none;
+    background: none;
+  }
+
+
+  .daily-pnl-graph h6{
+    margin: 0;
+  }

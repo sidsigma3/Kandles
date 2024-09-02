@@ -725,7 +725,7 @@ const handleInputChange = (e, inputName) => {
             </React.Fragment>
         ))}
        
-            <Button variant="secondary" className='mt-4' onClick={()=>addCondition('long')}>Add Long Condition</Button>
+            <Button variant="secondary" className='mt-4' onClick={()=>addCondition('long')}>{type} Long Condition</Button>
                 
             </div>
 
@@ -823,7 +823,7 @@ const handleInputChange = (e, inputName) => {
             </React.Fragment>
         ))}
        
-        <Button variant="secondary" className='mt-4' onClick={()=>addCondition('short')}>Add Short Condition</Button>
+        <Button variant="secondary" className='mt-4' onClick={()=>addCondition('short')}>{type} Short Condition</Button>
         </div>
     </Form>
 

@@ -49,40 +49,88 @@ operator2 = input_data.get('strategyDetails2')['logicalOperators']
 exit_conditions2 = input_data.get('strategyDetailsExit2')['conditions']
 exit_operator2 = input_data.get('strategyDetailsExit2')['logicalOperators']
 
-# stopLoss = 0.01
-# target = 0.01
+max_long_entry = input_data.get('maxLong', 1)
+max_short_entry = input_data.get('maxShort', 1)
 
-# start_date= '01-01-2020'
+selected_days = input_data.get('selectedDaysForIndi')
+
+# stopLoss = 0.01
+# target = 0.02
+
+# start_date= '01-01-2021'
 # end_date = '01-01-2022'
 # initial_capital = 100000000
 # quantity = 50
 
-# symbol =[
-#     "ABCAPITAL",
-#     'ABB'
+# symbol = [
+#   "HDFCBANK",
+#   "SBIN"
+# ]
+# conditions = [
+#     {
+#         "indicatorOne": {
+#             "value": "macd",
+#             "displayValue": "MACD",
+#             "indiInputs": {
+#                 "fastPeriod": 18,
+#                 "slowPeriod": 7,
+#                 "signalPeriod": 11
+#             }
+#         },
+#         "comparator": "crosses-above",
+#         "indicatorTwo": {
+#             "value": "macd",
+#             "displayValue": "MACD",
+#             "indiInputs": {
+#                 "fastPeriod": 33,
+#                 "slowPeriod": 32,
+#                 "signalPeriod": 30
+#             }
+#         }
+#     },
+#     {
+#         "indicatorOne": {
+#             "value": "rsi",
+#             "displayValue": "RSI",
+#             "indiInputs": {
+#                 "period": 4
+#             }
+#         },
+#         "comparator": "higher-than",
+#         "indicatorTwo": {
+#             "value": "number",
+#             "displayValue": "Number",
+#             "indiInputs": {
+#                 "number": 43
+#             }
+#         }
+#     },
+#     {
+#         "indicatorOne": {
+#             "value": "rsi",
+#             "displayValue": "RSI",
+#             "indiInputs": {
+#                 "period": 8
+#             }
+#         },
+#         "comparator": "crosses-above",
+#         "indicatorTwo": {
+#             "value": "rsi",
+#             "displayValue": "RSI",
+#             "indiInputs": {
+#                 "period": 25
+#             }
+#         }
+#     }
 # ]
 
-# conditions = [{
-#   "indicatorOne": {
-#     "value": "rsi",
-#     "displayValue": "RSI",
-#     "indiInputs": {
-#       "period": 14
-#     }
-#   },
-#   "comparator": "crosses-above",
-#   "indicatorTwo": {
-#     "value": "rsi",
-#     "displayValue": "RSI",
-#     "indiInputs": {
-#       "period": 23
-#     }
-#   }
-# }]
-
-# conditions=[]
-# operator = []
-
+# # conditions=[]
+# operator = [
+#     "AND",
+#     "AND"
+# ]
+# conditions2=[]
+# operator2=[]
 
 
 # conditions2 = [{
@@ -141,10 +189,18 @@ exit_operator2 = input_data.get('strategyDetailsExit2')['logicalOperators']
 # max_size_amount = None
 # moveSl = None
 # moveInstrument = None
-# time_period = 'daily'
+# time_period = 'hourly'
 # trade_type = 'cnc'
+# max_long_entry = 3
+# max_short_entry = 3
 
-
+# selected_days = {
+#     "Mon": True,
+#     "Tue": True,
+#     "Wed": True,
+#     "Thu": True,
+#     "Fri": True
+# }
 
 default_output_selection = {
     'macd': 'line',  # Use the MACD signal line
@@ -165,25 +221,19 @@ default_output_selection = {
 def get_output_column_name(indicator_name, params):
     if indicator_name in default_output_selection:
         output_key = default_output_selection[indicator_name]
-        if indicator_name == 'macd':
+        if indicator_name in ['macd', 'macd-s']:
             fast = params.get('fastPeriod', 12)
             slow = params.get('slowPeriod', 26)
             signal = params.get('signalPeriod', 9)
+
+            # Ensure fast is the minimum and slow is the maximum
+            fast, slow = min(fast, slow), max(fast, slow)
+
             outputs = {
                 'line': f"MACD_{fast}_{slow}_{signal}",
                 'hist': f"MACDh_{fast}_{slow}_{signal}",
                 'signal': f"MACDs_{fast}_{slow}_{signal}"
             }
-
-        elif indicator_name == 'macd-s':
-            fast = params.get('fastPeriod', 12)
-            slow = params.get('slowPeriod', 26)
-            signal = params.get('signalPeriod', 9)
-            outputs = {
-                'line': f"MACD_{fast}_{slow}_{signal}",
-                'hist': f"MACDh_{fast}_{slow}_{signal}",
-                'signal': f"MACDs_{fast}_{slow}_{signal}"
-            }   
 
         elif indicator_name == 'bollinger':
             period = params.get('period', 20)
@@ -352,7 +402,7 @@ def compute_heikin_ashi(data):
 
 # monthly pnl calculation
 
-def compute_monthly_pnl(trades,netPnl):
+def compute_monthly_pnl(trades,invested):
     # Create DataFrame from trade dates and cumulative P&L
     # data = pd.DataFrame({
     #     'Trade Date': pd.to_datetime(trade_dates),
@@ -392,8 +442,12 @@ def compute_monthly_pnl(trades,netPnl):
     # Resample monthly PnL
     monthly_pnl = pnl_data.set_index('Trade Date').resample('M').sum().round(0)
 
+   
+
     # Create pivot table for monthly PnL
     pivot_table = monthly_pnl.reset_index().pivot_table(values='PnL', index=monthly_pnl.index.year, columns=monthly_pnl.index.month_name(), aggfunc='sum', fill_value=0)
+
+    
 
     # Calculate total PnL per year
     pivot_table.loc['Total'] = pivot_table.sum().round(0)
@@ -402,17 +456,25 @@ def compute_monthly_pnl(trades,netPnl):
     # Reorder months
     months_ordered = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     pivot_table = pivot_table.reindex(columns=months_ordered + ['Total Yearly PnL'])
-
+    
     # Calculate yearly ROI
     yearly_pnl = pnl_data.set_index('Trade Date').resample('Y').sum().round(0)
-   
 
+    
+    
     # Calculate yearly win percentage
     yearly_trade_counts = trades_with_pnl.set_index('date').resample('Y').size()
 
-    yearly_roi = round((yearly_pnl['PnL'] /( yearly_pnl['Invested']/yearly_trade_counts)) * 100,2)
+   
+
+    yearly_roi = round((yearly_pnl['PnL'] /(invested)) * 100,2)
     yearly_win_counts = trades_with_pnl[trades_with_pnl['pnl'] > 0].set_index('date').resample('Y').size()
     yearly_win_percentage = round((yearly_win_counts / yearly_trade_counts) * 100 ,2)
+
+
+
+
+    
 
     # Add yearly ROI and Win Percentage to the pivot table
     for year in yearly_roi.index.year:
@@ -427,6 +489,33 @@ def compute_monthly_pnl(trades,netPnl):
 
 
 
+def compute_combined_pnl(long_trades_df, short_trades_df):
+    # Compute individual monthly PnL for long and short trades
+    # long_monthly_pnl = compute_monthly_pnl(long_trades_df,)
+    # short_monthly_pnl = compute_monthly_pnl(short_trades_df,)
+
+  
+    # Combine the data
+    combined_pnl = long_trades_df.add(short_trades_df, fill_value=0)
+    
+    combined_pnl['Yearly Win %'] = round((long_trades_df['Yearly Win %'] + short_trades_df['Yearly Win %']) / 2,2)
+    
+    
+    # Recalculate total yearly PnL
+    # combined_pnl['Total Yearly PnL'] = combined_pnl.drop(columns=['Yearly ROI (%)', 'Yearly Win %']).sum(axis=1).round(0)
+    # combined_pnl.loc['Total'] = combined_pnl.drop(index='Total').sum().round(0)
+
+    # Recalculate yearly ROI and Win Percentage
+    yearly_roi = (combined_pnl['Yearly ROI (%)'].drop('Total') * (combined_pnl['Total Yearly PnL'].drop('Total') / combined_pnl['Total Yearly PnL'].drop('Total').sum())).sum()
+    # yearly_win_percentage = (combined_pnl['Yearly Win %'].drop('Total') * (combined_pnl['Total Yearly PnL'].drop('Total') / combined_pnl['Total Yearly PnL'].drop('Total').sum())).sum()
+
+    # Add totals for ROI and Win Percentage
+    # combined_pnl.loc['Total', 'Yearly ROI (%)'] = yearly_roi
+    # combined_pnl.loc['Total', 'Yearly Win %'] = round(yearly_win_percentage,2)
+    
+
+
+    return combined_pnl
 
 
 
@@ -504,7 +593,7 @@ def calculate_indicator(dataframe, indicator_details):
         # Select the specific output column if necessary (for example, for MACD, select signal line)
         output_column = get_output_column_name(indicator_name, params)
 
-    
+
         
         if isinstance(result, pd.DataFrame) and output_column in result.columns:
            
@@ -569,6 +658,8 @@ def evaluate_condition(data, entry_condition, exit_condition ):
     # Initialize signals to False for the entire series
     buy_signal = pd.Series([False] * len(data), index=data.index)
     sell_signal = pd.Series([False] * len(data), index=data.index)
+
+   
 
     # Evaluate entry condition for buy signal
     if entry_condition['comparator'] == 'crosses-below':
@@ -991,9 +1082,28 @@ def combine_signals(data, entry_conditions, entry_logical_operators, exit_condit
 #         'Cumulative PnL': cumulative_pnl
 #     }
 
+file_path_vix = os.path.join(r'D:\stock_historical_data', f'historical_data_{time_period}', 'INDIA VIX.csv')
+
+df_vix = pd.read_csv(file_path_vix)
+
+df_vix['date'] = pd.to_datetime(df_vix['date'], utc=False)
+df_vix.set_index('date', inplace=True)  # Set the 'date' column as the index
+
+def classify_vix(high,low):
+    return (high,low)
+
+# Apply classification to VIX data
+# df_vix['vix_classification'] = classify_vix(df_vix['high'],df_vix['low'])
+df_vix['vix_classification'] = df_vix.apply(lambda row: classify_vix(row['high'], row['low']), axis=1)
+
+# df_vix['vix_classification'] = df_vix['close'].apply(classify_vix)
+
+vix_classification_dict = df_vix['vix_classification'].to_dict()
+
+
+
 
 data_directory = r'D:\stock_historical_data\historical_data_daily' 
-
 
 # function to get sentiment of day using open and close price
 
@@ -1013,12 +1123,12 @@ for instrument in symbol:
     file_path = os.path.join(data_directory, f'{instrument}.csv')
     
     # Load the DataFrame for the current instrument
-    sbi_data = pd.read_csv(file_path)
-    sbi_data['date'] = pd.to_datetime(sbi_data['date'], utc=False)
-    sbi_data.set_index('date', inplace=True)  # Set the 'date' column as the index
+    data_frame = pd.read_csv(file_path)
+    data_frame['date'] = pd.to_datetime(data_frame['date'], utc=False)
+    data_frame.set_index('date', inplace=True)  # Set the 'date' column as the index
     
     # Iterate over each row in the DataFrame
-    for index, row in sbi_data.iterrows():
+    for index, row in data_frame.iterrows():
         open_price = row['open']
         close_price = row['close']
         date = index.date()  # Extract the date from the index
@@ -1035,7 +1145,7 @@ for instrument in symbol:
 
 
 #function for backtesting 
-        
+
 def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_pct, trailing_stop_loss_pct, target_pct, initial_funds, quantity, trade_type,position_size_type=None, max_size_amount=None, max_quantity=None, exit_conditions=None,exit_conditions_short=None):
     is_in_position = False
     is_in_position_short = False
@@ -1043,10 +1153,13 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
     entry_price_short = 0
     funds = initial_funds
     funds_short = initial_funds
+    funds_total = initial_funds
     trades = []
     trades_short = []
     gains = []
     losses = []
+    gains_short = []
+    losses_short = []
     total_pnl = 0
     total_pnl_short = 0
     total_brokerage = 0
@@ -1054,13 +1167,27 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
     win_streak = 0
     loss_streak = 0
     current_streak = 0
+    win_streak_short = 0
+    loss_streak_short = 0
+    current_streak_short = 0
     wins = 0
     losses_count = 0
+    wins_short = 0
+    losses_count_short = 0
     last_outcome = None
-    peak_funds = initial_funds
+    last_outcome_short = None
+    peak_funds = 0
     max_drawdown = 0
     max_drawdown_days = 0
     drawdown_start = None
+    peak_funds_short = initial_funds
+    max_drawdown_short = 0
+    max_drawdown_days_short = 0
+    drawdown_start_short = None
+    peak_funds_total = initial_funds
+    max_drawdown_total = 0
+    max_drawdown_days_total = 0
+    drawdown_start_total = None
     trade_dates = [data.index[0]]
     cumulative_pnl = [0]
     trade_dates_short = [data.index[0]]
@@ -1068,6 +1195,7 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
     trailing_stop_loss_price = 0
     trailing_stop_loss_price_short = 0
     invested_fund = 0
+    invested_fund_short = 0
     tsl_count = 0
     tsl_count_short = 0
     target_count = 0
@@ -1088,6 +1216,13 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
     buy_signals = 0
     sell_signals = 0
 
+    daily_trade_count = 0
+    daily_short_trade_count = 0
+    current_day = data.index[0].date()
+
+    def is_day_selected(current_date, selected_days):
+        day_name = current_date.strftime('%a')
+        return selected_days.get(day_name, False)
 
 # loop over every candle data
     for i in range(len(data)):
@@ -1097,6 +1232,11 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
         close_price = data['close'].iloc[i]
         open_price = data['open'].iloc[i]
         brokerage_per_trade = min(close_price * quantity * 0.0003, 20)
+        day_name = current_date.strftime('%a')
+        
+        if not is_day_selected(current_date, selected_days):
+            continue
+
 
         if data['Buy_Signal'].iloc[i] == True:
             buy_signals+=1
@@ -1108,7 +1248,8 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
         #market sentiment data retrive
         day_type = market_sentiment_data[symbol].get(current_date.date(), 'sideways')
 
-
+        vix_classification = vix_classification_dict.get(current_date, 'unknown')
+        
         #last candle of the day flag
         if i < len(data) - 1 and current_date.date() != data.index[i+1].date():
             is_last_candle_of_day = True
@@ -1116,7 +1257,10 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
         else:
             is_last_candle_of_day = False
 
-
+        if current_date.date() != current_day:
+            daily_trade_count = 0
+            daily_short_trade_count = 0
+            current_day = current_date.date()
         
         if is_in_position:
             exit_price = None
@@ -1133,7 +1277,7 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
                #long condition
                     target_reached_price = entry_price * (1 + target_pct)
                     
-                    if trailing_stop_loss_pct is not None:
+                    if trailing_stop_loss_pct is not None and trailing_stop_loss_pct != 0:
                         # Check if the close price exceeds the highest profit achieved
                         if high_price >= entry_price_reference * (1 + price_move_pct):
                             next_reference_price = entry_price_reference * (1 + price_move_pct)
@@ -1168,12 +1312,13 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
 
             if exit_price:
                 pnl = (exit_price - entry_price) * quantity - brokerage_per_trade 
-                funds += (exit_price * quantity - brokerage_per_trade) 
+                funds += (exit_price * quantity - brokerage_per_trade)
+                funds_total += (exit_price * quantity - brokerage_per_trade) 
                 total_pnl += pnl
                 total_brokerage += brokerage_per_trade
 
-                invested_price = entry_price * quantity
-
+                invested_price = entry_price * quantity + brokerage_per_trade
+                invested_fund += invested_price
                 trades.append({
                     'symbol': symbol, 
                     'action': 'Sell' ,
@@ -1189,7 +1334,9 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
                     'trigger': action,
                     'day_type': day_type,
                     'signalType':'Long Exit',
-                    'tradeNumber':long_trade_number
+                    'tradeNumber':long_trade_number,
+                    'vix':vix_classification,
+                    'day':day_name
                     
                 })
                 is_in_position = False
@@ -1231,6 +1378,21 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
                     if drawdown_start is not None:
                         drawdown_days = (current_date - drawdown_start).days
                         max_drawdown_days = max(max_drawdown_days, drawdown_days)
+
+                if funds_total > peak_funds_total:
+                    peak_funds_total = funds
+                    drawdown_start_total = None
+                else:
+                    if drawdown_start_total is None:
+                        drawdown_start_total = current_date
+                    current_drawdown_total = (peak_funds_total - funds) / peak_funds_total
+                    current_drawdown_percentage_total = current_drawdown_total * 100  
+                 
+                    max_drawdown_total = max(max_drawdown_total, current_drawdown_percentage_total)
+                
+                    if drawdown_start_total is not None:
+                        drawdown_days_total = (current_date - drawdown_start_total).days
+                        max_drawdown_days_total = max(max_drawdown_days_total, drawdown_days_total)
                                 
                 
                 # if funds > peak_funds:
@@ -1276,7 +1438,7 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
                 #shrt condition
                     target_reached_price_short = entry_price_short * (1 - target_pct)
                     
-                    if trailing_stop_loss_pct is not None:
+                    if trailing_stop_loss_pct is not None and trailing_stop_loss_pct != 0:
                         # Check if the close price exceeds the highest profit achieved
                         if low_price <= entry_price_reference_short * (1 - price_move_pct):
                             next_reference_price_short = entry_price_reference_short * (1 - price_move_pct)
@@ -1312,10 +1474,11 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
             if exit_price_short:
                 pnl_short =  (entry_price_short - exit_price_short) * quantity_short - brokerage_per_trade_short
                 funds_short += (entry_price_short * quantity_short - exit_price_short * quantity_short - brokerage_per_trade_short)
+                funds_total += (entry_price_short * quantity_short - exit_price_short * quantity_short - brokerage_per_trade_short)
                 total_pnl_short += pnl_short
                 total_brokerage_short += brokerage_per_trade_short
-                invested_price_short = entry_price_short * quantity_short
-
+                invested_fund_short += invested_price_short
+        
                 trades_short.append({
                     'symbol': symbol,  
                     'action': 'Buy',
@@ -1331,32 +1494,68 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
                     'trigger': action_short,
                     'day_type': day_type,
                     'signalType':'Short Exit',
-                    'tradeNumber':short_trade_number
+                    'tradeNumber':short_trade_number,
+                    'vix':vix_classification,
+                    'day':day_name
                 })
                 is_in_position_short = False
                 trailing_stop_loss_price_short = 0
                 trade_dates.append(current_date)
+             
                 cumulative_pnl.append(cumulative_pnl[-1] + pnl_short)
 
                 # Track win or loss
                 if pnl_short > 0:
-                    wins += 1
-                    gains.append(pnl_short)
-                    if last_outcome == 'win':
-                        current_streak += 1
-                    else:
-                        current_streak = 1
-                    win_streak = max(win_streak, current_streak)
-                    last_outcome = 'win'
+                    wins_short += 1
+                    gains_short.append(pnl_short)
+                    if last_outcome_short == 'win':
+                        current_streak_short += 1
+                    else:   
+                        current_streak_short = 1
+                    win_streak_short = max(win_streak_short, current_streak_short)
+                    last_outcome_short = 'win'
                 else:
-                    losses_count += 1
-                    losses.append(-pnl_short)
-                    if last_outcome == 'loss':
-                        current_streak += 1
+                    losses_count_short += 1
+                    losses_short.append(-pnl_short)
+                    if last_outcome_short == 'loss':
+                        current_streak_short += 1
                     else:
-                        current_streak = 1
-                    loss_streak = max(loss_streak, current_streak)
-                    last_outcome = 'loss'
+                        current_streak_short = 1
+                    loss_streak_short = max(loss_streak_short, current_streak_short)
+                    last_outcome_short = 'loss'
+
+
+
+                if funds_short > peak_funds_short:
+                    peak_funds_short = funds_short
+                    drawdown_start_short = None
+                else:
+                    if drawdown_start_short is None:
+                        drawdown_start_short = current_date
+                    current_drawdown_short = (peak_funds_short - funds_short) / peak_funds_short
+                    current_drawdown_percentage_short = current_drawdown_short * 100  
+                 
+                    max_drawdown_short = max(max_drawdown_short, current_drawdown_percentage_short)
+                
+                    if drawdown_start_short is not None:
+                        drawdown_days_short = (current_date - drawdown_start_short).days
+                        max_drawdown_days_short = max(max_drawdown_days_short, drawdown_days_short)
+
+
+                if funds_total > peak_funds_total:
+                    peak_funds_total = funds_total
+                    drawdown_start_total = None
+                else:
+                    if drawdown_start_total is None:
+                        drawdown_start_total = current_date
+                    current_drawdown_total = (peak_funds_total - funds_total) / peak_funds_total
+                    current_drawdown_percentage_total = current_drawdown_total * 100  
+                 
+                    max_drawdown_total = max(max_drawdown_total, current_drawdown_percentage_total)
+                
+                    if drawdown_start_total is not None:
+                        drawdown_days_total = (current_date - drawdown_start_total).days
+                        max_drawdown_days_total = max(max_drawdown_days_total, drawdown_days_total)
 
                 # if funds > peak_funds:
                 #     peak_funds = funds
@@ -1400,7 +1599,7 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
         entry_signal = data['Buy_Signal'].iloc[i] 
         entry_signal_short = data['entry_signals_short'].iloc[i]
 
-        if entry_signal and not is_in_position and is_within_trading_hours(current_date) and conditions:
+        if entry_signal and not is_in_position and is_within_trading_hours(current_date) and conditions and daily_trade_count < max_long_entry:
             entry_price = close_price 
             trade_number+=1
             long_trade_number = trade_number
@@ -1417,11 +1616,12 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
             stop_loss_price = entry_price * (1 - stop_loss_pct)
             trailing_stop_loss_price = stop_loss_price if trailing_stop_loss_pct is not None else 0
             brokerage_per_trade = min(entry_price * quantity * 0.0003, 20)
-            funds -= (entry_price * quantity + brokerage_per_trade) if strategy_type == 'buy' else (entry_price * quantity - brokerage_per_trade)
+            funds -= (entry_price * quantity + brokerage_per_trade) 
+            funds_total -= (entry_price * quantity + brokerage_per_trade) 
             is_in_position = True
             entry_price_reference = entry_price
-            invested_price = entry_price * quantity
-            invested_fund += invested_price
+            invested_price = entry_price * quantity + brokerage_per_trade
+           
             trades.append({
                 'symbol': symbol,  
                 'action': 'Buy' ,
@@ -1437,12 +1637,15 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
                 'day_type': day_type,
                 'signalType':'Long Entry',
                 'tradeNumber':long_trade_number,
+                'vix':vix_classification,
+                'day':day_name
             })
             trade_dates.append(current_date)
             cumulative_pnl.append(cumulative_pnl[-1])
             total_brokerage += brokerage_per_trade
+            daily_trade_count+=1
 
-        if entry_signal_short and not is_in_position_short and is_within_trading_hours(current_date) and conditions2:
+        if entry_signal_short and not is_in_position_short and is_within_trading_hours(current_date) and conditions2 and daily_short_trade_count < max_short_entry:
             entry_price_short = close_price 
 
             # if is_in_position:
@@ -1465,11 +1668,12 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
             stop_loss_price_short = entry_price_short * (1 + stop_loss_pct)
             trailing_stop_loss_price_short = stop_loss_price_short if trailing_stop_loss_pct is not None else 0
             brokerage_per_trade_short = min(entry_price_short * quantity_short * 0.0003, 20)
-            funds -= (entry_price_short * quantity_short - brokerage_per_trade_short)
+            funds_short -= (entry_price_short * quantity_short - brokerage_per_trade_short)
+            funds_total -= (entry_price_short * quantity_short - brokerage_per_trade_short)
             is_in_position_short = True
             entry_price_reference_short = entry_price_short
-            invested_price_short = entry_price_short * quantity_short
-            invested_fund += invested_price_short
+            invested_price_short = entry_price_short * quantity_short + brokerage_per_trade_short
+           
             trades_short.append({
                 'symbol': symbol,  
                 'action': 'Sell',
@@ -1485,10 +1689,13 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
                 'day_type': day_type,
                 'signalType':'Short Entry',
                 'tradeNumber':short_trade_number,
+                'vix':vix_classification,
+                'day':day_name
             })
             trade_dates.append(current_date)
             cumulative_pnl.append(cumulative_pnl[-1])
-            total_brokerage += brokerage_per_trade_short    
+            total_brokerage_short += brokerage_per_trade_short 
+            daily_short_trade_count +=1   
 
     # Final metrics calculation
     total_trades = wins + losses_count
@@ -1499,6 +1706,30 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
     reward_to_risk = avg_gain / avg_loss if avg_loss != 0 else 0
     expectancy = (reward_to_risk * win_rate / 100) - (loss_rate / 100) if total_trades else 0
 
+    total_trades_short = wins_short + losses_count_short
+    avg_gain_short = sum(gains_short) / wins_short if wins_short else 0
+    avg_loss_short = sum(losses_short) / losses_count_short if losses_count_short else 0
+    win_rate_short = (wins_short / total_trades_short * 100) if total_trades_short else 0
+    loss_rate_short = (losses_count_short / total_trades_short * 100) if total_trades_short else 0
+    reward_to_risk_short = avg_gain_short / avg_loss_short if avg_loss_short != 0 else 0
+    expectancy_short = (reward_to_risk_short * win_rate_short / 100) - (loss_rate_short / 100) if total_trades_short else 0
+
+    reward_to_risk_avg = (avg_gain + avg_gain_short) / (avg_loss + avg_loss_short) 
+    win_rate_avg = (wins + wins_short) / (total_trades + total_trades_short) * 100
+    loss_rate_avg = (losses_count + losses_count_short) / (total_trades + total_trades_short) * 100
+    
+    expectancy_total = ((reward_to_risk_avg * (win_rate_avg / 100))) -(loss_rate_avg/100)  if total_trades_short==0 or total_trades==0 else 0
+
+
+    
+    if invested_fund == 0:
+        invested_fund_total = invested_fund_short/total_trades_short 
+    elif invested_fund_short == 0 :
+        invested_fund_total = invested_fund/total_trades 
+
+    else:
+        invested_fund_total = (invested_fund+invested_fund_short) / (total_trades+ total_trades_short)
+
     return {
         'trades': trades,
         'tradesShort':trades_short,
@@ -1507,30 +1738,61 @@ def execute_and_analyze_strategy(data, strategy_type, stop_loss_pct, price_move_
         'Number of Losses': losses_count,
         'Winning Streak': win_streak,
         'Losing Streak': loss_streak,
+        'gains':gains,
+        'gainsShort':gains_short,
+        'losses':losses,
+        'lossesShort':losses_short,
         'Max Gains': max(gains, default=0),
         'Max Loss': max(losses, default=0),
         'Avg Gain per Winning Trade': avg_gain,
         'Avg Loss per Losing Trade': avg_loss,
+        'Total Signals Short': total_trades_short,
+        'Number of Wins Short': wins_short,
+        'Number of Losses Short': losses_count_short,
+        'Winning Streak Short': win_streak_short,
+        'Losing Streak Short': loss_streak_short,
+        'Max Gains Short': max(gains_short, default=0),
+        'Max Loss Short': max(losses_short, default=0),
+        'Avg Gain per Winning Trade Short': avg_gain_short,
+        'Avg Loss per Losing Trade Short': avg_loss_short,
         'Max Drawdown': max_drawdown,
         'Max Drawdown Days': max_drawdown_days,
+        'Max Drawdown Short': max_drawdown_short,
+        'Max Drawdown Days Short': max_drawdown_days_short,
+        'Max Drawdown Total': max_drawdown_total,
+        'Max Drawdown Days Total': max_drawdown_days_total,
         'Win Rate (%)': win_rate,
         'Loss Rate (%)': loss_rate,
         'Expectancy': expectancy,
         'Profit Factor': reward_to_risk,
         'Total PnL': total_pnl,
+        'Win Rate Short(%)': win_rate_short,
+        'Loss Rate Short(%)': loss_rate_short,
+        'Expectancy Short': expectancy_short,
+        'Expectancy total':expectancy_total,
+        'Profit Factor Short': reward_to_risk_short,
+        'Profit Factor Total' : reward_to_risk_avg,
+        'Total PnL Short': total_pnl_short,
         'Total Brokerage': total_brokerage,
+        'Total Brokerage Short': total_brokerage_short,
         'Net PnL After Brokerage': total_pnl - total_brokerage,
+        'Net PnL After Brokerage Short': total_pnl_short - total_brokerage_short,
         'Remaining Funds': funds,
         'Trade Dates': trade_dates,
         'targetCount': target_count,
         'tslCount': tsl_count,
         'slCount': stoploss_count,
-        'investedFund': invested_fund,
+        'targetCountShort': target_count_short,
+        'tslCountShort': tsl_count_short,
+        'slCountShort': stoploss_count_short,
+        'investedFund': invested_fund/total_trades if total_trades is not 0 else 0,
+        'investedFundShort': invested_fund_short/total_trades_short if total_trades_short is not 0 else 0,
+        'investedTotal':invested_fund_total,
         'Cumulative PnL': cumulative_pnl,
         'sellSignalCount':sell_signal_count,
         'marketCloseCount':market_close,
-        'totalBuySignal':buy_signals,
-        'totalSellSignal':sell_signals
+        'marketCloseCountShort':market_close_short,
+        
     }
 
 
@@ -2117,11 +2379,11 @@ for symbol in symbol:
     start_date = start_date.tz_localize(None)
     end_date = end_date.tz_localize(None)
 
-    
+    close_prices = sbi_data[['date', 'close']].reset_index().to_json(orient='records')
     # sbi_data.sort_values(by='date', inplace=True)
     sbi_data.set_index('date', inplace=True)
 
-   
+
 
     
     if graph_type == 'heikin-ashi':
@@ -2147,13 +2409,13 @@ for symbol in symbol:
     # strategy_metrics_2 = execute_and_analyze_strategy_2(sbi_data, strategy_type ,stopLoss,trailing_sl, target, initial_capital, quantity,position_size_type,max_size_amount,max_quantity,exit_conditions)
   
     strategy_metrics = execute_and_analyze_strategy(sbi_data, strategy_type ,stopLoss,moveInstrument,moveSl, target, initial_capital, quantity,trade_type,position_size_type,max_size_amount,max_quantity,exit_conditions,exit_conditions2)
-   
+    
    
     # strategy_metrics_2 = execute_and_analyze_strategy_2(sbi_data, strategy_type ,stopLoss,moveInstrument,moveSl, target, initial_capital, quantity,trade_type,position_size_type,max_size_amount,max_quantity,exit_conditions)
     
     trade_dates = pd.to_datetime(strategy_metrics['Trade Dates'])
     
-
+   
 
     trades = strategy_metrics['trades']
     buy_dates = [pd.to_datetime(trade['date']) for trade in trades if trade['action'] == 'Buy']
@@ -2171,13 +2433,26 @@ for symbol in symbol:
     labels = {pd.to_datetime(trade['date']): trade['tradeNumber'] for trade in trades}
     labels_short = {pd.to_datetime(trade['date']): trade['tradeNumber'] for trade in trades2}
 
-    if conditions:
-        monthly_pnl = compute_monthly_pnl(strategy_metrics['trades'],strategy_metrics['Total PnL'])
+
+
+    if conditions and not conditions2:
+        monthly_pnl = compute_monthly_pnl(strategy_metrics['trades'],strategy_metrics['investedFund'])
+        monthly_pnl_short = pd.DataFrame(columns=['date', 'pnl', 'invested'])
+        monthly_pnl_total = monthly_pnl
 
     elif conditions2 and not conditions:
-        monthly_pnl = compute_monthly_pnl(strategy_metrics['tradesShort'],strategy_metrics['Total PnL'])
+        monthly_pnl_short = compute_monthly_pnl(strategy_metrics['tradesShort'],strategy_metrics['investedFundShort'])
+        monthly_pnl = pd.DataFrame(columns=['date', 'pnl', 'invested'])
+        monthly_pnl_total = monthly_pnl_short
+    else:
+        
+        monthly_pnl = compute_monthly_pnl(strategy_metrics['trades'],strategy_metrics['investedFund'])
+        
+        monthly_pnl_short = compute_monthly_pnl(strategy_metrics['tradesShort'],strategy_metrics['investedFundShort'])
+       
+        monthly_pnl_total = compute_combined_pnl(monthly_pnl,monthly_pnl_short)
+        
 
-    
     plt.figure(figsize=(15, 5))
     plt.plot(sbi_data.index, sbi_data['close'], label='Closing Price')
 
@@ -2268,7 +2543,9 @@ for symbol in symbol:
         'trade_graph': trade_graph,
         'funds_graph': funds_graph,
         'monthly_pnl': monthly_pnl.to_json(orient='split'),
-       
+        'monthly_pnl_short':monthly_pnl_short.to_json(orient='split'),
+        'monthly_pnl_total':monthly_pnl_total.to_json(orient='split'),
+        'closePrices': close_prices
     })
 
 

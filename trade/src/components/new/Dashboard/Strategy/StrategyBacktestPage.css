@@ -1,0 +1,241 @@
+
+
+.Backtest-Parameters .heading{
+    background: var(--primary-light, #EFEEFB);
+
+    height: 40px;
+    flex-shrink: 0;
+    padding-left: 25px;
+}
+
+.Backtest-Parameters .heading h3{
+    color: var(--dark, var(--Dark, #1A1E29));
+    font-family: "Open Sans";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    padding-top: 10px;
+}
+
+input[type=select]:focus{
+    outline:1px solid var(--disable-primary, #a6b3e8); 
+  }
+
+input[type=text]:focus{
+    outline:1px solid var(--disable-primary, #a6b3e8); 
+  }
+
+  input[type=number]:focus{
+    outline:1px solid var(--disable-primary, #a6b3e8); 
+  }
+
+  select:focus{
+    outline:1px solid var(--disable-primary, #a6b3e8); 
+  }
+  
+  .Backtest-Parameters>select {
+  border-radius: 10px;
+  border: 1px solid var(--disable-primary, #C6CBDF);
+  background: var(--white, #FFF);
+  width: 287.857px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 0 10px;
+  }
+
+
+  .Backtest-Parameters .btn-container{
+    display: flex;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    padding-left: 34px;
+    padding-right: 34px;
+    gap: 19px;
+}
+
+  .Backtest-Parameters .btn-container input{
+    border-radius: 10px;
+    border: 1px solid var(--grey-text, #707EAE);
+    background: var(--white, #FFF);
+    width: 98%;
+    height: 46px;
+    flex-shrink: 0;
+    text-align: center;
+    color: #707EAE;
+  }
+
+  .Backtest-Parameters .btn-container input[type='time']{
+    border-radius: 10px;
+    border: 1px solid var(--grey-text, #707EAE);
+    background: var(--white, #FFF);
+    width: 98%;
+    height: 46px;
+    flex-shrink: 0;
+    text-align: center;
+    color: #707EAE;
+    position: relative;
+  }
+
+  .Backtest-Parameters .btn-container input[type='date']{
+    border-radius: 10px;
+    border: 1px solid var(--grey-text, #707EAE);
+    background: var(--white, #FFF);
+    width: 98%;
+    height: 46px;
+    flex-shrink: 0;
+    text-align: center;
+    color: #707EAE;
+    position: relative;
+  }
+
+  .Backtest-Parameters .btn-container input[type='time']::after {
+    content: url('./../../../../../public/icons8-clock.svg');
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; /* Allow clicking through the icon */
+    background-color:white;
+  }
+
+  .Backtest-Parameters .btn-container input[type='date']::after {
+    content: url('./../../../../../public/icons8-calendar-24.png');
+    position: absolute;
+   background-color: white;
+    top: 25px;
+    right: 10px;
+    transform: translateY(-50%);
+    pointer-events: none; /* Allow clicking through the icon */
+   
+  }
+
+  .Backtest-Parameters .btn-container input[type='time']::-webkit-calendar-picker-indicator {
+        color: #586389; 
+        margin-right: 10px; 
+        opacity: 2px;
+        
+}
+
+.Backtest-Parameters .btn-container input[type='date']::-webkit-calendar-picker-indicator {
+  color: #586389; 
+  margin-right: 10px; 
+  
+}
+
+  .Backtest-Parameters .btn-container label{
+    color: var(--dark, var(--Dark, #1A1E29));
+font-family: "Open Sans";
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+letter-spacing: -0.28px;
+  }
+
+  .Backtest-Parameters  .run-btn{
+    display: flex;
+    justify-content: end;
+    margin-right: 45px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+
+  .Backtest-Parameters  .run-btn button{
+    width: 150px;
+    height: 35px;
+    border-radius: 10px;
+    border: 1px solid var(--Primary, #5A55D2);
+    display: flex;
+    padding: 0px 20px;
+    justify-content: center;
+    align-items: center;
+    background: none;
+    color: var(--Primary, #5A55D2);
+    text-align: center;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 120%; /* 16.8px */
+    letter-spacing: 0.25px;
+    text-transform: uppercase;
+  }
+
+  .Backtest-Parameters .btn-container .days-btn{
+    width: 98%;
+ 
+    display: flex;
+    height: 47px;
+    border-radius: 10px;
+    border: 1px solid var(--disable-primary, #C6CBDF);
+    background: var(--Primary, #5A55D2);
+  }
+
+  .Backtest-Parameters .btn-container .days-btn button{
+    width: 20%;
+    height: 47px;
+    flex-shrink: 0;
+    /* border-radius: 0px 10px 10px 0px; */
+    border: 1px solid var(--disable-primary, #C6CBDF);
+    background: var(--bg, #F3F6F9);
+    color: var(--grey-text, #707EAE);
+    text-align: center;
+    font-family: "Open Sans";
+    cursor: pointer;
+    height: 46px;
+
+  }
+
+.Backtest-Parameters .days-btn button.selected {
+    background: var(--selected-primary,  #5A55D2);
+    border: 1px solid var(--selected-border, #4141a1);
+    color: var(--white, #FFF);
+    text-align: center;
+    font-family: "Open Sans";
+  }
+
+  
+
+    .Backtest-Parameters .result-container{
+        width: 95%;
+   
+        flex-shrink: 0;
+        border-radius: 10px;
+     
+        background: var(--white, #FFF);
+        margin-left: 35px;
+        margin-right: 35px;
+   
+  }
+
+  .Backtest-Parameters .top{
+    display: flex;
+    justify-content: space-between;
+    margin-left: 35px;
+    margin-right: 35px;
+    margin-top: 50px;
+  }
+
+  .Backtest-Parameters .top h4{
+  color: var(--grey-text, #707EAE);
+font-family: "Open Sans";
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+
+  }
+
+
+  .Backtest-Parameters .btn-container>div{
+    width: 33%;
+  }
+
+  /* .Backtest-Parameters .btn-container>div{
+    width: 33%;
+  } */

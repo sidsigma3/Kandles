@@ -1,0 +1,643 @@
+.strategy-optimise .heading{
+    background: var(--primary-light, #EFEEFB);
+    height: 40px;
+    flex-shrink: 0;
+    padding: 10px 0px 0px 30px;
+}
+
+
+.strategy-optimise .heading h4{
+    color: var(--dark, var(--Dark, #1A1E29));
+    font-family: "Open Sans";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    /* margin: 10px 0px 0px 10px; */
+    
+    }
+
+
+
+
+.strategy-optimise .goal{
+    border-radius: 10px;
+    border: 1px solid #C6CBDF;
+    background: #FFF;
+    width: 97%;
+    height: 95px;
+    margin: 25px 25px 25px 25px;
+    padding: 10px 30px 10px 30px;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.strategy-optimise .goal h4{
+    color: var(--dark, var(--Dark, #1A1E29));
+font-family: "Open Sans";
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+letter-spacing: -0.28px;
+text-transform: capitalize;
+text-align: center;
+}
+
+
+.strategy-optimise .goal>div{
+    display: flex;
+    gap: 80px;
+    margin-left: 15vw;
+
+}
+
+
+.strategy-optimise .goal select{
+    width: 30%;
+    /* color: var(--disable-primary, #767882);  */
+   
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.24px;
+    text-align: center;
+}
+
+.strategy-optimise .constraint{
+    border-radius: 10px;
+    border: 1px solid #C6CBDF;
+    background: #FFF;
+    flex-shrink: 0;
+    width: 97%;
+    margin: 25px 25px 25px 25px;
+    padding: 10px 30px 10px 30px;
+}
+
+.strategy-optimise .constraint label{
+    color: var(--dark, var(--Dark, #1A1E29));
+font-family: "Open Sans";
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+letter-spacing: -0.28px;
+}
+
+.strategy-optimise .constraint h4{
+    color: var(--dark, var(--Dark, #1A1E29));
+font-family: "Open Sans";
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+letter-spacing: -0.28px;
+text-align: center;
+margin-bottom: 20px;
+}
+
+
+.strategy-optimise .constraint .parameters-container{
+    display:flex;
+    justify-content: space-between;
+    gap: 50px;
+    margin-top: 10px;
+}
+
+.strategy-optimise .constraint .parameters-container>div {
+    display: flex;
+    gap: 10px;
+    width: 50%;
+   
+}
+
+.strategy-optimise .constraint .parameters-container>div>div {
+    display: flex;
+    gap: 10px;
+    width: 40%;
+}
+
+.strategy-optimise .constraint .parameters-container select{
+    border-radius: 10px;
+    border: 1px solid #C6CBDF;
+    background: var(--white, #FFF);
+    display: flex;
+    width: 95%;
+    height: 40px;
+    padding: 5px 8px;
+    align-items: flex-start;
+    flex-shrink: 0;
+    
+    /* color: var(--disable-primary, #767882); */
+    text-align: center;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.24px;
+    text-align: center;
+}
+
+.strategy-optimise .constraint .parameters-container input[type='number']{
+    border-radius: 10px;
+border: 1px solid var(--disable-primary, #C6CBDF);
+background: var(--white, #FFF);
+width: 50%;
+height: 40px;
+flex-shrink: 0;
+/* color: var(--disable-primary, #C6CBDF); */
+text-align: center;
+font-family: "Open Sans";
+font-size: 12px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+letter-spacing: -0.24px;
+}
+
+.strategy-optimise .constraint .parameters-container input[type='number']::placeholder {
+  text-align: left;
+  padding-left: 10px;
+}
+
+.strategy-optimise .variable input[type='number'] {
+  text-align: center;
+ 
+}
+
+.strategy-optimise .variable input[type='number']::placeholder {
+  text-align: left;
+  padding-left: 10px;
+}
+
+
+.strategy-optimise .constraint .parameters-container input[type='checkbox'] {
+    /* Remove default styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    /* Set the dimensions */
+    width: 15px;
+    height: 15px;
+  
+    /* Customize the appearance */
+    background-color: white;
+    border: 2px solid #C6CBDF;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 1px;
+  }
+  
+  .strategy-optimise .constraint .parameters-container input[type='checkbox']:checked {
+    /* Custom appearance when checked */
+    background-color: #5A55D2;
+    border: 2px solid #5A55D2;
+    padding: 1px;
+  }
+  
+  .strategy-optimise .constraint .parameters-container input[type='checkbox']:checked::before {
+    /* Custom checkmark */
+    content: '✓';
+    display: block;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    line-height: 18px; /* Adjust based on the height */
+    font-size: 14px; /* Adjust the size of the checkmark */
+    margin-bottom: 5px;
+  }
+
+
+  .strategy-optimise .variable{
+    border-radius: 10px;
+    border: 1px solid #C6CBDF;
+    background: #FFF;
+    width: 97%;
+    margin: 25px 25px 25px 25px;
+    padding: 10px 30px 10px 30px;
+  }
+
+  /* .strategy-optimise .variable label{
+    color: var(--dark, var(--Dark, #1A1E29));
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.28px;
+    margin-bottom: 10px;
+
+  } */
+
+  .strategy-optimise .variable h4{
+    color: var(--dark, var(--Dark, #1A1E29));
+font-family: "Open Sans";
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+letter-spacing: -0.28px;
+text-align: center;
+  }
+
+  .strategy-optimise .variable .left-right{
+    display: flex;
+    justify-content: space-between;
+    padding: 0px 15px;
+  }
+
+  /* .strategy-optimise .variable>div{
+    display: flex;
+    justify-content: space-between;
+    
+  } */
+
+  .strategy-optimise .variable>div>div>div{
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+
+  /* .strategy-optimise .variable>div>div>div>div{
+    display: flex;
+    gap: 5px;
+  } */
+  .strategy-optimise .variable .variable-inputs>div>div>h5{
+    text-align: center;
+  }
+
+  .strategy-optimise .variable .variable-inputs{
+    width: 100%;
+  }
+  .strategy-optimise .variable .time-inputs{
+    width: 30%;
+  }
+
+  .strategy-optimise .variable .variable-inputs .range-left {
+    width: 100%;
+    display: flex; 
+    gap: 20px;
+  }
+
+
+  .strategy-optimise .variable .variable-inputs .range-right{
+    width: 100%;
+    display: flex; 
+    gap: 20px;
+  }
+
+  .strategy-optimise .variable .variable-inputs .range-left>div{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+  }
+
+  .strategy-optimise .variable .variable-inputs .range-left>div>div{
+    display: flex;
+    justify-content: left;
+  }
+
+  .strategy-optimise .variable .variable-inputs .range-left>div>label{
+    width: 100%;
+    color: var(--dark, var(--Dark, #1A1E29));
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.28px;
+    margin-left: 10px;
+   
+  }
+
+  .strategy-optimise .variable .variable-inputs .range-left input{
+    margin: 0 10px 0 10px;
+  }
+
+
+
+  .strategy-optimise .variable .variable-inputs .range-right>div{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.strategy-optimise .variable .variable-inputs .range-right>div>div{
+  display: flex;
+  justify-content: right;
+}
+
+.strategy-optimise .variable .variable-inputs .range-right>div>label{
+  width: 100%;
+  color: var(--dark, var(--Dark, #1A1E29));
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.28px;
+  margin-right: 10px;
+  text-align: end;
+ 
+}
+
+.strategy-optimise .variable .variable-inputs .range-right input{
+  margin: 0 10px 0 10px;
+}
+
+  .strategy-optimise .variable .variable-inputs .step{
+    width: 30%;
+  }
+
+  .strategy-optimise .variable select{
+    border-radius: 10px;
+border: 1px solid var(--disable-primary, #C6CBDF);
+background: var(--white, #FFF);
+width: 50%;
+height: 40px;
+flex-shrink: 0;
+  }
+
+  .strategy-optimise .variable input[type='number']{
+    border-radius: 10px;
+    border: 1px solid #C6CBDF;
+    background: var(--white, #FFF);
+    width: 30%;
+    height: 40px;
+    flex-shrink: 0;
+    
+  }
+
+  .strategy-optimise .variable>div>div>div>div>div{
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+
+  .strategy-optimise .run-btn{
+    display: flex;
+    justify-content: end;
+    margin-top: 20px;
+    width: 101%;
+  }
+
+  .strategy-optimise .run-btn button{
+    border-radius: 10px;
+    border: 1px solid var(--Primary, #5A55D2);
+    display: flex;
+    width: 15%;
+    height: 40px;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    background: none;
+    color: var(--Primary, #5A55D2);
+    text-align: center;
+    font-family: "Open Sans";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 120%; /* 16.8px */
+    letter-spacing: 0.25px;
+    text-transform: uppercase;
+    margin-left: 5px;
+  }
+
+  .strategy-optimise .rank-result .rank-tanle-container{
+    padding-left: 30px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-right: 20px;
+  }
+
+
+
+  .strategy-optimise .rank-result .rank-table{
+    border-radius: 16px;
+    background: var(--white, #FFF);
+    width: 100%;
+    padding-left: 10px;
+  }
+
+  .strategy-optimise .rank-result .rank-table td{
+    border: none;
+    color: var(--dark, var(--Dark, #1A1E29));
+font-family: "Open Sans";
+font-size: 12px;
+font-style: normal;
+font-weight: 400;
+line-height: 120%; /* 14.4px */
+letter-spacing: 0.25px;
+text-transform: uppercase;
+padding: 20px;
+  }
+
+  .strategy-optimise .rank-result .rank-table tr{
+    border-radius: 10px;
+    border: 1px solid var(--disable-primary, #C6CBDF);
+    background: var(--white, #FFF);
+    padding: 10px;
+  }
+
+  .strategy-optimise .rank-result .rank-table th{
+    
+font-family: "Open Sans";
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: 120%; /* 16.8px */
+letter-spacing: 0.25px;
+padding: 15px;
+background: #5A55D2;
+color:#EFEEFB;
+}
+
+
+.strategy-optimise .rank-result .rank-table thead tr{
+  border: none;
+}
+
+.strategy-optimise .rank-result .rank-table th:first-child{
+  border-top-left-radius: 13px;
+}
+
+.strategy-optimise .rank-result .rank-table th:last-child{
+  border-top-right-radius: 13px;
+}
+
+
+.strategy-optimise .optimise-btn-container{
+    display: flex;
+    justify-content: end;
+    padding-right: 20px;
+}
+
+.strategy-optimise .optimise-btn-container button{
+    border-radius: 10px;
+background: var(--Primary, #5A55D2);
+display: inline-flex;
+padding: 18px 30px;
+justify-content: center;
+align-items: center;
+gap: 10px;
+color: #FFF;
+text-align: center;
+font-family: "Open Sans";
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: 120%; /* 16.8px */
+letter-spacing: 0.25px;
+text-transform: uppercase;
+margin-bottom: 20px;
+}
+
+.strategy-optimise .optimise-result-table{
+    
+    background: var(--white, #FFF);
+    width: 100%;
+    padding-left: 10px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    
+}
+
+.strategy-optimise .optimise-result-table th{
+
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 120%; /* 16.8px */
+  letter-spacing: 0.25px;
+  padding: 15px;
+  background:#5A55D2;
+  color: #EFEEFB;
+
+}
+
+.strategy-optimise .optimise-result-table thead th:first-child {
+  border-top-left-radius: 13px;
+}
+
+.strategy-optimise .optimise-result-table thead th:last-child  {
+  border-top-right-radius: 13px;
+}
+
+.strategy-optimise .optimise-result-table thead tr{
+  border: none;
+}
+
+.strategy-optimise .optimise-result-table tr{
+  border-radius: 10px;
+    border: 1px solid var(--disable-primary, #C6CBDF);
+    background: var(--white, #FFF);
+    padding: 10px;
+
+}
+
+.strategy-optimise .optimise-result-table td{
+    border: none;
+    color: var(--dark, var(--Dark, #1A1E29));
+    font-family: "Open Sans";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 120%; /* 14.4px */
+    letter-spacing: 0.25px;
+    text-transform: uppercase;
+    padding: 20px;
+}
+
+
+.strategy-optimise .optimization-result-container .optimise-table-container::-webkit-scrollbar {
+  margin-top: 10px;
+  width:20px !important;
+}
+
+.strategy-optimise .optimization-result-container .optimise-table-container::-webkit-scrollbar-track {
+       /* color of the tracking area */
+  width: 20px;
+}
+
+.strategy-optimise .optimization-result-container .optimise-table-container::-webkit-scrollbar-thumb {
+  background-color:#5A55D2;    /* color of the scroll thumb */
+  border-radius: 20px;       /* roundness of the scroll thumb */
+  border: 3px solid #4141a1;  /* creates padding around scroll thumb */
+  width: 5px
+}
+
+.strategy-optimise .optimization-result-container .optimise-table-container{
+  padding: 0 20px;
+  overflow: auto; 
+}
+
+.strategy-optimise .optimization-result-container .best-parameter{
+  color: var(--dark, var(--Dark, #1A1E29));
+  text-align: center;
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -0.28px;
+
+}
+
+
+.strategy-optimise .optimization-result-container .optimise-table-container h4{
+  color: var(--dark, var(--Dark, #1A1E29));
+  text-align: center;
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -0.28px;
+}
+
+.strategy-optimise .optimization-result-container .heading{
+  margin-bottom: 20px;
+}
+
+
+.strategy-optimise .time-inputs button{
+  width: 20%;
+}
+
+
+.strategy-optimise .time-inputs .interval-btn {
+  display: flex !important;
+  margin-top: 10px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--disable-primary, #C6CBDF) !important;
+  background: var(--Primary, #5A55D2) !important;
+}
+
+.strategy-optimise .time-inputs .interval-btn button {
+  width: 14.3% !important;
+  height: 40px !important;
+  flex-shrink: 0 !important;
+  border: 1px solid var(--disable-primary, #C6CBDF) !important;
+  background: var(--bg, #F3F6F9) !important;
+  color: var(--grey-text, #707EAE) !important;
+  text-align: center !important;
+  font-family: "Open Sans" !important;
+  cursor: pointer !important;
+}
+
+.strategy-optimise .time-inputs .interval-btn button.selected {
+  background: var(--selected-primary, #5A55D2) !important;
+  border: 1px solid var(--selected-border, #4141a1) !important;
+  color: var(--white, #FFF) !important;
+  text-align: center !important;
+  font-family: "Open Sans" !important;
+}

@@ -1,4 +1,4 @@
-import React, { Component} from 'react';
+import React, { Component ,useState , useEffect} from 'react';
 import axios from 'axios'
 import queryString from 'query-string';
 import Reset from './pages/Reset';
@@ -27,10 +27,32 @@ import HomePage from './components/new/Dashboard/Home/HomePage';
 import SystemTrading from './components/new/Dashboard/systemTrading/SystemTrading';
 import CompeteRank from './components/new/Dashboard/Competition/CompeteRank';
 import Graph from './components/new/Dashboard/Graph/Graph';
+import StrategyHome from './components/new/Dashboard/Strategy/StrategyHome';
+
+import StrategyBuild from './components/new/Dashboard/Strategy/StrategyBuild';
+import StrategyBuildPage from './components/new/Dashboard/Strategy/StrategyBuildPage';
+
+
+const saveToLocalStorage = (key, value) => {
+    localStorage.setItem(key, JSON.stringify(value));
+  };
+  
+const retrieveFromLocalStorage = (key, defaultValue) => {
+    const savedValue = localStorage.getItem(key);
+    return savedValue ? JSON.parse(savedValue) : defaultValue;
+  };
+  
+    
+
 const browserHistory = createBrowserHistory({forceRefresh:true})
 
 const Home = () =>{
    
+const [strategyListIndi,setStrategyListIndi] = useState(() => retrieveFromLocalStorage('strategyListIndi', []))
+
+useEffect(()=>{
+    saveToLocalStorage('strategyListIndi',strategyListIndi)
+},[strategyListIndi])
 
 
 return(
@@ -56,7 +78,11 @@ return(
 
 
                 {/* <Route exact path='/' element={<Start></Start>}/>  */}
-                <Route exact path='/dashboard' element={<Dashboard></Dashboard>}/> 
+                {/* <Route exact path='/dashboard' element={<StrategyHome></StrategyHome>}/>  */}
+
+                <Route exact path='/dashboard' element={<StrategyBuildPage  setStrategyListIndi={setStrategyListIndi} strategyListIndi={strategyListIndi}></StrategyBuildPage>}/> 
+
+                {/* <Route exact path='/dashboard' element={<Dashboard></Dashboard>}/>  */}
                 <Route exact path='/login' element={<Log></Log>}/> 
                 <Route exact path='/signup' element={<Log></Log>}/>  
                 <Route exact path='/reset' element={<Reset></Reset>}/>  

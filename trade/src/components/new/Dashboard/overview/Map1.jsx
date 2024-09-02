@@ -34,7 +34,6 @@ const Map1 = ({ indices }) => {
   }, []);
 
   useEffect(() => {
-    console.log('Fetching initial data');
     axios
       .post('http://localhost:5000/getlastPrice', { indices })
       .then((res) => {

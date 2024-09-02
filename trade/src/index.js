@@ -31,6 +31,7 @@ import Dashboard from './components/new/Dashboard/Dashboard';
 import SystemTrading from './components/new/Dashboard/systemTrading/SystemTrading';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <GoogleOAuthProvider clientId="377046758434-nnu0bme8nrlogj08vuk72e8ss20b10a1.apps.googleusercontent.com">

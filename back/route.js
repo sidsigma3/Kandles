@@ -27,7 +27,7 @@ const Upstox = require('upstox-js-sdk');
 const puppeteer = require('puppeteer');
 const otplib = require('otplib');
 const Razorpay = require('razorpay');
-
+const path = require('path');
 const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const { spawn } = require('child_process');
@@ -2383,6 +2383,45 @@ function getMargins(segment) {
 // });
 
 
+router.post('/optimize', (req, res) => {
+  const { constraints, variableInputs ,goal, strategy} = req.body;
+
+  console.log('Received constraints:', constraints);
+  console.log('Received variableInputs:', variableInputs);
+  console.log(goal)
+ 
+
+  const pythonScriptPath = path.resolve(__dirname, 'config/optimise.py');
+  const pythonProcess = spawn('python', [pythonScriptPath]);
+
+  let dataString = '';
+
+  pythonProcess.stdin.write(JSON.stringify({ constraints, variableInputs , goal ,strategy }));
+  pythonProcess.stdin.end();
+
+  pythonProcess.stdout.on('data', (data) => {
+      dataString += data.toString();
+      console.log(`stdout: ${data.toString()}`);
+  });
+
+  pythonProcess.stderr.on('data', (data) => {
+      console.error(`stderr: ${data.toString()}`);
+  });
+
+  pythonProcess.on('error', (error) => {
+      console.error(`Error: ${error.message}`);
+      res.status(500).send({ error: 'Internal Server Error' });
+  });
+
+  pythonProcess.on('close', (code) => {
+      console.log(`Process exited with code ${code}`);
+      if (code === 0) {
+          res.json(JSON.parse(dataString)); // Send the Python script's response back to React
+      } else {
+          res.status(500).send({ error: 'Python script failed' });
+      }
+  });
+});
 
 
   return router;

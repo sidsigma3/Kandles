@@ -117,7 +117,6 @@ const Watchlist = ({ onSelectInstrument , selectInstrument }) => {
   }, []);
 
 
-  
 
 
   return (
