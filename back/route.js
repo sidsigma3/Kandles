@@ -23,7 +23,7 @@ const KiteTicker = require("kiteconnect").KiteTicker;
 // const WebSocket = require("ws");
 const io = require("./server");
 const { v4: uuidv4 } = require('uuid');
-const Upstox = require('upstox-js-sdk');
+// const Upstox = require('upstox-js-sdk');
 const puppeteer = require('puppeteer');
 const otplib = require('otplib');
 const Razorpay = require('razorpay');
@@ -520,31 +520,31 @@ module.exports = function (io) {
 
   // ticker.connect();
 
-  const apiVersion = '2.0'
- router.post("/getLastPrice",(req,res)=>{
+//   const apiVersion = '2.0'
+//  router.post("/getLastPrice",(req,res)=>{
 
-  const indices = req.body.indices
+//   const indices = req.body.indices
 
-  const symbol ='NSE_INDEX|'+indices
+//   const symbol ='NSE_INDEX|'+indices
 
-  const parts = symbol.split('|');
+//   const parts = symbol.split('|');
 
-// Combine the parts with ':'
-  const convertedSymbol = parts.join(':');
+// // Combine the parts with ':'
+//   const convertedSymbol = parts.join(':');
 
- console.log(symbol)
+//  console.log(symbol)
 
-  let api = new Upstox.MarketQuoteApi();
-  api.getFullMarketQuote(symbol, apiVersion, (error, data, response) => {
-    if (error) {
-      console.error('wrong');
-    } else {
-      const price= data.data[convertedSymbol].lastPrice
-      const change = data.data[convertedSymbol].netChange
-      console.log('API called successfully. Returned data: ' + change);
-      res.send({lastPrice:price,change:change})
-    }
-  });
+  // let api = new Upstox.MarketQuoteApi();
+  // api.getFullMarketQuote(symbol, apiVersion, (error, data, response) => {
+  //   if (error) {
+  //     console.error('wrong');
+  //   } else {
+  //     const price= data.data[convertedSymbol].lastPrice
+  //     const change = data.data[convertedSymbol].netChange
+  //     console.log('API called successfully. Returned data: ' + change);
+  //     res.send({lastPrice:price,change:change})
+  //   }
+  // });
 
 
 
@@ -571,54 +571,54 @@ module.exports = function (io) {
   // }  
 
 
-  const getMarketFeedUrl = async () => {
-    return new Promise((resolve, reject) => {
-      let apiInstance = new Upstox.WebsocketApi(); // Create new Websocket API instance
+  // const getMarketFeedUrl = async () => {
+  //   return new Promise((resolve, reject) => {
+  //     let apiInstance = new Upstox.WebsocketApi(); // Create new Websocket API instance
   
-      // Call the getMarketDataFeedAuthorize function from the API
-      apiInstance.getMarketDataFeedAuthorize(
-        apiVersion,
-        (error, data, response) => {
-          if (error) reject(error); // If there's an error, reject the promise
-          else resolve(data.data.authorizedRedirectUri); // Else, resolve the promise with the authorized URL
-        }
-      );
-    });
-  };
+  //     // Call the getMarketDataFeedAuthorize function from the API
+  //     apiInstance.getMarketDataFeedAuthorize(
+  //       apiVersion,
+  //       (error, data, response) => {
+  //         if (error) reject(error); // If there's an error, reject the promise
+  //         else resolve(data.data.authorizedRedirectUri); // Else, resolve the promise with the authorized URL
+  //       }
+  //     );
+  //   });
+  // };
   
   // Function to establish WebSocket connection
-  const connectWebSocket = async (wsUrl) => {
-    return new Promise((resolve, reject) => {
-      const ws = new WebSocket(wsUrl, {
-        headers: {
-          "Api-Version": apiVersion,
-          Authorization: "Bearer " + accessToken,
-        },
-        followRedirects: true,
-      });
+  // const connectWebSocket = async (wsUrl) => {
+  //   return new Promise((resolve, reject) => {
+  //     const ws = new WebSocket(wsUrl, {
+  //       headers: {
+  //         "Api-Version": apiVersion,
+  //         Authorization: "Bearer " + accessToken,
+  //       },
+  //       followRedirects: true,
+  //     });
   
-      // WebSocket event handlers
-      ws.on("open", () => {
-        console.log("connected");
-        resolve(ws); // Resolve the promise once connected
+  //     // WebSocket event handlers
+  //     ws.on("open", () => {
+  //       console.log("connected");
+  //       resolve(ws); // Resolve the promise once connected
   
-        // Set a timeout to send a subscription message after 1 second
-        setTimeout(() => {
-          const data = {
-            guid: "someguid",
-            method: "sub",
-            data: {
-              mode: "full",
-              instrumentKeys: [symbol],
-            },
-          };
-          ws.send(Buffer.from(JSON.stringify(data)));
-        }, 1000);
-      });
+  //       // Set a timeout to send a subscription message after 1 second
+  //       setTimeout(() => {
+  //         const data = {
+  //           guid: "someguid",
+  //           method: "sub",
+  //           data: {
+  //             mode: "full",
+  //             instrumentKeys: [symbol],
+  //           },
+  //         };
+  //         ws.send(Buffer.from(JSON.stringify(data)));
+  //       }, 1000);
+  //     });
   
-      ws.on("close", () => {
-        console.log("disconnected");
-      });
+  //     ws.on("close", () => {
+  //       console.log("disconnected");
+  //     });
   
       // ws.on("message", (data) => {
       //   const decodedData = decodeProfobuf(data);
@@ -632,92 +632,92 @@ module.exports = function (io) {
       //   io.emit('marketDataUpdate', { lastPrice, change });
       // });
   
-      ws.on("message", (data) => {
-        const decodedData = decodeProfobuf(data);
+  //     ws.on("message", (data) => {
+  //       const decodedData = decodeProfobuf(data);
        
       
-        // Check if the expected properties exist before accessing them
-        if (
-          decodedData.feeds &&
-          decodedData.feeds[symbol] &&
-          decodedData.feeds[symbol].ff &&
-          decodedData.feeds[symbol].ff.indexFF &&
-          decodedData.feeds[symbol].ff.indexFF.ltpc
-        ) {
-          // Extract last price and change from decoded data
-          const lastPrice = decodedData.feeds[symbol].ff.indexFF.ltpc.ltp;
-          const cp = decodedData.feeds[symbol].ff.indexFF.ltpc.cp;
+  //       // Check if the expected properties exist before accessing them
+  //       if (
+  //         decodedData.feeds &&
+  //         decodedData.feeds[symbol] &&
+  //         decodedData.feeds[symbol].ff &&
+  //         decodedData.feeds[symbol].ff.indexFF &&
+  //         decodedData.feeds[symbol].ff.indexFF.ltpc
+  //       ) {
+  //         // Extract last price and change from decoded data
+  //         const lastPrice = decodedData.feeds[symbol].ff.indexFF.ltpc.ltp;
+  //         const cp = decodedData.feeds[symbol].ff.indexFF.ltpc.cp;
 
-          const priceChange = lastPrice - cp;
-          const percentageChange = ((lastPrice - cp) / cp) * 100;
+  //         const priceChange = lastPrice - cp;
+  //         const percentageChange = ((lastPrice - cp) / cp) * 100;
           
-          // Emit last price and change to connected clients
-          io.emit('marketDataUpdate', { lastPrice, indices ,percentageChange,priceChange});
-        } else {
-          console.error('Expected properties not found in the data structure.');
-        }
-      });
+  //         // Emit last price and change to connected clients
+  //         io.emit('marketDataUpdate', { lastPrice, indices ,percentageChange,priceChange});
+  //       } else {
+  //         console.error('Expected properties not found in the data structure.');
+  //       }
+  //     });
 
-      ws.on("error", (error) => {
-        console.log("error:", error);
-        reject(error); // Reject the promise on error
-      });
-    });
-  };
+  //     ws.on("error", (error) => {
+  //       console.log("error:", error);
+  //       reject(error); // Reject the promise on error
+  //     });
+  //   });
+  // };
   
-  // Function to initialize the protobuf part
-  const initProtobuf = async () => {
-    protobufRoot = await protobuf.load('./config/MarketDataFeed.proto');
-    console.log("Protobuf part initialization complete");
+  // // Function to initialize the protobuf part
+  // const initProtobuf = async () => {
+  //   protobufRoot = await protobuf.load('./config/MarketDataFeed.proto');
+  //   console.log("Protobuf part initialization complete");
     
-  };
+  // };
   
-  // Function to decode protobuf message
-  const decodeProfobuf = (buffer) => {
-    if (!protobufRoot) {
-      console.warn("Protobuf part not initialized yet!");
-      return null;
-    }
+  // // Function to decode protobuf message
+  // const decodeProfobuf = (buffer) => {
+  //   if (!protobufRoot) {
+  //     console.warn("Protobuf part not initialized yet!");
+  //     return null;
+  //   }
   
-    const FeedResponse = protobufRoot.lookupType(
-      "com.upstox.marketdatafeeder.rpc.proto.FeedResponse"
-    );
-    return FeedResponse.decode(buffer);
-  };
+  //   const FeedResponse = protobufRoot.lookupType(
+  //     "com.upstox.marketdatafeeder.rpc.proto.FeedResponse"
+  //   );
+  //   return FeedResponse.decode(buffer);
+  // };
   
-  // Initialize the protobuf part and establish the WebSocket connection
-  (async () => {
-    try {
-      await initProtobuf(); // Initialize protobuf
-      const wsUrl = await getMarketFeedUrl(); // Get the market feed URL
-      const ws = await connectWebSocket(wsUrl); // Connect to the WebSocket
-    } catch (error) {
-      console.error("An error occurred:", error);
-    }
-  })();
+  // // Initialize the protobuf part and establish the WebSocket connection
+  // (async () => {
+  //   try {
+  //     await initProtobuf(); // Initialize protobuf
+  //     const wsUrl = await getMarketFeedUrl(); // Get the market feed URL
+  //     const ws = await connectWebSocket(wsUrl); // Connect to the WebSocket
+  //   } catch (error) {
+  //     console.error("An error occurred:", error);
+  //   }
+  // })();
 
- })  
+//  })  
 
 
 
- router.post("/getGraph",(req,res)=>{
+//  router.post("/getGraph",(req,res)=>{
 
-  const today = new Date().toISOString().split('T')[0];
-  const selectedInstrument = req.body.instrument || "NSE_INDEX|Nifty 50";
-  let api = new Upstox.HistoryApi();
-  let instrumentKey = selectedInstrument; // String | 
-  let interval = "day"; // String | 
-  let toDate = today; // String | 
-  api.getHistoricalCandleData(instrumentKey, interval, toDate, apiVersion, (error, data, response) => {
-    if (error) {
-      console.error(error);
-    } else {
-      console.log('API called successfully. Returned data: ' + data);
-      res.send({candle:data.data.candles})
-    }
-  });
+//   const today = new Date().toISOString().split('T')[0];
+//   const selectedInstrument = req.body.instrument || "NSE_INDEX|Nifty 50";
+//   let api = new Upstox.HistoryApi();
+//   let instrumentKey = selectedInstrument; // String | 
+//   let interval = "day"; // String | 
+//   let toDate = today; // String | 
+//   api.getHistoricalCandleData(instrumentKey, interval, toDate, apiVersion, (error, data, response) => {
+//     if (error) {
+//       console.error(error);
+//     } else {
+//       console.log('API called successfully. Returned data: ' + data);
+//       res.send({candle:data.data.candles})
+//     }
+//   });
 
- })
+//  })
 
 
  router.post("/top-movers", async (req, res) => {
@@ -928,14 +928,14 @@ function getMargins(segment) {
   const REDIRECT_URI = 'http://localhost:3000/dashboard'; // Make sure this matches the redirect URI in your Upstox app settings
   // const upstox = new Upstox(API_KEY, API_SECRET);
   // const loginUrl = upstox.getLoginUri(REDIRECT_URI);
-  const defaultClient = Upstox.ApiClient.instance;
-  const OAUTH2 = defaultClient.authentications['OAUTH2'];
-  const api = new Upstox.MarketQuoteApi()
+  // const defaultClient = Upstox.ApiClient.instance;
+  // const OAUTH2 = defaultClient.authentications['OAUTH2'];
+  // const api = new Upstox.MarketQuoteApi()
   var accessToken
   // const api = new UpstoxClient.ChargeApi()
-  const AUTH_URL = 'https://api-v2.upstox.com/login/authorization/dialog'
-  const accessTokenUrl = 'https://api-v2.upstox.com/login/authorization/token';
-  const authUrl = `${AUTH_URL}?client_id=${API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`
+  // const AUTH_URL = 'https://api-v2.upstox.com/login/authorization/dialog'
+  // const accessTokenUrl = 'https://api-v2.upstox.com/login/authorization/token';
+  // const authUrl = `${AUTH_URL}?client_id=${API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`
  
   const otplibAuthenticator = otplib.authenticator;
 
@@ -972,98 +972,98 @@ function getMargins(segment) {
 
   })
 
-  router.post("/connect/upstox", (req, res) => {
-    // const requestToken = req.body.requestToken;
+  // router.post("/connect/upstox", (req, res) => {
+  //   // const requestToken = req.body.requestToken;
 
-    // const connectKite = async () => {
-    //   try {
-    //     const response = await kite.generateSession(requestToken, secret);
-    //     access_token = response.access_token;
-    //     console.log("processing");
-    //     await kite.setAccessToken(access_token);
+  //   // const connectKite = async () => {
+  //   //   try {
+  //   //     const response = await kite.generateSession(requestToken, secret);
+  //   //     access_token = response.access_token;
+  //   //     console.log("processing");
+  //   //     await kite.setAccessToken(access_token);
 
-    //     const ticker = new KiteTicker({
-    //       api_key: "0bpuke0rhsjgq3lm",
-    //       access_token: access_token,
-    //     });
+  //   //     const ticker = new KiteTicker({
+  //   //       api_key: "0bpuke0rhsjgq3lm",
+  //   //       access_token: access_token,
+  //   //     });
 
-    //     ticker.connect();
-    //     res.send('ho gaya')
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // };
-    // if (!access_token) {
-    //   connectKite();
-    // }
+  //   //     ticker.connect();
+  //   //     res.send('ho gaya')
+  //   //   } catch (error) {
+  //   //     console.error(error);
+  //   //   }
+  //   // };
+  //   // if (!access_token) {
+  //   //   connectKite();
+  //   // }
 
     
-    // const authorizationCode = req.body.requestToken;
-    // console.log(authorizationCode)
+  //   // const authorizationCode = req.body.requestToken;
+  //   // console.log(authorizationCode)
   
-    // const params = {
-    //   code: authorizationCode,
-    //   client_id: API_KEY,
-    //   client_secret: API_SECRET,
-    //   redirect_uri: REDIRECT_URI,
-    //   grant_type: 'authorization_code',
-    // };
+  //   // const params = {
+  //   //   code: authorizationCode,
+  //   //   client_id: API_KEY,
+  //   //   client_secret: API_SECRET,
+  //   //   redirect_uri: REDIRECT_URI,
+  //   //   grant_type: 'authorization_code',
+  //   // };
     
 
-  //   var params = {
-  //     'apiSecret' : API_SECRET,
-  //     'code' : authorizationCode,
-  //     'grant_type' : "authorization_code",
-  //     'redirect_uri' : REDIRECT_URI
-  // };
+  // //   var params = {
+  // //     'apiSecret' : API_SECRET,
+  // //     'code' : authorizationCode,
+  // //     'grant_type' : "authorization_code",
+  // //     'redirect_uri' : REDIRECT_URI
+  // // };
 
-    const headers = {
-      'accept': 'application/json',
-      'Api-Version': '2.0',
-      'Content-Type': 'application/x-www-form-urlencoded',
-    };
+  //   const headers = {
+  //     'accept': 'application/json',
+  //     'Api-Version': '2.0',
+  //     'Content-Type': 'application/x-www-form-urlencoded',
+  //   };
 
 
-    if (authorizationCode) {
-      // Step 4: Exchange the authorization code for an access token
-      // upstox.getAccessToken(params)
-      // .then(function (response) {
-      //   const accessToken = response.access_token;
-      //   console.log('Access Token:', accessToken);
-      // })
-      // .catch(function (err) {
-      //   console.error('Error getting access token:', err);
-      //   // Handle the error as needed
-      // });
+  //   if (authorizationCode) {
+  //     // Step 4: Exchange the authorization code for an access token
+  //     // upstox.getAccessToken(params)
+  //     // .then(function (response) {
+  //     //   const accessToken = response.access_token;
+  //     //   console.log('Access Token:', accessToken);
+  //     // })
+  //     // .catch(function (err) {
+  //     //   console.error('Error getting access token:', err);
+  //     //   // Handle the error as needed
+  //     // });
 
-      axios.post(accessTokenUrl, new URLSearchParams(params), { headers })
-    .then(response => {
-      accessToken = response.data.access_token;
-      console.log('Access Token:', accessToken);
-    // Now you can use the access token for making authorized requests to Upstox 
-      OAUTH2.accessToken = accessToken
-      res.send({'messeage':'completed'})
-      // api.getFullMarketQuote(symbol, apiVersion, (error, data, response) => {
-      //   if (error) {
-      //     console.error(error);
-      //   } else {
-      //     console.log('API called successfully. Returned data: ' + data.data[convertedSymbol].lastPrice);
-      //   }
-      // });
+  //     axios.post(accessTokenUrl, new URLSearchParams(params), { headers })
+  //   .then(response => {
+  //     accessToken = response.data.access_token;
+  //     console.log('Access Token:', accessToken);
+  //   // Now you can use the access token for making authorized requests to Upstox 
+  //     OAUTH2.accessToken = accessToken
+  //     res.send({'messeage':'completed'})
+  //     // api.getFullMarketQuote(symbol, apiVersion, (error, data, response) => {
+  //     //   if (error) {
+  //     //     console.error(error);
+  //     //   } else {
+  //     //     console.log('API called successfully. Returned data: ' + data.data[convertedSymbol].lastPrice);
+  //     //   }
+  //     // });
 
-      })
-      .catch(error => {
-        console.error('Error obtaining access token:', error.message);
-        // Handle the error as needed
-      });
+  //     })
+  //     .catch(error => {
+  //       console.error('Error obtaining access token:', error.message);
+  //       // Handle the error as needed
+  //     });
 
-      } else {
-        console.error('Authorization code not found.');
-      }
+  //     } else {
+  //       console.error('Authorization code not found.');
+  //     }
     
   
 
-  });
+  // });
 
   router.post("/stock", async (req, res) => {
  
@@ -1524,7 +1524,7 @@ function getMargins(segment) {
   });
 
 
-  router.post("/upstox", async (req, res) => {
+  // router.post("/upstox", async (req, res) => {
     // const totpCode = otplibAuthenticator.generate('7IUFMEYXZGOW2RDWQNOMMET3GV6URFYW' );
 
     // const options = new chrome.Options();
@@ -1614,9 +1614,9 @@ function getMargins(segment) {
     // open(login_url);
     // res.send(authUrl)
     // open(authUrl)
-    console.log(authUrl)
-    res.json({ authUrl });
-  });
+  //   console.log(authUrl)
+  //   res.json({ authUrl });
+  // });
 
   router.post("/exit", (req, res) => {
     const type = req.body.exitTrade.type;
