@@ -1,0 +1,112 @@
+.landing-page {
+    background-color: #C6CBDF;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    padding: 150px 175px;
+}
+
+.landing-page .landing-page-container{
+    width: 80%;
+    display: flex;
+
+}
+
+.landing-page .landing-page-container .right{
+    border-radius: 20px;
+    background: var(--Colors-Primary-White, #FFF);
+    width: 50%;
+    padding: 20px 45px;
+
+}
+
+
+.landing-page .landing-page-container .right .logo-container{
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.landing-page .landing-page-container .right .logo-container .logo-name h3{
+    color: var(--Primary, #5A55D2);
+font-family: "Open Sans";
+font-size: 36px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+
+}
+
+
+.landing-page .landing-page-container .right .logo-container .logo-name h3>a{
+    color: var(--Secondary, #FFC100);
+font-family: "Open Sans";
+font-size: 36px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+}
+
+.landing-page .landing-page-container .right h3{
+    color: var(--dark, var(--Dark, #1A1E29));
+font-family: "Open Sans";
+font-size: 30px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+}
+
+.landing-page .landing-page-container .right h4{
+
+    color: var(--dark, var(--Dark, #1A1E29));
+font-family: "Open Sans";
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+margin-bottom: 30px;
+}
+
+.landing-page .landing-page-container .right h4 a{
+    color: var(--Primary, var(--Dark, #5A55D2));
+font-family: "Open Sans";
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+
+}
+
+.landing-page .landing-page-container form .input-field{
+    margin-bottom: 20px;
+}
+
+.landing-page .landing-page-container form label{
+    color: var(--dark, var(--Dark, #1A1E29));
+font-family: "Open Sans";
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+margin-bottom: 15px;
+}
+
+.landing-page .landing-page-container form label a{
+    color: var(--Danger, var(--Dark, #CC4F4F));
+font-family: "Open Sans";
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+}
+
+
+.landing-page .landing-page-container form input{
+    border-radius: 10px;
+border: 1px solid var(--disable-primary, #C6CBDF);
+background: #FFF;
+display: flex;
+width: 390px;
+padding: 14px 23px;
+align-items: center;
+gap: 10px;
+}

@@ -32,6 +32,8 @@ import StrategyHome from './components/new/Dashboard/Strategy/StrategyHome';
 import StrategyBuild from './components/new/Dashboard/Strategy/StrategyBuild';
 import StrategyBuildPage from './components/new/Dashboard/Strategy/StrategyBuildPage';
 
+import LandingPage from './components/new/Landing/LandingPage';
+
 
 const saveToLocalStorage = (key, value) => {
     localStorage.setItem(key, JSON.stringify(value));
@@ -64,6 +66,7 @@ return(
                 <Route exact path='/about-Us' element={<AboutUs></AboutUs>}/> 
                 <Route exact path='/blog' element={<News></News>}/> 
                 
+                <Route exact path='/landing' element={<LandingPage></LandingPage>}/> 
                 
                 {/* <Route path="homepage" element={<HomePage></HomePage>} /> */}
                 <Route path="system-trading" element={<SystemTrading />} />
