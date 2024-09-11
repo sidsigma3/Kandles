@@ -1,43 +1,25 @@
-.landing-page {
-    background-color: #C6CBDF;
-    display: flex;
+.landing-page{
     width: 100%;
-    justify-content: center;
-    padding: 150px 175px;
+    height: 100vh;
 }
 
-.landing-page .landing-page-container{
-    width: 80%;
+.landing-page .heading{
     display: flex;
-
+    align-items: flex-end;
+    height: 10%;
+    padding-left: 6vw;
 }
 
-.landing-page .landing-page-container .right{
-    border-radius: 20px;
-    background: var(--Colors-Primary-White, #FFF);
-    width: 50%;
-    padding: 20px 45px;
-
-}
-
-
-.landing-page .landing-page-container .right .logo-container{
-    display: flex;
-    margin-bottom: 20px;
-}
-
-.landing-page .landing-page-container .right .logo-container .logo-name h3{
-    color: var(--Primary, #5A55D2);
+.landing-page .heading h3{
+    color: #5A55D2;
 font-family: "Open Sans";
 font-size: 36px;
 font-style: normal;
 font-weight: 600;
 line-height: normal;
-
 }
 
-
-.landing-page .landing-page-container .right .logo-container .logo-name h3>a{
+.landing-page .heading h3>a{
     color: var(--Secondary, #FFC100);
 font-family: "Open Sans";
 font-size: 36px;
@@ -46,67 +28,162 @@ font-weight: 600;
 line-height: normal;
 }
 
-.landing-page .landing-page-container .right h3{
-    color: var(--dark, var(--Dark, #1A1E29));
+
+
+.landing-page .container{
+    display: flex;
+    width: 100%;
+    height: 90%;
+    gap: 5vw;
+}
+
+.landing-page .container .left {
+    padding-top: 12vh;
+    width: 50%;
+   
+    height: 100%;
+
+}
+
+
+
+.landing-page .container .left h3{  
+    color: var(--Dark, #1A1E29);
 font-family: "Open Sans";
-font-size: 30px;
+font-size: 40px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+
+}
+
+.landing-page .container .left h4{
+    color: #707EAE;
+font-family: "Open Sans";
+font-size: 20px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+}
+
+
+
+.landing-page .container .left .inputs-container{
+    margin-bottom: 3vh;
+}
+
+.landing-page .container .left input[type='text']{
+    display: flex;
+width: 100%;
+height:7vh;
+flex-direction: column;
+align-items: flex-start;
+}
+
+.landing-page .container .left .forgot-password{
+    color: var(--Alert, #FF423C);
+text-align: right;
+font-family: "Open Sans";
+font-size: 14px;
 font-style: normal;
 font-weight: 600;
 line-height: normal;
 }
 
-.landing-page .landing-page-container .right h4{
+.landing-page .container .left .remember-me{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3vh;
+}
 
-    color: var(--dark, var(--Dark, #1A1E29));
+.landing-page .container .left .remember-me>div{
+    display: flex;
+    gap: 1vw;
+}
+
+.landing-page .container .left .remember-me .remember-input{
+    width: 24px;
+    height: 24px;
+}
+
+.landing-page .container .left .dont-have{
+    color: var(--Dark, #1A1E29);
+text-align: center;
 font-family: "Open Sans";
-font-size: 16px;
+font-size: 14px;
 font-style: normal;
-font-weight: 400;
+font-weight: 600;
 line-height: normal;
-margin-bottom: 30px;
+margin-bottom: 1vh;
 }
 
-.landing-page .landing-page-container .right h4 a{
-    color: var(--Primary, var(--Dark, #5A55D2));
+.landing-page .container .left .dont-have a{
+    color: var(--Dark, #FF423B);
 font-family: "Open Sans";
-font-size: 16px;
+font-size: 14px;
 font-style: normal;
-font-weight: 400;
-line-height: normal;
-
-}
-
-.landing-page .landing-page-container form .input-field{
-    margin-bottom: 20px;
-}
-
-.landing-page .landing-page-container form label{
-    color: var(--dark, var(--Dark, #1A1E29));
-font-family: "Open Sans";
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-margin-bottom: 15px;
-}
-
-.landing-page .landing-page-container form label a{
-    color: var(--Danger, var(--Dark, #CC4F4F));
-font-family: "Open Sans";
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
+font-weight: 600;
 line-height: normal;
 }
 
-
-.landing-page .landing-page-container form input{
-    border-radius: 10px;
-border: 1px solid var(--disable-primary, #C6CBDF);
-background: #FFF;
+.landing-page .container .left button{
+    border-radius: 8px;
+background: #5A55D2;
 display: flex;
-width: 390px;
-padding: 14px 23px;
+height: 48px;
+padding: 8px 16px;
+justify-content: center;
 align-items: center;
-gap: 10px;
+gap: 4px;
+align-self: stretch;
+color: #F3F3F3;
+font-family: "Open Sans";
+font-size: 14px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+width: 100%;
+margin-bottom: 1vh;
 }
+
+
+.landing-page .container .left .login-alternative{
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+}
+
+.landing-page .container .left .login-alternative>div{
+    border-radius: 10px;
+border: 1px solid #5A55D2;
+display: flex;
+padding: 16px 24px;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+flex: 1 0 0;
+
+}
+
+.landing-page .container .left h5{
+    color: #707EAE;
+font-family: "Open Sans";
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+    text-align: center;
+}
+
+
+.landing-page .container .right{
+    width: 50%;
+}
+
+
+.landing-page .container .right img{
+    width: 90%;
+height: 95%;
+flex-shrink: 0;
+} 

@@ -526,7 +526,7 @@ input[type=text]:focus{
   padding: 0 10px 0 10px;
   }
  /* Hide the default checkbox */
-input[type=checkbox] {
+.strategy-build input[type=checkbox] {
     appearance: none; /* Remove default styling */
     width: 20px;
     height: 20px;
@@ -539,13 +539,13 @@ input[type=checkbox] {
   }
   
   /* Change the border color and background color when the checkbox is checked */
-  input[type=checkbox]:checked {
+  .strategy-build input[type=checkbox]:checked {
     background-color: #ffffff; /* Purple color */
     border-color: #5A55D2;
     border-width: 1px;
   }
   
-  input[type=checkbox]:checked::before {
+  .strategy-build input[type=checkbox]:checked::before {
     content: "";
     width: 12px; /* Inner circle width (half of outer circle) */
     height: 12px; /* Inner circle height (half of outer circle) */
@@ -557,7 +557,7 @@ input[type=checkbox] {
     transform: translate(-50%, -50%); /* Center the inner circle */
   }
   
-  input[type=radio] {
+  .strategy-build input[type=radio] {
     appearance: none; /* Remove default styling */
     width: 20px;
     height: 20px;
@@ -570,13 +570,13 @@ input[type=checkbox] {
   }
   
   /* Change the border color and background color when the radio is checked */
-  input[type=radio]:checked {
+  .strategy-build input[type=radio]:checked {
     background-color: #ffffff; /* Purple color */
     border-color: #5A55D2;
     border-width: 1px;
   }
   
-  input[type=radio]:checked::before {
+  .strategy-build input[type=radio]:checked::before {
     content: "";
     width: 12px; /* Inner circle width (half of outer circle) */
     height: 12px; /* Inner circle height (half of outer circle) */
@@ -590,7 +590,7 @@ input[type=checkbox] {
   
 
 
-::placeholder{
+  .strategy-build::placeholder{
     width: 222px;
 height: 18.261px;
 flex-shrink: 0;

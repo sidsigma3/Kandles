@@ -1,14 +1,12 @@
 import React from 'react'
-import './LandingPage.css'
+import './SignUpPage.css'
 
 
-
-const LandingPage = () => {
+const SignUpPage = () => {
   return (
-    <div className='landing-page'>
-        
-       <div className='heading'>
-            <div>
+    <div className='signup-page'>
+        <div className='heading'>
+        <div>
             <svg xmlns="http://www.w3.org/2000/svg" width="70" height="71" viewBox="0 0 70 71" fill="none">
                 <path d="M30.625 17.699C26.2985 17.699 22.0692 18.9965 18.4719 21.4275C14.8746 23.8584 12.0708 27.3137 10.4151 31.3562C8.75948 35.3988 8.32628 39.8471 9.17033 44.1387C10.0144 48.4302 12.0978 52.3723 15.157 55.4663C18.2163 58.5604 22.1141 60.6674 26.3574 61.5211C30.6007 62.3747 34.9991 61.9366 38.9962 60.2621C42.9933 58.5876 46.4098 55.752 48.8134 52.1138C51.2171 48.4756 52.5 44.1982 52.5 39.8226H30.625V17.699Z" stroke="#5A55D2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M39.375 30.973H61.25C61.25 25.1054 58.9453 19.4782 54.843 15.3292C50.7406 11.1802 45.1766 8.84937 39.375 8.84937V30.973Z" stroke="#FFC100" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -18,50 +16,74 @@ const LandingPage = () => {
             <div>
                 <h3>Stock <a>Angel</a></h3>
             </div>
+        </div>
 
-       </div>
 
-
-       <div className='container'>
+        <div className='container'>
             <div className='left'>
+                <img src='./signup-img.png'></img>
+            </div>
 
-                <h3>Login</h3>
+            <div className='right'>
 
-                <h4>Login to access your WeCollab account</h4>
+                <h3>Sign up</h3>
 
+                <h4>Let’s get you all st up so you can access your personal account.</h4>
 
                 <form>
-                    <div className='inputs-container'>
-                        <label>Email</label>
+                    <div className='name-container'>
+                        <div className='input-container'>
+                            <label>First Name</label>
+                            <input type='text'></input>
+                        </div>
+
+                        <div className='input-container'>
+                            <label>Last Name</label>
+                            <input type='text'></input>
+                        </div>
+
+
+                    </div>
+
+                    <div className='name-container'>
+                        <div className='input-container'>
+                            <label>Email</label>
+                            <input type='text'></input>
+                        </div>
+
+                        <div className='input-container'>
+                            <label>Phone Number</label>
+                            <input type='tel'></input>
+                        </div>
+
+
+                    </div>
+
+                    <div className='input-container'>
+                        <label>Password</label>
                         <input type='text'></input>
                     </div>
 
-                    <div className='inputs-container'>
-                        <label>Password </label>
+                    <div className='input-container'> 
+                        <label>Confirm Password</label>
                         <input type='text'></input>
                     </div>
 
                 </form>
 
-            <div className='remember-me'>
 
-                <div>
-                    <input className='remember-input' type='checkbox'></input>
-                    <label>Remember me</label>
+                <div className='agree-policy'>
+                    <input type='checkbox'></input>
+                    <label>I agree to all the <a>Terms</a> and <a>Privacy Policies</a></label>
                 </div>
 
-                <h4 className='forgot-password'>Forgot Password</h4>
-            
-            </div>
+                <button>Create account</button>
 
-            <button>Login</button>
+                <h4 className='already-have'>Already have an account? <a>Login</a></h4>
 
-            <h4 className='dont-have'>Don’t have an account? <a>Sign up</a></h4>
+                <h5>--------------------Or Sign up with----------------------</h5>
 
-
-            <h5>-------------Or login with----------------</h5>
-
-            <div className='login-alternative'>
+                <div className='login-alternative'>
                 <div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M24 12.0733C24 5.40546 18.6274 0 12 0C5.37262 0 0 5.40536 0 12.0733C0 18.0994 4.38825 23.0943 10.125 24V15.5633H7.07812V12.0733H10.125V9.41343C10.125 6.38755 11.9166 4.71615 14.6575 4.71615C15.9705 4.71615 17.3438 4.95195 17.3438 4.95195V7.92313H15.8306C14.3398 7.92313 13.875 8.85381 13.875 9.80864V12.0733H17.2031L16.6711 15.5633H13.875V24C19.6117 23.0943 24 18.0995 24 12.0733Z" fill="#1877F2"/>
@@ -89,18 +111,10 @@ const LandingPage = () => {
 
             </div>
 
-
-            <div className='right'>
-
-                <img src='./login-img.png'></img>
-
-            </div>
-
-
-       </div>
+        </div>
 
     </div>
   )
 }
 
-export default LandingPage
+export default SignUpPage
